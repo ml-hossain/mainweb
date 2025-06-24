@@ -16,32 +16,41 @@ import TestPreparation from './pages/services/TestPreparation.jsx'
 import InterviewPreparation from './pages/services/InterviewPreparation.jsx'
 import DocumentationSupport from './pages/services/DocumentationSupport.jsx'
 import FloatingContactButton from './components/FloatingContactButton.jsx'
+import AdminApp from './admin/AdminApp.jsx'
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/success-stories" element={<SuccessStories />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/consultation" element={<Consultation />} />
-            <Route path="/services/university-selection" element={<UniversitySelection />} />
-            <Route path="/services/application-assistance" element={<ApplicationAssistance />} />
-            <Route path="/services/visa-processing" element={<VisaProcessing />} />
-            <Route path="/services/scholarship-guidance" element={<ScholarshipGuidance />} />
-            <Route path="/services/pre-departure-orientation" element={<PreDepartureOrientation />} />
-            <Route path="/services/test-preparation" element={<TestPreparation />} />
-            <Route path="/services/interview-preparation" element={<InterviewPreparation />} />
-            <Route path="/services/documentation-support" element={<DocumentationSupport />} />
-          </Routes>
-        </main>
-        <FloatingContactButton />
-      </div>
+      <Routes>
+        {/* Admin Routes - No navbar for admin */}
+        <Route path="/admin/*" element={<AdminApp />} />
+        
+        {/* Public Routes - With navbar */}
+        <Route path="/*" element={
+          <div className="min-h-screen bg-white">
+            <Navbar />
+            <main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/success-stories" element={<SuccessStories />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/consultation" element={<Consultation />} />
+                <Route path="/services/university-selection" element={<UniversitySelection />} />
+                <Route path="/services/application-assistance" element={<ApplicationAssistance />} />
+                <Route path="/services/visa-processing" element={<VisaProcessing />} />
+                <Route path="/services/scholarship-guidance" element={<ScholarshipGuidance />} />
+                <Route path="/services/pre-departure-orientation" element={<PreDepartureOrientation />} />
+                <Route path="/services/test-preparation" element={<TestPreparation />} />
+                <Route path="/services/interview-preparation" element={<InterviewPreparation />} />
+                <Route path="/services/documentation-support" element={<DocumentationSupport />} />
+              </Routes>
+            </main>
+            <FloatingContactButton />
+          </div>
+        } />
+      </Routes>
     </Router>
   )
 }
