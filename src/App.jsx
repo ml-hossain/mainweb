@@ -12,6 +12,9 @@ import ApplicationAssistance from './pages/services/ApplicationAssistance.jsx'
 import VisaProcessing from './pages/services/VisaProcessing.jsx'
 import ScholarshipGuidance from './pages/services/ScholarshipGuidance.jsx'
 import PreDepartureOrientation from './pages/services/PreDepartureOrientation.jsx'
+import TestPreparation from './pages/services/TestPreparation.jsx'
+import InterviewPreparation from './pages/services/InterviewPreparation.jsx'
+import DocumentationSupport from './pages/services/DocumentationSupport.jsx'
 import FloatingContactButton from './components/FloatingContactButton.jsx'
 
 function App() {
@@ -32,6 +35,9 @@ function App() {
             <Route path="/services/visa-processing" element={<VisaProcessing />} />
             <Route path="/services/scholarship-guidance" element={<ScholarshipGuidance />} />
             <Route path="/services/pre-departure-orientation" element={<PreDepartureOrientation />} />
+            <Route path="/services/test-preparation" element={<TestPreparation />} />
+            <Route path="/services/interview-preparation" element={<InterviewPreparation />} />
+            <Route path="/services/documentation-support" element={<DocumentationSupport />} />
           </Routes>
         </main>
         <FloatingContactButton />

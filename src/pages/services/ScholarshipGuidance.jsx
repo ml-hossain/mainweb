@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiAward, FiCheck, FiDollarSign, FiTrendingUp, FiArrowRight } from 'react-icons/fi'
+import Footer from '../../components/Footer'
 
 const ScholarshipGuidance = () => {
   const headerRef = useRef(null)
@@ -60,18 +61,21 @@ const ScholarshipGuidance = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-orange-600/10"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
         {/* Header */}
         <div ref={headerRef} className="text-center mb-16">
-          <div className="w-20 h-20 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FiAward className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-3xl mb-8 shadow-2xl">
+            <FiAward className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-800 mb-6">
+          <h1 className="text-5xl md:text-7xl font-heading font-black bg-gradient-to-r from-white via-yellow-200 to-yellow-300 bg-clip-text text-transparent mb-6">
             Scholarship Guidance
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Maximize your chances of securing scholarships and financial aid to make your international education dreams affordable.
           </p>
         </div>
@@ -83,14 +87,14 @@ const ScholarshipGuidance = () => {
             {scholarshipTypes.map((type, index) => {
               const IconComponent = type.icon
               return (
-                <div key={index} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center">
+                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 text-center hover:bg-white/20 transition-all duration-300">
                   <div className={`w-16 h-16 ${type.color} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
                     <IconComponent className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-heading font-bold text-gray-800 mb-4">
+                  <h3 className="text-xl font-heading font-bold text-white mb-4">
                     {type.title}
                   </h3>
-                  <p className="text-gray-600">{type.description}</p>
+                  <p className="text-gray-300">{type.description}</p>
                 </div>
               )
             })}
@@ -99,31 +103,31 @@ const ScholarshipGuidance = () => {
           {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-heading font-bold text-gray-800 mb-6">
+              <h2 className="text-3xl font-heading font-bold text-white mb-6">
                 Unlock Scholarship Opportunities
               </h2>
-              <p className="text-gray-600 mb-8 leading-relaxed">
+              <p className="text-gray-300 mb-8 leading-relaxed">
                 Our scholarship guidance service helps you discover and apply for various funding opportunities that can significantly reduce your education costs. We have helped students secure over $50 million in scholarships.
               </p>
               <div className="space-y-4">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mt-0.5">
-                      <FiCheck className="w-4 h-4 text-yellow-600" />
+                    <div className="w-6 h-6 bg-yellow-500/30 backdrop-blur-sm rounded-full flex items-center justify-center mt-0.5 border border-yellow-400/50">
+                      <FiCheck className="w-4 h-4 text-yellow-300" />
                     </div>
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-gray-200">{feature}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <h3 className="text-2xl font-heading font-bold text-gray-800 mb-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+              <h3 className="text-2xl font-heading font-bold text-white mb-6">
                 Success Statistics
               </h3>
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-yellow-600 mb-2">$50M+</div>
-                  <div className="text-gray-600">Total Scholarships Secured</div>
+                  <div className="text-4xl font-bold text-yellow-300 mb-2">$50M+</div>
+                  <div className="text-gray-300">Total Scholarships Secured</div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-bold text-green-600 mb-2">85%</div>
@@ -163,6 +167,7 @@ const ScholarshipGuidance = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

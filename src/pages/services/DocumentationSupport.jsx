@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
-import { FiFolder, FiCheck, FiFileText, FiShield, FiArrowRight } from 'react-icons/fi'
+import { FiFileText, FiCheck, FiShield, FiClock, FiArrowRight } from 'react-icons/fi'
+import Footer from '../../components/Footer'
 
 const DocumentationSupport = () => {
   const headerRef = useRef(null)
@@ -62,18 +63,21 @@ const DocumentationSupport = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-blue-600/10"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
         {/* Header */}
         <div ref={headerRef} className="text-center mb-16">
-          <div className="w-20 h-20 bg-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FiFolder className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-3xl mb-8 shadow-2xl">
+            <FiFileText className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-800 mb-6">
+          <h1 className="text-5xl md:text-7xl font-heading font-black bg-gradient-to-r from-white via-indigo-200 to-indigo-300 bg-clip-text text-transparent mb-6">
             Documentation Support
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Professional assistance with document preparation, verification, and organization for your university applications.
           </p>
         </div>
@@ -184,6 +188,7 @@ const DocumentationSupport = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
-import { FiUsers, FiCheck, FiMic, FiVideo, FiArrowRight } from 'react-icons/fi'
+import { FiMic, FiCheck, FiUsers, FiTarget, FiArrowRight } from 'react-icons/fi'
+import Footer from '../../components/Footer'
 
 const InterviewPreparation = () => {
   const headerRef = useRef(null)
@@ -60,18 +61,21 @@ const InterviewPreparation = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-rose-600/10"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
         {/* Header */}
         <div ref={headerRef} className="text-center mb-16">
-          <div className="w-20 h-20 bg-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <FiUsers className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-pink-500 to-rose-600 rounded-3xl mb-8 shadow-2xl">
+            <FiUsers className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-800 mb-6">
+          <h1 className="text-5xl md:text-7xl font-heading font-black bg-gradient-to-r from-white via-pink-200 to-pink-300 bg-clip-text text-transparent mb-6">
             Interview Preparation
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Build confidence and excel in university interviews with our comprehensive preparation program and expert coaching.
           </p>
         </div>
@@ -197,6 +201,7 @@ const InterviewPreparation = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
