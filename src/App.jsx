@@ -18,38 +18,44 @@ import DocumentationSupport from './pages/services/DocumentationSupport.jsx'
 import FloatingContactButton from './components/FloatingContactButton.jsx'
 import AdminApp from './admin/AdminApp.jsx'
 
+// Layout component for public pages
+const PublicLayout = ({ children }) => (
+  <div className="min-h-screen bg-white">
+    <Navbar />
+    <main>
+      {children}
+    </main>
+    <FloatingContactButton />
+  </div>
+)
+
 function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <Routes>
         {/* Admin Routes - No navbar for admin */}
         <Route path="/admin/*" element={<AdminApp />} />
-        
+
         {/* Public Routes - With navbar */}
-        <Route path="/*" element={
-          <div className="min-h-screen bg-white">
-            <Navbar />
-            <main>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/success-stories" element={<SuccessStories />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/consultation" element={<Consultation />} />
-                <Route path="/services/university-selection" element={<UniversitySelection />} />
-                <Route path="/services/application-assistance" element={<ApplicationAssistance />} />
-                <Route path="/services/visa-processing" element={<VisaProcessing />} />
-                <Route path="/services/scholarship-guidance" element={<ScholarshipGuidance />} />
-                <Route path="/services/pre-departure-orientation" element={<PreDepartureOrientation />} />
-                <Route path="/services/test-preparation" element={<TestPreparation />} />
-                <Route path="/services/interview-preparation" element={<InterviewPreparation />} />
-                <Route path="/services/documentation-support" element={<DocumentationSupport />} />
-              </Routes>
-            </main>
-            <FloatingContactButton />
-          </div>
-        } />
+        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
+        <Route path="/success-stories" element={<PublicLayout><SuccessStories /></PublicLayout>} />
+        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/consultation" element={<PublicLayout><Consultation /></PublicLayout>} />
+        <Route path="/services/university-selection" element={<PublicLayout><UniversitySelection /></PublicLayout>} />
+        <Route path="/services/application-assistance" element={<PublicLayout><ApplicationAssistance /></PublicLayout>} />
+        <Route path="/services/visa-processing" element={<PublicLayout><VisaProcessing /></PublicLayout>} />
+        <Route path="/services/scholarship-guidance" element={<PublicLayout><ScholarshipGuidance /></PublicLayout>} />
+        <Route path="/services/pre-departure-orientation" element={<PublicLayout><PreDepartureOrientation /></PublicLayout>} />
+        <Route path="/services/test-preparation" element={<PublicLayout><TestPreparation /></PublicLayout>} />
+        <Route path="/services/interview-preparation" element={<PublicLayout><InterviewPreparation /></PublicLayout>} />
+        <Route path="/services/documentation-support" element={<PublicLayout><DocumentationSupport /></PublicLayout>} />
       </Routes>
     </Router>
   )

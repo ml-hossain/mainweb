@@ -1,494 +1,820 @@
-import React, { useState } from 'react'
-import { 
-  FiHome,
-  FiBarChart2,
-  FiInfo,
-  FiUser,
-  FiEdit2,
-  FiSave,
-  FiX,
-  FiImage,
-  FiType,
-  FiHash
-} from 'react-icons/fi'
+import React, { useState, useEffect } from 'react'
+import { FiPlus, FiEdit, FiTrash2, FiSettings, FiFileText, FiEye, FiEyeOff } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
+import { supabase } from '../../lib/supabase'
 
 const Content = ({ onLogout }) => {
-  const [activeSection, setActiveSection] = useState('hero')
-  const [editingField, setEditingField] = useState(null)
-  
-  const [contentData, setContentData] = useState({
-    hero: {
-      badge: '#1 Education Consultancy',
-      title: 'Your Gateway to Global Education',
-      subtitle: 'Transform your educational dreams into reality with expert guidance, personalized support, and proven success strategies.',
-      backgroundImage: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644',
-      ctaPrimary: 'Start Your Journey',
-      ctaSecondary: 'Explore Services'
-    },
-    statistics: {
-      studentsPlaced: { value: 2500, label: 'Students Placed', description: 'Successful Placements' },
-      universities: { value: 150, label: 'Partner Universities', description: 'Top Ranked Globally' },
-      experience: { value: 12, label: 'Years Experience', description: 'Trusted Expertise' },
-      successRate: { value: 98.5, label: 'Success Rate', description: 'Application Approval' }
-    },
-    about: {
-      title: 'About MA Education',
-      subtitle: 'Your trusted partner in achieving global education dreams with personalized guidance and expert support.',
-      mission: 'To empower students with the knowledge, guidance, and support needed to pursue quality education abroad and achieve their academic and career aspirations.',
-      vision: 'To be the leading education consultancy that transforms dreams into reality by connecting students with world-class educational opportunities.',
-      whyChooseUs: [
-        'Expert Guidance: Experienced counselors with deep knowledge of international education',
-        'Personalized Support: Tailored solutions for each student\'s unique needs and goals',
-        'Comprehensive Services: From university selection to visa approval and beyond',
-        'Proven Track Record: High success rate in university admissions and visa approvals',
-        'End-to-End Service: From university selection to visa approval and beyond'
-      ]
-    },
-    ceo: {
-      name: 'Dr. Ahmad Rahman',
-      title: 'Founder & Chief Executive Officer',
-      education: 'PhD in Education',
-      experience: '15+ Years',
-      successRate: '98%',
-      universities: '25+',
-      countries: '15+',
-      credentials: ['PhD in Education', 'Certified Immigration Consultant', 'ICEF Agent', '15+ Awards'],
-      message: 'Education is the most powerful weapon you can use to change the world. I\'m dedicated to helping students unlock their potential through quality international education.',
-      achievements: [
-        'Successfully placed 2,500+ students globally',
-        'Established partnerships with 150+ universities',
-        'Achieved 98.5% visa approval success rate',
-        'Recognized education consultant of the year 2023'
-      ],
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'
-    }
+  const [activeTab, setActiveTab] = useState('content')
+  const [contentSections, setContentSections] = useState([])
+  const [siteSettings, setSiteSettings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
+  const [modalType, setModalType] = useState('content') // 'content' or 'setting'
+
+  const [contentForm, setContentForm] = useState({
+    page_name: '',
+    section_name: '',
+    title: '',
+    subtitle: '',
+    content: '',
+    image_url: '',
+    button_text: '',
+    button_link: '',
+    display_order: 0,
+    is_active: true
   })
 
-  const sections = [
-    { id: 'hero', label: 'Hero Section', icon: FiHome },
-    { id: 'statistics', label: 'Statistics', icon: FiBarChart2 },
-    { id: 'about', label: 'About Page', icon: FiInfo },
-    { id: 'ceo', label: 'CEO Section', icon: FiUser }
-  ]
+  const [settingForm, setSettingForm] = useState({
+    setting_key: '',
+    setting_value: '',
+    setting_type: 'text',
+    description: '',
+    is_active: true
+  })
 
-  const handleFieldEdit = (section, field, value) => {
-    setContentData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }))
+  const pages = ['home', 'about', 'services', 'contact', 'success-stories']
+  const settingTypes = ['text', 'number', 'boolean', 'json']
+
+  useEffect(() => {
+    if (activeTab === 'content') {
+      fetchContentSections()
+    } else {
+      fetchSiteSettings()
+    }
+  }, [activeTab])
+
+  const fetchContentSections = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('*')
+        .order('page_name', { ascending: true })
+        .order('display_order', { ascending: true })
+
+      if (error) throw error
+      setContentSections(data || [])
+    } catch (error) {
+      console.error('Error fetching content sections:', error)
+      alert('Error loading content sections')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleStatEdit = (statKey, field, value) => {
-    setContentData(prev => ({
-      ...prev,
-      statistics: {
-        ...prev.statistics,
-        [statKey]: {
-          ...prev.statistics[statKey],
-          [field]: value
+  const fetchSiteSettings = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .order('setting_key', { ascending: true })
+
+      if (error) throw error
+      setSiteSettings(data || [])
+    } catch (error) {
+      console.error('Error fetching site settings:', error)
+      alert('Error loading site settings')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleContentSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      if (editingItem) {
+        const { error } = await supabase
+          .from('content_sections')
+          .update(contentForm)
+          .eq('id', editingItem.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('content_sections')
+          .insert([contentForm])
+
+        if (error) throw error
+      }
+
+      setShowModal(false)
+      setEditingItem(null)
+      resetContentForm()
+      fetchContentSections()
+      alert(editingItem ? 'Content updated successfully!' : 'Content added successfully!')
+    } catch (error) {
+      console.error('Error saving content:', error)
+      alert('Error saving content')
+    }
+  }
+
+  const handleSettingSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      // Parse setting value based on type
+      let parsedValue = settingForm.setting_value
+      if (settingForm.setting_type === 'number') {
+        parsedValue = parseFloat(settingForm.setting_value)
+      } else if (settingForm.setting_type === 'boolean') {
+        parsedValue = settingForm.setting_value === 'true'
+      } else if (settingForm.setting_type === 'json') {
+        try {
+          parsedValue = JSON.parse(settingForm.setting_value)
+        } catch {
+          alert('Invalid JSON format')
+          return
         }
       }
-    }))
-  }
 
-  const handleArrayEdit = (section, field, index, value) => {
-    setContentData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: prev[section][field].map((item, i) => i === index ? value : item)
+      const settingData = {
+        ...settingForm,
+        setting_value: JSON.stringify(parsedValue)
       }
+
+      if (editingItem) {
+        const { error } = await supabase
+          .from('site_settings')
+          .update(settingData)
+          .eq('id', editingItem.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('site_settings')
+          .insert([settingData])
+
+        if (error) throw error
+      }
+
+      setShowModal(false)
+      setEditingItem(null)
+      resetSettingForm()
+      fetchSiteSettings()
+      alert(editingItem ? 'Setting updated successfully!' : 'Setting added successfully!')
+    } catch (error) {
+      console.error('Error saving setting:', error)
+      alert('Error saving setting')
+    }
+  }
+
+  const handleEditContent = (content) => {
+    setEditingItem(content)
+    setContentForm({
+      page_name: content.page_name || '',
+      section_name: content.section_name || '',
+      title: content.title || '',
+      subtitle: content.subtitle || '',
+      content: content.content || '',
+      image_url: content.image_url || '',
+      button_text: content.button_text || '',
+      button_link: content.button_link || '',
+      display_order: content.display_order || 0,
+      is_active: content.is_active || true
+    })
+    setModalType('content')
+    setShowModal(true)
+  }
+
+  const handleEditSetting = (setting) => {
+    setEditingItem(setting)
+    let displayValue = setting.setting_value
+    try {
+      const parsed = JSON.parse(setting.setting_value)
+      if (setting.setting_type === 'json') {
+        displayValue = JSON.stringify(parsed, null, 2)
+      } else {
+        displayValue = parsed.toString()
+      }
+    } catch {
+      displayValue = setting.setting_value
+    }
+
+    setSettingForm({
+      setting_key: setting.setting_key || '',
+      setting_value: displayValue,
+      setting_type: setting.setting_type || 'text',
+      description: setting.description || '',
+      is_active: setting.is_active || true
+    })
+    setModalType('setting')
+    setShowModal(true)
+  }
+
+  const handleDeleteContent = async (id) => {
+    if (!confirm('Are you sure you want to delete this content section?')) return
+
+    try {
+      const { error } = await supabase
+        .from('content_sections')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      fetchContentSections()
+      alert('Content deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting content:', error)
+      alert('Error deleting content')
+    }
+  }
+
+  const handleDeleteSetting = async (id) => {
+    if (!confirm('Are you sure you want to delete this setting?')) return
+
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      fetchSiteSettings()
+      alert('Setting deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting setting:', error)
+      alert('Error deleting setting')
+    }
+  }
+
+  const toggleContentActive = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('content_sections')
+        .update({ is_active: !currentStatus })
+        .eq('id', id)
+
+      if (error) throw error
+      fetchContentSections()
+    } catch (error) {
+      console.error('Error updating active status:', error)
+      alert('Error updating active status')
+    }
+  }
+
+  const toggleSettingActive = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ is_active: !currentStatus })
+        .eq('id', id)
+
+      if (error) throw error
+      fetchSiteSettings()
+    } catch (error) {
+      console.error('Error updating active status:', error)
+      alert('Error updating active status')
+    }
+  }
+
+  const resetContentForm = () => {
+    setContentForm({
+      page_name: '',
+      section_name: '',
+      title: '',
+      subtitle: '',
+      content: '',
+      image_url: '',
+      button_text: '',
+      button_link: '',
+      display_order: 0,
+      is_active: true
+    })
+  }
+
+  const resetSettingForm = () => {
+    setSettingForm({
+      setting_key: '',
+      setting_value: '',
+      setting_type: 'text',
+      description: '',
+      is_active: true
+    })
+  }
+
+  const handleContentInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setContentForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }))
   }
 
-  const EditableField = ({ value, onSave, type = 'text', placeholder, className = '' }) => {
-    const [editValue, setEditValue] = useState(value)
-    const [isEditing, setIsEditing] = useState(false)
-
-    const handleSave = () => {
-      onSave(editValue)
-      setIsEditing(false)
-    }
-
-    const handleCancel = () => {
-      setEditValue(value)
-      setIsEditing(false)
-    }
-
-    if (isEditing) {
-      return (
-        <div className="flex items-center space-x-2">
-          {type === 'textarea' ? (
-            <textarea
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows="3"
-              placeholder={placeholder}
-            />
-          ) : (
-            <input
-              type={type}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder={placeholder}
-            />
-          )}
-          <button onClick={handleSave} className="p-2 text-green-600 hover:bg-green-50 rounded-md">
-            <FiSave className="w-4 h-4" />
-          </button>
-          <button onClick={handleCancel} className="p-2 text-red-600 hover:bg-red-50 rounded-md">
-            <FiX className="w-4 h-4" />
-          </button>
-        </div>
-      )
-    }
-
-    return (
-      <div className={`group flex items-center justify-between ${className}`}>
-        <span className="flex-1">{value}</span>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="opacity-0 group-hover:opacity-100 p-2 text-gray-600 hover:bg-gray-50 rounded-md transition-opacity"
-        >
-          <FiEdit2 className="w-4 h-4" />
-        </button>
-      </div>
-    )
+  const handleSettingInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setSettingForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
   }
 
-  const renderHeroSection = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Hero Section</h2>
-      
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Badge Text</label>
-          <EditableField
-            value={contentData.hero.badge}
-            onSave={(value) => handleFieldEdit('hero', 'badge', value)}
-            placeholder="Enter badge text"
-          />
+  if (loading) {
+    return (
+      <AdminLayout onLogout={onLogout}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Main Title</label>
-          <EditableField
-            value={contentData.hero.title}
-            onSave={(value) => handleFieldEdit('hero', 'title', value)}
-            placeholder="Enter main title"
-            className="text-lg font-medium"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-          <EditableField
-            value={contentData.hero.subtitle}
-            onSave={(value) => handleFieldEdit('hero', 'subtitle', value)}
-            type="textarea"
-            placeholder="Enter subtitle"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Background Image URL</label>
-          <EditableField
-            value={contentData.hero.backgroundImage}
-            onSave={(value) => handleFieldEdit('hero', 'backgroundImage', value)}
-            placeholder="Enter image URL"
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Primary CTA Button</label>
-            <EditableField
-              value={contentData.hero.ctaPrimary}
-              onSave={(value) => handleFieldEdit('hero', 'ctaPrimary', value)}
-              placeholder="Primary button text"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Secondary CTA Button</label>
-            <EditableField
-              value={contentData.hero.ctaSecondary}
-              onSave={(value) => handleFieldEdit('hero', 'ctaSecondary', value)}
-              placeholder="Secondary button text"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderStatisticsSection = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Statistics</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Object.entries(contentData.statistics).map(([key, stat]) => (
-          <div key={key} className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 capitalize">{key.replace(/([A-Z])/g, ' $1')}</h3>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
-                <EditableField
-                  value={stat.value.toString()}
-                  onSave={(value) => handleStatEdit(key, 'value', parseFloat(value) || 0)}
-                  type="number"
-                  placeholder="Enter value"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Label</label>
-                <EditableField
-                  value={stat.label}
-                  onSave={(value) => handleStatEdit(key, 'label', value)}
-                  placeholder="Enter label"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <EditableField
-                  value={stat.description}
-                  onSave={(value) => handleStatEdit(key, 'description', value)}
-                  placeholder="Enter description"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-
-  const renderAboutSection = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">About Page</h2>
-      
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Page Title</label>
-          <EditableField
-            value={contentData.about.title}
-            onSave={(value) => handleFieldEdit('about', 'title', value)}
-            placeholder="Enter page title"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-          <EditableField
-            value={contentData.about.subtitle}
-            onSave={(value) => handleFieldEdit('about', 'subtitle', value)}
-            type="textarea"
-            placeholder="Enter subtitle"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Mission</label>
-          <EditableField
-            value={contentData.about.mission}
-            onSave={(value) => handleFieldEdit('about', 'mission', value)}
-            type="textarea"
-            placeholder="Enter mission statement"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Vision</label>
-          <EditableField
-            value={contentData.about.vision}
-            onSave={(value) => handleFieldEdit('about', 'vision', value)}
-            type="textarea"
-            placeholder="Enter vision statement"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Why Choose Us Points</label>
-          <div className="space-y-2">
-            {contentData.about.whyChooseUs.map((point, index) => (
-              <EditableField
-                key={index}
-                value={point}
-                onSave={(value) => handleArrayEdit('about', 'whyChooseUs', index, value)}
-                type="textarea"
-                placeholder="Enter point"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderCeoSection = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">CEO Section</h2>
-      
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-            <EditableField
-              value={contentData.ceo.name}
-              onSave={(value) => handleFieldEdit('ceo', 'name', value)}
-              placeholder="Enter CEO name"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <EditableField
-              value={contentData.ceo.title}
-              onSave={(value) => handleFieldEdit('ceo', 'title', value)}
-              placeholder="Enter CEO title"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Education</label>
-            <EditableField
-              value={contentData.ceo.education}
-              onSave={(value) => handleFieldEdit('ceo', 'education', value)}
-              placeholder="Enter education"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
-            <EditableField
-              value={contentData.ceo.experience}
-              onSave={(value) => handleFieldEdit('ceo', 'experience', value)}
-              placeholder="Enter experience"
-            />
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image URL</label>
-          <EditableField
-            value={contentData.ceo.image}
-            onSave={(value) => handleFieldEdit('ceo', 'image', value)}
-            placeholder="Enter image URL"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Personal Message</label>
-          <EditableField
-            value={contentData.ceo.message}
-            onSave={(value) => handleFieldEdit('ceo', 'message', value)}
-            type="textarea"
-            placeholder="Enter personal message"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Credentials</label>
-          <div className="space-y-2">
-            {contentData.ceo.credentials.map((credential, index) => (
-              <EditableField
-                key={index}
-                value={credential}
-                onSave={(value) => handleArrayEdit('ceo', 'credentials', index, value)}
-                placeholder="Enter credential"
-              />
-            ))}
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Achievements</label>
-          <div className="space-y-2">
-            {contentData.ceo.achievements.map((achievement, index) => (
-              <EditableField
-                key={index}
-                value={achievement}
-                onSave={(value) => handleArrayEdit('ceo', 'achievements', index, value)}
-                type="textarea"
-                placeholder="Enter achievement"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderActiveSection = () => {
-    switch (activeSection) {
-      case 'hero': return renderHeroSection()
-      case 'statistics': return renderStatisticsSection()
-      case 'about': return renderAboutSection()
-      case 'ceo': return renderCeoSection()
-      default: return renderHeroSection()
-    }
+      </AdminLayout>
+    )
   }
 
   return (
     <AdminLayout onLogout={onLogout}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Content Management</h1>
-            <p className="text-gray-600 mt-1">Manage website content, text, and media</p>
+            <p className="text-gray-600">Manage website content and settings</p>
           </div>
-          <div className="flex space-x-3">
-            <button className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <FiImage className="w-4 h-4 mr-2" />
-              Media Library
-            </button>
-            <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              <FiSave className="w-4 h-4 mr-2" />
-              Save All Changes
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setEditingItem(null)
+              if (activeTab === 'content') {
+                resetContentForm()
+                setModalType('content')
+              } else {
+                resetSettingForm()
+                setModalType('setting')
+              }
+              setShowModal(true)
+            }}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <FiPlus className="w-4 h-4 mr-2" />
+            Add {activeTab === 'content' ? 'Content' : 'Setting'}
+          </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
-          <div className="lg:w-64 space-y-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Content Sections</h3>
-              <nav className="space-y-1">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      activeSection === section.id
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <section.icon className="w-4 h-4 mr-3" />
-                    {section.label}
-                  </button>
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('content')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'content'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              <FiFileText className="w-4 h-4 inline mr-2" />
+              Content Sections
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'settings'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              <FiSettings className="w-4 h-4 inline mr-2" />
+              Site Settings
+            </button>
+          </nav>
+        </div>
+
+        {/* Content Sections Tab */}
+        {activeTab === 'content' && (
+          <div className="space-y-4">
+            {pages.map((page) => {
+              const pageSections = contentSections.filter(section => section.page_name === page)
+              if (pageSections.length === 0) return null
+
+              return (
+                <div key={page} className="bg-white rounded-lg shadow">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 capitalize">{page} Page</h3>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {pageSections.map((section) => (
+                      <div key={section.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h4 className="font-medium text-gray-900">{section.section_name}</h4>
+                              <span className={`text-xs px-2 py-1 rounded ${section.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                {section.is_active ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                            {section.title && (
+                              <p className="text-sm font-medium text-gray-700 mb-1">{section.title}</p>
+                            )}
+                            {section.subtitle && (
+                              <p className="text-sm text-gray-600 mb-2">{section.subtitle}</p>
+                            )}
+                            {section.content && (
+                              <p className="text-sm text-gray-500 line-clamp-2">{section.content}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2 ml-4">
+                            <button
+                              onClick={() => toggleContentActive(section.id, section.is_active)}
+                              className={`p-1 rounded ${section.is_active ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}
+                              title="Toggle Active"
+                            >
+                              {section.is_active ? <FiEye className="w-4 h-4" /> : <FiEyeOff className="w-4 h-4" />}
+                            </button>
+                            <button
+                              onClick={() => handleEditContent(section)}
+                              className="p-1 text-blue-600 hover:text-blue-700"
+                              title="Edit"
+                            >
+                              <FiEdit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteContent(section.id)}
+                              className="p-1 text-red-600 hover:text-red-700"
+                              title="Delete"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+
+            {contentSections.length === 0 && (
+              <div className="text-center py-12">
+                <FiFileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No content sections yet</h3>
+                <p className="text-gray-500 mb-4">Start by adding your first content section.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Site Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6">
+              <div className="space-y-4">
+                {siteSettings.map((setting) => (
+                  <div key={setting.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h4 className="font-medium text-gray-900">{setting.setting_key}</h4>
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {setting.setting_type}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded ${setting.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                            {setting.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        {setting.description && (
+                          <p className="text-sm text-gray-600 mb-2">{setting.description}</p>
+                        )}
+                        <div className="text-sm text-gray-500 font-mono bg-gray-50 p-2 rounded">
+                          {setting.setting_value}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2 ml-4">
+                        <button
+                          onClick={() => toggleSettingActive(setting.id, setting.is_active)}
+                          className={`p-1 rounded ${setting.is_active ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}
+                          title="Toggle Active"
+                        >
+                          {setting.is_active ? <FiEye className="w-4 h-4" /> : <FiEyeOff className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleEditSetting(setting)}
+                          className="p-1 text-blue-600 hover:text-blue-700"
+                          title="Edit"
+                        >
+                          <FiEdit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSetting(setting.id)}
+                          className="p-1 text-red-600 hover:text-red-700"
+                          title="Delete"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </nav>
+
+                {siteSettings.length === 0 && (
+                  <div className="text-center py-12">
+                    <FiSettings className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No settings yet</h3>
+                    <p className="text-gray-500 mb-4">Start by adding your first site setting.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {renderActiveSection()}
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  {editingItem ? 'Edit' : 'Add'} {modalType === 'content' ? 'Content Section' : 'Site Setting'}
+                </h2>
+
+                {/* Content Form */}
+                {modalType === 'content' && (
+                  <form onSubmit={handleContentSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Page *
+                        </label>
+                        <select
+                          name="page_name"
+                          value={contentForm.page_name}
+                          onChange={handleContentInputChange}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select Page</option>
+                          {pages.map(page => (
+                            <option key={page} value={page}>{page}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Section Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="section_name"
+                          value={contentForm.section_name}
+                          onChange={handleContentInputChange}
+                          required
+                          placeholder="e.g., hero, features, testimonials"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        value={contentForm.title}
+                        onChange={handleContentInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        name="subtitle"
+                        value={contentForm.subtitle}
+                        onChange={handleContentInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Content
+                      </label>
+                      <textarea
+                        name="content"
+                        value={contentForm.content}
+                        onChange={handleContentInputChange}
+                        rows="4"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Image URL
+                        </label>
+                        <input
+                          type="url"
+                          name="image_url"
+                          value={contentForm.image_url}
+                          onChange={handleContentInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          name="display_order"
+                          value={contentForm.display_order}
+                          onChange={handleContentInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Button Text
+                        </label>
+                        <input
+                          type="text"
+                          name="button_text"
+                          value={contentForm.button_text}
+                          onChange={handleContentInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Button Link
+                        </label>
+                        <input
+                          type="text"
+                          name="button_link"
+                          value={contentForm.button_link}
+                          onChange={handleContentInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="is_active"
+                          checked={contentForm.is_active}
+                          onChange={handleContentInputChange}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Active</span>
+                      </label>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(false)
+                          setEditingItem(null)
+                          resetContentForm()
+                        }}
+                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {editingItem ? 'Update' : 'Add'} Content
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Setting Form */}
+                {modalType === 'setting' && (
+                  <form onSubmit={handleSettingSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Setting Key *
+                        </label>
+                        <input
+                          type="text"
+                          name="setting_key"
+                          value={settingForm.setting_key}
+                          onChange={handleSettingInputChange}
+                          required
+                          placeholder="e.g., site_title, contact_email"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Type *
+                        </label>
+                        <select
+                          name="setting_type"
+                          value={settingForm.setting_type}
+                          onChange={handleSettingInputChange}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {settingTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Setting Value *
+                      </label>
+                      {settingForm.setting_type === 'json' ? (
+                        <textarea
+                          name="setting_value"
+                          value={settingForm.setting_value}
+                          onChange={handleSettingInputChange}
+                          required
+                          rows="4"
+                          placeholder='{"key": "value"}'
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        />
+                      ) : settingForm.setting_type === 'boolean' ? (
+                        <select
+                          name="setting_value"
+                          value={settingForm.setting_value}
+                          onChange={handleSettingInputChange}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="true">True</option>
+                          <option value="false">False</option>
+                        </select>
+                      ) : (
+                        <input
+                          type={settingForm.setting_type === 'number' ? 'number' : 'text'}
+                          name="setting_value"
+                          value={settingForm.setting_value}
+                          onChange={handleSettingInputChange}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        value={settingForm.description}
+                        onChange={handleSettingInputChange}
+                        rows="2"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="is_active"
+                          checked={settingForm.is_active}
+                          onChange={handleSettingInputChange}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Active</span>
+                      </label>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowModal(false)
+                          setEditingItem(null)
+                          resetSettingForm()
+                        }}
+                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {editingItem ? 'Update' : 'Add'} Setting
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   )

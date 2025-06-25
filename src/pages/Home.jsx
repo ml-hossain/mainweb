@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import UniversityCard from '../components/UniversityCard'
 import Footer from '../components/Footer'
+import { supabase } from '../lib/supabase'
 
 const Home = () => {
   const heroRef = useRef(null)
@@ -15,7 +16,7 @@ const Home = () => {
   const reviewsRef = useRef(null)
   const offerCardRef = useRef(null)
   const statsectionRef = useRef(null)
-  
+
   // Timer state for 30-day countdown
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -34,124 +35,49 @@ const Home = () => {
   const [locationFilter, setLocationFilter] = useState('All Malaysia')
   const [rankingFilter, setRankingFilter] = useState('All Rankings')
 
-  // University data
-  const [universities] = useState([
-    {
-      ranking: "QS Ranking",
-      rankingNumber: 1,
-      university: "University of Malaya",
-      location: "Kuala Lumpur",
-      program: "Medicine",
-      budget: "RM 45,000",
-      budgetNumber: 45000,
-      duration: "5 years",
-      additionalPrograms: ["Engineering", "Business", "Law"],
-      allPrograms: ["Engineering", "Business", "Law", "Computer Science", "Economics", "Pharmacy"],
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "university-of-malaya"
-    },
-    {
-      ranking: "QS Top 25",
-      rankingNumber: 25,
-      university: "Universiti Sains Malaysia",
-      location: "Penang",
-      program: "Engineering",
-      budget: "RM 35,000",
-      budgetNumber: 35000,
-      duration: "4 years",
-      additionalPrograms: ["Science", "Pharmacy", "Arts"],
-      allPrograms: ["Science", "Pharmacy", "Arts", "Mathematics", "Physics", "Chemistry", "Biology"],
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "universiti-sains-malaysia"
-    },
-    {
-      ranking: "QS Top 35",
-      rankingNumber: 35,
-      university: "Universiti Kebangsaan Malaysia",
-      location: "Selangor",
-      program: "Business",
-      budget: "RM 28,000",
-      budgetNumber: 28000,
-      duration: "3 years",
-      additionalPrograms: ["Economics", "Social Sciences"],
-      allPrograms: ["Economics", "Social Sciences", "Psychology", "Anthropology", "Political Science", "Sociology", "International Relations"],
-      image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "universiti-kebangsaan-malaysia"
-    },
-    {
-      ranking: "QS Top 42",
-      rankingNumber: 42,
-      university: "Universiti Putra Malaysia",
-      location: "Selangor",
-      program: "Agriculture",
-      budget: "RM 25,000",
-      budgetNumber: 25000,
-      duration: "4 years",
-      additionalPrograms: ["Veterinary", "Forestry"],
-      allPrograms: ["Veterinary", "Forestry", "Biotechnology", "Food Science", "Environmental Science", "Animal Science", "Plant Science", "Aquaculture"],
-      image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "universiti-putra-malaysia"
-    },
-    {
-      ranking: "QS Top 58",
-      rankingNumber: 58,
-      university: "Universiti Teknologi Malaysia",
-      location: "Johor",
-      program: "Technology",
-      budget: "RM 32,000",
-      budgetNumber: 32000,
-      duration: "4 years",
-      additionalPrograms: ["IT", "Architecture"],
-      allPrograms: ["IT", "Architecture", "Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Software Engineering"],
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "universiti-teknologi-malaysia"
-    },
-    {
-      ranking: "QS Top 67",
-      rankingNumber: 67,
-      university: "UCSI University",
-      location: "Kuala Lumpur",
-      program: "Music",
-      budget: "RM 55,000",
-      budgetNumber: 55000,
-      duration: "3 years",
-      additionalPrograms: ["Hospitality", "Pharmacy"],
-      allPrograms: ["Hospitality", "Pharmacy", "Medicine", "Psychology", "Business"],
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "ucsi-university"
-    }
-  ])
+  // Dynamic content states
+  const [contentSections, setContentSections] = useState({})
+  const [siteSettings, setSiteSettings] = useState({})
+  const [loadingContent, setLoadingContent] = useState(true)
+
+  // University data from Supabase
+  const [universities, setUniversities] = useState([])
 
   // Filtered universities based on search and filters
   const filteredUniversities = universities.filter(uni => {
     // Search filter
-    const matchesSearch = searchTerm === '' || 
-      uni.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      uni.program.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      uni.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      uni.additionalPrograms.some(prog => prog.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesSearch = searchTerm === '' ||
+      uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      uni.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (uni.programs && uni.programs.some(prog => prog.toLowerCase().includes(searchTerm.toLowerCase())))
 
     // Program filter
-    const matchesProgram = programFilter === 'All Programs' || 
-      uni.program === programFilter ||
-      uni.additionalPrograms.some(prog => prog === programFilter)
+    const matchesProgram = programFilter === 'All Programs' ||
+      (uni.programs && uni.programs.some(prog => prog === programFilter))
 
-    // Budget filter
-    const matchesBudget = budgetFilter === 'All Budgets' || 
-      (budgetFilter === 'Under 30,000' && uni.budgetNumber < 30000) ||
-      (budgetFilter === '30,000 - 50,000' && uni.budgetNumber >= 30000 && uni.budgetNumber <= 50000) ||
-      (budgetFilter === '50,000 - 100,000' && uni.budgetNumber >= 50000 && uni.budgetNumber <= 100000) ||
-      (budgetFilter === 'Above 100,000' && uni.budgetNumber > 100000)
+    // Budget filter - parse tuition fee range if available
+    let budgetNumber = 0
+    if (uni.tuition_fee_range) {
+      const match = uni.tuition_fee_range.match(/\d+,?\d*/g)
+      if (match) {
+        budgetNumber = parseInt(match[0].replace(',', ''))
+      }
+    }
+    const matchesBudget = budgetFilter === 'All Budgets' ||
+      (budgetFilter === 'Under 30,000' && budgetNumber < 30000) ||
+      (budgetFilter === '30,000 - 50,000' && budgetNumber >= 30000 && budgetNumber <= 50000) ||
+      (budgetFilter === '50,000 - 100,000' && budgetNumber >= 50000 && budgetNumber <= 100000) ||
+      (budgetFilter === 'Above 100,000' && budgetNumber > 100000)
 
     // Location filter
-    const matchesLocation = locationFilter === 'All Malaysia' || uni.location === locationFilter
+    const matchesLocation = locationFilter === 'All Malaysia' || uni.country === locationFilter
 
     // Ranking filter
     const matchesRanking = rankingFilter === 'All Rankings' ||
-      (rankingFilter === 'Top 10' && uni.rankingNumber <= 10) ||
-      (rankingFilter === 'Top 50' && uni.rankingNumber <= 50) ||
-      (rankingFilter === 'Top 100' && uni.rankingNumber <= 100) ||
-      (rankingFilter === 'Top 500' && uni.rankingNumber <= 500)
+      (rankingFilter === 'Top 10' && uni.ranking && uni.ranking <= 10) ||
+      (rankingFilter === 'Top 50' && uni.ranking && uni.ranking <= 50) ||
+      (rankingFilter === 'Top 100' && uni.ranking && uni.ranking <= 100) ||
+      (rankingFilter === 'Top 500' && uni.ranking && uni.ranking <= 500)
 
     return matchesSearch && matchesProgram && matchesBudget && matchesLocation && matchesRanking
   })
@@ -160,19 +86,19 @@ const Home = () => {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
-      
+
       // Get stored start date or create new one
       let startDate = localStorage.getItem('offerStartDate')
       if (!startDate) {
         startDate = now.toISOString()
         localStorage.setItem('offerStartDate', startDate)
       }
-      
+
       const offerStart = new Date(startDate)
       const targetDate = new Date(offerStart.getTime() + (30 * 24 * 60 * 60 * 1000))
-      
+
       const difference = targetDate - now
-      
+
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -186,7 +112,7 @@ const Home = () => {
         localStorage.setItem('offerStartDate', newStartDate)
         const newTargetDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000))
         const newDifference = newTargetDate - now
-        
+
         setTimeLeft({
           days: Math.floor(newDifference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((newDifference / (1000 * 60 * 60)) % 24),
@@ -201,6 +127,71 @@ const Home = () => {
 
     return () => clearInterval(timer)
   }, [])
+
+  // Fetch dynamic content from Supabase
+  useEffect(() => {
+    fetchContentData()
+    fetchUniversities()
+  }, [])
+
+  const fetchContentData = async () => {
+    try {
+      // Fetch content sections
+      const { data: contentData, error: contentError } = await supabase
+        .from('content_sections')
+        .select('*')
+        .eq('page_name', 'home')
+        .eq('is_active', true)
+
+      if (contentError) throw contentError
+
+      // Convert array to object for easy access
+      const contentObj = {}
+      contentData.forEach(section => {
+        contentObj[section.section_name] = section
+      })
+      setContentSections(contentObj)
+
+      // Fetch site settings
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('is_active', true)
+
+      if (settingsError) throw settingsError
+
+      // Convert array to object for easy access
+      const settingsObj = {}
+      settingsData.forEach(setting => {
+        try {
+          settingsObj[setting.setting_key] = JSON.parse(setting.setting_value)
+        } catch {
+          settingsObj[setting.setting_key] = setting.setting_value
+        }
+      })
+      setSiteSettings(settingsObj)
+
+    } catch (error) {
+      console.error('Error fetching content data:', error)
+    } finally {
+      setLoadingContent(false)
+    }
+  }
+
+  const fetchUniversities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .eq('is_active', true)
+        .order('ranking', { ascending: true, nullsLast: true })
+
+      if (error) throw error
+      setUniversities(data || [])
+    } catch (error) {
+      console.error('Error fetching universities:', error)
+    }
+  }
 
   useEffect(() => {
     // Reset any existing animations
@@ -221,75 +212,75 @@ const Home = () => {
       duration: 0.5,
       ease: "power2.out"
     })
-    
-    // Title animation
-    .to(titleRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      ease: "power2.out"
-    }, "-=0.3")
-    
-    // Subtitle animation
-    .to(subtitleRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    }, "-=0.4")
-    
-    // Stats animation
-    .to(statsRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    }, "-=0.3")
-    
-    // Buttons animation
-    .to(buttonsRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    }, "-=0.3")
-    
-    // Reviews animation
-    .to(reviewsRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: "power2.out"
-    }, "-=0.2")
-    
-    // Offer card animation with special effects
-    .fromTo(offerCardRef.current, 
-      { 
-        opacity: 0, 
-        x: 100, 
-        y: 30,
-        scale: 0.9 
-      },
-      {
+
+      // Title animation
+      .to(titleRef.current, {
         opacity: 1,
-        x: 0,
         y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: "back.out(1.2)"
-      }, 
-      "-=0.5"
-    )
+        duration: 0.6,
+        ease: "power2.out"
+      }, "-=0.3")
+
+      // Subtitle animation
+      .to(subtitleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      }, "-=0.4")
+
+      // Stats animation
+      .to(statsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      }, "-=0.3")
+
+      // Buttons animation
+      .to(buttonsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      }, "-=0.3")
+
+      // Reviews animation
+      .to(reviewsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      }, "-=0.2")
+
+      // Offer card animation with special effects
+      .fromTo(offerCardRef.current,
+        {
+          opacity: 0,
+          x: 100,
+          y: 30,
+          scale: 0.9
+        },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "back.out(1.2)"
+        },
+        "-=0.5"
+      )
 
     // Statistics section animation with scroll trigger
     const statsObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          gsap.fromTo(entry.target.children, 
+          gsap.fromTo(entry.target.children,
             { opacity: 0, y: 50 },
-            { 
-              opacity: 1, 
-              y: 0, 
+            {
+              opacity: 1,
+              y: 0,
               duration: 0.6,
               stagger: 0.1,
               ease: "power2.out"
@@ -316,7 +307,7 @@ const Home = () => {
       {/* Hero Section */}
       <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
@@ -326,10 +317,10 @@ const Home = () => {
         {/* Hero Content */}
         <div ref={heroRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-            
+
             {/* Left Content */}
             <div className="flex-1 lg:pr-12 text-center lg:text-left">
-              
+
               {/* Badge */}
               <div ref={badgeRef} className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-6">
                 <FiStar className="w-4 h-4 mr-2" />
@@ -338,42 +329,48 @@ const Home = () => {
 
               {/* Main Headline */}
               <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
-                Your Gateway to
+                {contentSections.hero?.title || 'Your Gateway to'}
                 <span className="block text-green-400">Global Education</span>
               </h1>
 
               {/* Subtitle */}
               <p ref={subtitleRef} className="text-xl md:text-2xl text-gray-200 mb-8 max-w-2xl leading-relaxed mx-auto lg:mx-0">
-                Transform your dreams into reality with personalized guidance for studying abroad.
+                {contentSections.hero?.content || 'Transform your dreams into reality with personalized guidance for studying abroad.'}
               </p>
 
               {/* Stats */}
               <div ref={statsRef} className="flex flex-wrap gap-8 mb-10 justify-center lg:justify-start">
                 <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-white">2000+</div>
+                  <div className="text-3xl font-bold text-white">
+                    {siteSettings.hero_stats?.students_placed || '2500'}+
+                  </div>
                   <div className="text-green-300 text-sm">Students Placed</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-white">95%</div>
+                  <div className="text-3xl font-bold text-white">
+                    {siteSettings.hero_stats?.success_rate || '98'}%
+                  </div>
                   <div className="text-green-300 text-sm">Success Rate</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-3xl font-bold text-white">50+</div>
+                  <div className="text-3xl font-bold text-white">
+                    {siteSettings.hero_stats?.university_partners || '150'}+
+                  </div>
                   <div className="text-green-300 text-sm">Universities</div>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 mb-12 justify-center lg:justify-start">
-                <Link 
-                  to="/consultation" 
+                <Link
+                  to="/consultation"
                   className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center group"
                 >
                   Start Your Journey
                   <FiArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link 
-                  to="/services" 
+                <Link
+                  to="/services"
                   className="relative bg-white/10 backdrop-blur-sm text-white border border-white/30 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 overflow-hidden group"
                 >
                   {/* Left to Right Orange Background - 50% width */}
@@ -415,7 +412,7 @@ const Home = () => {
                     <FiClock className="w-3 h-3 mr-1" />
                     LIMITED OFFER
                   </div>
-                  
+
                   {/* Timer */}
                   <div className="bg-gray-700 rounded-xl p-2 mb-3 border border-gray-600">
                     <div className="text-amber-400 text-xs mb-1 text-center">Ends In:</div>
@@ -488,14 +485,14 @@ const Home = () => {
                   </div>
 
                   {/* CTA Button */}
-                  <Link 
+                  <Link
                     to="/consultation"
                     className="relative w-full bg-amber-400 text-gray-900 font-black text-sm py-3 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 overflow-hidden group"
                   >
                     {/* Bottom-right to Top-left White Background - 50% diagonal */}
-                    <span className="absolute inset-0 bg-white transform origin-bottom-right scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{clipPath: 'polygon(50% 100%, 100% 100%, 100% 0%)'}}></span>
+                    <span className="absolute inset-0 bg-white transform origin-bottom-right scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{ clipPath: 'polygon(50% 100%, 100% 100%, 100% 0%)' }}></span>
                     {/* Top-left to Bottom-right White Background - 50% diagonal */}
-                    <span className="absolute inset-0 bg-white transform origin-top-left scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{clipPath: 'polygon(0% 0%, 50% 0%, 0% 100%)'}}></span>
+                    <span className="absolute inset-0 bg-white transform origin-top-left scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{ clipPath: 'polygon(0% 0%, 50% 0%, 0% 100%)' }}></span>
                     <span className="relative z-10 flex items-center">
                       <FiGift className="mr-2 w-4 h-4" />
                       CLAIM OFFER NOW
@@ -533,22 +530,22 @@ const Home = () => {
                 <stop offset="100%" stopColor="rgba(6, 95, 70, 0.6)" />
               </linearGradient>
             </defs>
-            
+
             {/* First wave layer */}
-            <path 
-              fill="url(#waveGradient1)" 
+            <path
+              fill="url(#waveGradient1)"
               d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             />
-            
+
             {/* Second wave layer */}
-            <path 
-              fill="url(#waveGradient2)" 
+            <path
+              fill="url(#waveGradient2)"
               d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,80C672,64,768,64,864,80C960,96,1056,128,1152,128C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             />
-            
+
             {/* Third wave layer */}
-            <path 
-              fill="url(#waveGradient3)" 
+            <path
+              fill="url(#waveGradient3)"
               d="M0,32L48,48C96,64,192,96,288,96C384,96,480,64,576,48C672,32,768,32,864,48C960,64,1056,96,1152,96C1248,96,1344,64,1392,48L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             />
           </svg>
@@ -561,7 +558,7 @@ const Home = () => {
         <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-green-200/30 to-blue-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-yellow-200/20 to-orange-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="text-center mb-8">
@@ -647,7 +644,7 @@ const Home = () => {
         {/* Background Decorative Elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100/50 to-indigo-100/50 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-br from-green-100/50 to-emerald-100/50 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="text-center mb-12">
@@ -686,7 +683,7 @@ const Home = () => {
 
               {/* Filter Button */}
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="group relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg flex items-center space-x-2 overflow-hidden"
                 >
@@ -712,7 +709,7 @@ const Home = () => {
                 {/* Program Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Program</label>
-                  <select 
+                  <select
                     value={programFilter}
                     onChange={(e) => setProgramFilter(e.target.value)}
                     className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -730,7 +727,7 @@ const Home = () => {
                 {/* Budget Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Budget (RM)</label>
-                  <select 
+                  <select
                     value={budgetFilter}
                     onChange={(e) => setBudgetFilter(e.target.value)}
                     className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -746,7 +743,7 @@ const Home = () => {
                 {/* Location Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                  <select 
+                  <select
                     value={locationFilter}
                     onChange={(e) => setLocationFilter(e.target.value)}
                     className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -764,7 +761,7 @@ const Home = () => {
                 {/* Ranking Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ranking</label>
-                  <select 
+                  <select
                     value={rankingFilter}
                     onChange={(e) => setRankingFilter(e.target.value)}
                     className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -779,7 +776,7 @@ const Home = () => {
 
                 {/* Clear Filters Button */}
                 <div className="flex items-end">
-                  <button 
+                  <button
                     onClick={() => {
                       setSearchTerm('')
                       setProgramFilter('All Programs')
@@ -815,15 +812,15 @@ const Home = () => {
                 <UniversityCard
                   key={index}
                   ranking={university.ranking}
-                  university={university.university}
-                  location={university.location}
-                  program={university.program}
-                  budget={university.budget}
-                  duration={university.duration}
-                  additionalPrograms={university.additionalPrograms}
-                  allPrograms={university.allPrograms}
-                  image={university.image}
-                  slug={university.slug}
+                  university={university.name}
+                  location={university.country}
+                  program={university.programs ? university.programs.join(', ') : 'Various Programs'}
+                  budget={university.tuition_fee_range}
+                  duration={university.duration || 'Contact for details'}
+                  additionalPrograms={university.programs || []}
+                  allPrograms={university.programs || []}
+                  image={university.logo_url}
+                  slug={university.slug || university.name?.toLowerCase().replace(/\s+/g, '-')}
                 />
               ))
             ) : (
@@ -847,7 +844,7 @@ const Home = () => {
               </svg>
               Previous
             </button>
-            
+
             <div className="flex space-x-2">
               <button className="w-10 h-10 bg-blue-600 text-white rounded-lg font-semibold">1</button>
               <button className="w-10 h-10 text-gray-600 hover:bg-blue-100 rounded-lg font-semibold transition-colors duration-300">2</button>
@@ -873,11 +870,11 @@ const Home = () => {
           <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
             <g fill="none" fillRule="evenodd">
               <g fill="#1e40af" fillOpacity="0.4">
-                <circle cx="30" cy="30" r="1"/>
-                <circle cx="15" cy="15" r="1"/>
-                <circle cx="45" cy="15" r="1"/>
-                <circle cx="15" cy="45" r="1"/>
-                <circle cx="45" cy="45" r="1"/>
+                <circle cx="30" cy="30" r="1" />
+                <circle cx="15" cy="15" r="1" />
+                <circle cx="45" cy="15" r="1" />
+                <circle cx="15" cy="45" r="1" />
+                <circle cx="45" cy="45" r="1" />
               </g>
             </g>
           </svg>
@@ -933,13 +930,13 @@ const Home = () => {
 
             {/* CTA Button */}
             <div className="relative inline-block">
-              <Link 
+              <Link
                 to="/consultation"
                 className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white font-bold text-base rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group relative overflow-hidden"
               >
                 {/* Animated Background */}
                 <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-                
+
                 {/* Button Content */}
                 <span className="relative z-10 flex items-center">
                   <FiGift className="w-5 h-5 mr-2" />
@@ -973,23 +970,23 @@ const Home = () => {
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-br from-green-200/20 to-teal-200/20 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
+
             {/* CEO Photo - Left Side */}
             <div className="relative order-2 lg:order-1">
               <div className="relative mx-auto max-w-md">
                 {/* Main Photo Container */}
                 <div className="relative">
                   <div className="aspect-[3/4] w-full max-w-sm mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50">
-                    <img 
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800&q=80" 
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800&q=80"
                       alt="CEO - Dr. Ahmad Rahman"
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  
+
                   {/* Floating Achievement Badge */}
                   <div className="absolute -top-4 -right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-2xl shadow-xl transform rotate-6">
                     <div className="text-center">
@@ -998,7 +995,7 @@ const Home = () => {
                       <div className="text-xs">Experience</div>
                     </div>
                   </div>
-                  
+
                   {/* Floating Stats Badge */}
                   <div className="absolute -bottom-4 -left-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-2xl shadow-xl transform -rotate-6">
                     <div className="text-center">
@@ -1061,7 +1058,7 @@ const Home = () => {
                       "Your success is our mission, and your dreams are our responsibility."
                     </p>
                   </blockquote>
-                  
+
                   {/* Signature */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="flex items-center">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 // Admin Components
 import AdminLogin from './components/AdminLogin'
@@ -17,29 +18,71 @@ import Settings from './pages/Settings'
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Check if user is already authenticated (e.g., from localStorage)
-    const authStatus = localStorage.getItem('adminAuthenticated')
-    if (authStatus === 'true') {
-      setIsAuthenticated(true)
+    let mounted = true
+
+    // Check if user is admin
+    const checkAdminStatus = (user) => {
+      if (!user) return false
+      const adminEmails = ['play.rjfahad@gmail.com', 'admin@maeducation.com']
+      return adminEmails.includes(user.email)
     }
-    setIsLoading(false)
+
+    // Handle auth state changes
+    const handleAuthChange = async (event, session) => {
+      console.log('Auth event:', event, 'Session:', !!session)
+
+      if (!mounted) return
+
+      if (session && session.user) {
+        // User is signed in
+        if (checkAdminStatus(session.user)) {
+          console.log('User is admin - authenticated')
+          setIsAuthenticated(true)
+          setUser(session.user)
+        } else {
+          console.log('User is not admin - signing out')
+          await supabase.auth.signOut()
+          setIsAuthenticated(false)
+          setUser(null)
+        }
+      } else {
+        // No session
+        console.log('No session - not authenticated')
+        setIsAuthenticated(false)
+        setUser(null)
+      }
+
+      setIsLoading(false)
+    }
+
+    // Set up auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange)
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleAuthChange('INITIAL_SESSION', session)
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
-  const handleLogin = (status) => {
-    setIsAuthenticated(status)
-    if (status) {
-      localStorage.setItem('adminAuthenticated', 'true')
+  const handleLogout = async () => {
+    setIsLoading(true)
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Logout error:', error)
+      setIsLoading(false)
     }
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    localStorage.removeItem('adminAuthenticated')
-  }
-
-  // Show loading state while checking authentication
+  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -53,28 +96,24 @@ const AdminApp = () => {
 
   // Show login if not authenticated
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />
+    return <AdminLogin />
   }
 
-  // Show admin dashboard if authenticated
+  // Authenticated - show admin routes
   return (
     <Routes>
-      <Route path="/admin" element={<Dashboard onLogout={handleLogout} />} />
-      <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
-      <Route path="/admin/universities" element={<Universities onLogout={handleLogout} />} />
-      <Route path="/admin/services" element={<Services onLogout={handleLogout} />} />
-      <Route path="/admin/consultations" element={<Consultations onLogout={handleLogout} />} />
-      <Route path="/admin/content" element={<Content onLogout={handleLogout} />} />
-      <Route path="/admin/users" element={<Users onLogout={handleLogout} />} />
-      <Route path="/admin/analytics" element={<Analytics onLogout={handleLogout} />} />
-      <Route path="/admin/settings" element={<Settings onLogout={handleLogout} />} />
-      
-      {/* Service subpages - could be individual service management pages */}
-      <Route path="/admin/services/*" element={<Services onLogout={handleLogout} />} />
-      <Route path="/admin/content/*" element={<Content onLogout={handleLogout} />} />
-      
-      {/* Catch-all redirect to main dashboard */}
-      <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
+      <Route index element={<Dashboard onLogout={handleLogout} />} />
+      <Route path="dashboard" element={<Navigate to="/admin" replace />} />
+      <Route path="universities" element={<Universities onLogout={handleLogout} />} />
+      <Route path="services" element={<Services onLogout={handleLogout} />} />
+      <Route path="services/*" element={<Services onLogout={handleLogout} />} />
+      <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
+      <Route path="content" element={<Content onLogout={handleLogout} />} />
+      <Route path="content/*" element={<Content onLogout={handleLogout} />} />
+      <Route path="users" element={<Users onLogout={handleLogout} />} />
+      <Route path="analytics" element={<Analytics onLogout={handleLogout} />} />
+      <Route path="settings" element={<Settings onLogout={handleLogout} />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
   )
 }

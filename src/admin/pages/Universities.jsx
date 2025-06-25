@@ -1,478 +1,510 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  FiPlus, 
-  FiEdit, 
-  FiTrash2, 
-  FiSearch, 
-  FiFilter,
-  FiMapPin,
-  FiDollarSign,
-  FiClock,
-  FiStar
-} from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiGlobe, FiStar, FiEye, FiEyeOff } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
+import { supabase } from '../../lib/supabase'
 
 const Universities = ({ onLogout }) => {
-  const [universities, setUniversities] = useState([
-    {
-      id: 1,
-      university: "University of Malaya",
-      location: "Kuala Lumpur",
-      ranking: "QS Ranking",
-      rankingNumber: 1,
-      program: "Medicine",
-      budget: "RM 45,000",
-      budgetNumber: 45000,
-      duration: "5 years",
-      additionalPrograms: ["Engineering", "Business", "Law"],
-      allPrograms: ["Engineering", "Business", "Law", "Computer Science", "Economics", "Pharmacy"],
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "university-of-malaya",
-      featured: true,
-      status: "active"
-    },
-    {
-      id: 2,
-      university: "Universiti Sains Malaysia",
-      location: "Penang",
-      ranking: "QS Top 25",
-      rankingNumber: 25,
-      program: "Engineering",
-      budget: "RM 35,000",
-      budgetNumber: 35000,
-      duration: "4 years",
-      additionalPrograms: ["Science", "Pharmacy", "Arts"],
-      allPrograms: ["Science", "Pharmacy", "Arts", "Mathematics", "Physics", "Chemistry", "Biology"],
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      slug: "universiti-sains-malaysia",
-      featured: false,
-      status: "active"
-    },
-    // Add more universities...
-  ])
-
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedLocation, setSelectedLocation] = useState('all')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [universities, setUniversities] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
   const [editingUniversity, setEditingUniversity] = useState(null)
-
-  const [newUniversity, setNewUniversity] = useState({
-    university: '',
-    location: '',
+  const [formData, setFormData] = useState({
+    name: '',
+    country: '',
+    logo_url: '',
+    description: '',
     ranking: '',
-    rankingNumber: '',
-    program: '',
-    budget: '',
-    budgetNumber: '',
-    duration: '',
-    additionalPrograms: [],
-    allPrograms: [],
-    image: '',
-    slug: '',
-    featured: false,
-    status: 'active'
+    website_url: '',
+    tuition_fee_range: '',
+    programs: '',
+    requirements: '',
+    is_featured: false,
+    is_active: true
   })
 
-  const locations = ['all', 'Kuala Lumpur', 'Penang', 'Selangor', 'Johor', 'Sabah', 'Sarawak']
-  const statuses = ['all', 'active', 'inactive', 'pending']
+  useEffect(() => {
+    fetchUniversities()
+  }, [])
 
-  const filteredUniversities = universities.filter(uni => {
-    const matchesSearch = uni.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         uni.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         uni.program.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesLocation = selectedLocation === 'all' || uni.location === selectedLocation
-    const matchesStatus = selectedStatus === 'all' || uni.status === selectedStatus
-    
-    return matchesSearch && matchesLocation && matchesStatus
-  })
+  const fetchUniversities = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('universities')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  const handleAddUniversity = () => {
-    const id = Math.max(...universities.map(u => u.id)) + 1
-    const slug = newUniversity.university.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    
-    setUniversities([...universities, { 
-      ...newUniversity, 
-      id,
-      slug,
-      budgetNumber: parseInt(newUniversity.budget.replace(/[^\d]/g, ''))
-    }])
-    setNewUniversity({
-      university: '',
-      location: '',
-      ranking: '',
-      rankingNumber: '',
-      program: '',
-      budget: '',
-      budgetNumber: '',
-      duration: '',
-      additionalPrograms: [],
-      allPrograms: [],
-      image: '',
-      slug: '',
-      featured: false,
-      status: 'active'
-    })
-    setShowAddModal(false)
-  }
-
-  const handleEditUniversity = (university) => {
-    setEditingUniversity(university)
-    setNewUniversity(university)
-    setShowAddModal(true)
-  }
-
-  const handleUpdateUniversity = () => {
-    setUniversities(universities.map(uni => 
-      uni.id === editingUniversity.id ? newUniversity : uni
-    ))
-    setEditingUniversity(null)
-    setShowAddModal(false)
-    setNewUniversity({
-      university: '',
-      location: '',
-      ranking: '',
-      rankingNumber: '',
-      program: '',
-      budget: '',
-      budgetNumber: '',
-      duration: '',
-      additionalPrograms: [],
-      allPrograms: [],
-      image: '',
-      slug: '',
-      featured: false,
-      status: 'active'
-    })
-  }
-
-  const handleDeleteUniversity = (id) => {
-    if (window.confirm('Are you sure you want to delete this university?')) {
-      setUniversities(universities.filter(uni => uni.id !== id))
+      if (error) throw error
+      setUniversities(data || [])
+    } catch (error) {
+      console.error('Error fetching universities:', error)
+      alert('Error loading universities')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const toggleFeatured = (id) => {
-    setUniversities(universities.map(uni => 
-      uni.id === id ? { ...uni, featured: !uni.featured } : uni
-    ))
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      // Convert programs string to array
+      const programsArray = formData.programs
+        .split(',')
+        .map(p => p.trim())
+        .filter(p => p.length > 0)
+
+      const universityData = {
+        ...formData,
+        programs: programsArray,
+        ranking: formData.ranking ? parseInt(formData.ranking) : null
+      }
+
+      if (editingUniversity) {
+        const { error } = await supabase
+          .from('universities')
+          .update(universityData)
+          .eq('id', editingUniversity.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('universities')
+          .insert([universityData])
+
+        if (error) throw error
+      }
+
+      setShowModal(false)
+      setEditingUniversity(null)
+      resetForm()
+      fetchUniversities()
+      alert(editingUniversity ? 'University updated successfully!' : 'University added successfully!')
+    } catch (error) {
+      console.error('Error saving university:', error)
+      alert('Error saving university')
+    }
+  }
+
+  const handleEdit = (university) => {
+    setEditingUniversity(university)
+    setFormData({
+      name: university.name || '',
+      country: university.country || '',
+      logo_url: university.logo_url || '',
+      description: university.description || '',
+      ranking: university.ranking?.toString() || '',
+      website_url: university.website_url || '',
+      tuition_fee_range: university.tuition_fee_range || '',
+      programs: university.programs?.join(', ') || '',
+      requirements: university.requirements || '',
+      is_featured: university.is_featured || false,
+      is_active: university.is_active || true
+    })
+    setShowModal(true)
+  }
+
+  const handleDelete = async (id) => {
+    if (!confirm('Are you sure you want to delete this university?')) return
+
+    try {
+      const { error } = await supabase
+        .from('universities')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      fetchUniversities()
+      alert('University deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting university:', error)
+      alert('Error deleting university')
+    }
+  }
+
+  const toggleFeatured = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('universities')
+        .update({ is_featured: !currentStatus })
+        .eq('id', id)
+
+      if (error) throw error
+      fetchUniversities()
+    } catch (error) {
+      console.error('Error updating featured status:', error)
+      alert('Error updating featured status')
+    }
+  }
+
+  const toggleActive = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('universities')
+        .update({ is_active: !currentStatus })
+        .eq('id', id)
+
+      if (error) throw error
+      fetchUniversities()
+    } catch (error) {
+      console.error('Error updating active status:', error)
+      alert('Error updating active status')
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      country: '',
+      logo_url: '',
+      description: '',
+      ranking: '',
+      website_url: '',
+      tuition_fee_range: '',
+      programs: '',
+      requirements: '',
+      is_featured: false,
+      is_active: true
+    })
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout onLogout={onLogout}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (
     <AdminLayout onLogout={onLogout}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Universities</h1>
-            <p className="text-gray-600">Manage university partnerships and listings</p>
+            <p className="text-gray-600">Manage partner universities and institutions</p>
           </div>
           <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+            onClick={() => {
+              setEditingUniversity(null)
+              resetForm()
+              setShowModal(true)
+            }}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <FiPlus className="w-4 h-4" />
-            <span>Add University</span>
+            <FiPlus className="w-4 h-4 mr-2" />
+            Add University
           </button>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search universities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {locations.map(location => (
-                <option key={location} value={location}>
-                  {location === 'all' ? 'All Locations' : location}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {statuses.map(status => (
-                <option key={status} value={status}>
-                  {status === 'all' ? 'All Statuses' : status.charAt(0).toUpperCase() + status.slice(1)}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Found: {filteredUniversities.length}</span>
-            </div>
-          </div>
         </div>
 
         {/* Universities Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUniversities.map((university) => (
+          {universities.map((university) => (
             <div key={university.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-              <div className="relative">
-                <img
-                  src={university.image}
-                  alt={university.university}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-orange-400 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    {university.ranking}
-                  </span>
+              {university.logo_url && (
+                <div className="h-32 bg-gray-100 rounded-t-lg flex items-center justify-center">
+                  <img
+                    src={university.logo_url}
+                    alt={university.name}
+                    className="max-h-20 max-w-full object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                    }}
+                  />
                 </div>
-                <div className="absolute top-4 right-4">
-                  <button
-                    onClick={() => toggleFeatured(university.id)}
-                    className={`p-2 rounded-full ${university.featured ? 'bg-yellow-400 text-white' : 'bg-white text-gray-400'}`}
-                  >
-                    <FiStar className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="absolute bottom-4 right-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    university.status === 'active' ? 'bg-green-100 text-green-800' :
-                    university.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {university.status}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{university.university}</h3>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FiMapPin className="w-4 h-4 mr-2" />
-                    {university.location}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FiDollarSign className="w-4 h-4 mr-2" />
-                    {university.budget}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FiClock className="w-4 h-4 mr-2" />
-                    {university.duration}
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-900 mb-2">Primary Program:</p>
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    {university.program}
-                  </span>
-                </div>
-
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-900 mb-2">Other Programs:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {university.additionalPrograms.slice(0, 2).map((program, index) => (
-                      <span key={index} className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                        {program}
+              )}
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900 text-sm">{university.name}</h3>
+                  <div className="flex items-center space-x-1">
+                    {university.ranking && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        #{university.ranking}
                       </span>
-                    ))}
-                    {university.additionalPrograms.length > 2 && (
-                      <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                        +{university.additionalPrograms.length - 2} more
-                      </span>
+                    )}
+                    {university.is_featured && (
+                      <FiStar className="w-4 h-4 text-yellow-500 fill-current" />
                     )}
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <button
-                    onClick={() => handleEditUniversity(university)}
-                    className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                  >
-                    <FiEdit className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => handleDeleteUniversity(university.id)}
-                    className="text-red-600 hover:text-red-800 flex items-center space-x-1"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
+                <p className="text-sm text-gray-600 mb-2">{university.country}</p>
+
+                {university.description && (
+                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                    {university.description}
+                  </p>
+                )}
+
+                {university.programs && university.programs.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex flex-wrap gap-1">
+                      {university.programs.slice(0, 3).map((program, index) => (
+                        <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                          {program}
+                        </span>
+                      ))}
+                      {university.programs.length > 3 && (
+                        <span className="text-xs text-gray-500">
+                          +{university.programs.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {university.tuition_fee_range && (
+                  <p className="text-sm font-medium text-green-600 mb-3">
+                    {university.tuition_fee_range}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => toggleFeatured(university.id, university.is_featured)}
+                      className={`p-1 rounded ${university.is_featured ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                      title="Toggle Featured"
+                    >
+                      <FiStar className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => toggleActive(university.id, university.is_active)}
+                      className={`p-1 rounded ${university.is_active ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}
+                      title="Toggle Active"
+                    >
+                      {university.is_active ? <FiEye className="w-4 h-4" /> : <FiEyeOff className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleEdit(university)}
+                      className="p-1 text-blue-600 hover:text-blue-700"
+                      title="Edit"
+                    >
+                      <FiEdit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(university.id)}
+                      className="p-1 text-red-600 hover:text-red-700"
+                      title="Delete"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add/Edit Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {editingUniversity ? 'Edit University' : 'Add New University'}
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">University Name</label>
-                  <input
-                    type="text"
-                    value={newUniversity.university}
-                    onChange={(e) => setNewUniversity({...newUniversity, university: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <input
-                    type="text"
-                    value={newUniversity.location}
-                    onChange={(e) => setNewUniversity({...newUniversity, location: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ranking</label>
-                  <input
-                    type="text"
-                    value={newUniversity.ranking}
-                    onChange={(e) => setNewUniversity({...newUniversity, ranking: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ranking Number</label>
-                  <input
-                    type="number"
-                    value={newUniversity.rankingNumber}
-                    onChange={(e) => setNewUniversity({...newUniversity, rankingNumber: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Primary Program</label>
-                  <input
-                    type="text"
-                    value={newUniversity.program}
-                    onChange={(e) => setNewUniversity({...newUniversity, program: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
-                  <input
-                    type="text"
-                    value={newUniversity.budget}
-                    onChange={(e) => setNewUniversity({...newUniversity, budget: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                  <input
-                    type="text"
-                    value={newUniversity.duration}
-                    onChange={(e) => setNewUniversity({...newUniversity, duration: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                  <input
-                    type="text"
-                    value={newUniversity.image}
-                    onChange={(e) => setNewUniversity({...newUniversity, image: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Additional Programs (comma separated)</label>
-                  <input
-                    type="text"
-                    value={newUniversity.additionalPrograms.join(', ')}
-                    onChange={(e) => setNewUniversity({
-                      ...newUniversity, 
-                      additionalPrograms: e.target.value.split(',').map(p => p.trim()).filter(p => p)
-                    })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center">
+        {universities.length === 0 && (
+          <div className="text-center py-12">
+            <FiGlobe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No universities yet</h3>
+            <p className="text-gray-500 mb-4">Start by adding your first partner university.</p>
+            <button
+              onClick={() => {
+                setEditingUniversity(null)
+                resetForm()
+                setShowModal(true)
+              }}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <FiPlus className="w-4 h-4 mr-2" />
+              Add University
+            </button>
+          </div>
+        )}
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  {editingUniversity ? 'Edit University' : 'Add New University'}
+                </h2>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        University Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Country *
+                      </label>
+                      <input
+                        type="text"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        World Ranking
+                      </label>
+                      <input
+                        type="number"
+                        name="ranking"
+                        value={formData.ranking}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tuition Fee Range
+                      </label>
+                      <input
+                        type="text"
+                        name="tuition_fee_range"
+                        value={formData.tuition_fee_range}
+                        onChange={handleInputChange}
+                        placeholder="e.g., $20,000 - $30,000/year"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Logo URL
+                    </label>
                     <input
-                      type="checkbox"
-                      checked={newUniversity.featured}
-                      onChange={(e) => setNewUniversity({...newUniversity, featured: e.target.checked})}
-                      className="mr-2"
+                      type="url"
+                      name="logo_url"
+                      value={formData.logo_url}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    Featured
-                  </label>
-                  
-                  <select
-                    value={newUniversity.status}
-                    onChange={(e) => setNewUniversity({...newUniversity, status: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="pending">Pending</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-4 mt-6">
-                <button
-                  onClick={() => {
-                    setShowAddModal(false)
-                    setEditingUniversity(null)
-                    setNewUniversity({
-                      university: '',
-                      location: '',
-                      ranking: '',
-                      rankingNumber: '',
-                      program: '',
-                      budget: '',
-                      budgetNumber: '',
-                      duration: '',
-                      additionalPrograms: [],
-                      allPrograms: [],
-                      image: '',
-                      slug: '',
-                      featured: false,
-                      status: 'active'
-                    })
-                  }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={editingUniversity ? handleUpdateUniversity : handleAddUniversity}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  {editingUniversity ? 'Update' : 'Add'} University
-                </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Website URL
+                    </label>
+                    <input
+                      type="url"
+                      name="website_url"
+                      value={formData.website_url}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      rows="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Programs Offered (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      name="programs"
+                      value={formData.programs}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Engineering, Business, Medicine, Computer Science"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Admission Requirements
+                    </label>
+                    <textarea
+                      name="requirements"
+                      value={formData.requirements}
+                      onChange={handleInputChange}
+                      rows="2"
+                      placeholder="e.g., IELTS 6.5+, Strong academic record"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-6">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="is_featured"
+                        checked={formData.is_featured}
+                        onChange={handleInputChange}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Featured University</span>
+                    </label>
+
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="is_active"
+                        checked={formData.is_active}
+                        onChange={handleInputChange}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Active</span>
+                    </label>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowModal(false)
+                        setEditingUniversity(null)
+                        resetForm()
+                      }}
+                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      {editingUniversity ? 'Update' : 'Add'} University
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
