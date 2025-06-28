@@ -20,7 +20,6 @@ import {
   FiHeart,
   FiShield
 } from 'react-icons/fi'
-import Footer from '../../components/Footer'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -189,7 +188,9 @@ const UniversitySelection = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
+    <div className="min-h-screen bg-gray-900">
+      {/* Background overlay with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 to-gray-900/50"></div>
       
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -417,9 +418,6 @@ const UniversitySelection = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

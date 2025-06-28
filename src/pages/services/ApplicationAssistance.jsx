@@ -61,19 +61,23 @@ const ApplicationAssistance = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black pt-16">
-      <div className="max-w-7xl mx-auto mb-8 px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div ref={headerRef} className="text-center mb-16">
-          <div className="inline-flex items-center px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-green-400 text-sm font-medium mb-6">
-            <FiFileText className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-gray-900">
+      {/* Background overlay with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 to-gray-900/50"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        {/* Service Badge */}
+        <div className="flex justify-center mb-8">
+          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+            <FiFileText className="mr-2 h-4 w-4" />
             Professional Application Support
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6">
-            <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Application Assistance
-            </span>
+          </span>
+        </div>
+
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-7xl font-heading font-black text-white mb-6">
+            Application Assistance
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Complete support for your university applications with expert essay writing, document preparation, and deadline management.

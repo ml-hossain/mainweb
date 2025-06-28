@@ -137,6 +137,15 @@ const Navbar = () => {
               <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
               <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
             </Link>
+
+            <Link 
+              to="/universities" 
+              className={`relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 group ${location.pathname === '/universities' ? 'text-amber-400' : ''}`}
+            >
+              Universities
+              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+              <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+            </Link>
             
             <Link 
               to="/contact" 
@@ -190,6 +199,7 @@ const Navbar = () => {
               <Link to="/services" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Services</Link>
               <Link to="/success-stories" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Success Stories</Link>
               <Link to="/about" className="block px-3 py-2 text-gray-300 hover:text-amber-400">About</Link>
+              <Link to="/universities" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Universities</Link>
               <Link to="/contact" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Contact</Link>
               <Link 
                 to="/consultation"

@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
-import { FiCreditCard, FiCheck, FiShield, FiClock, FiArrowRight } from 'react-icons/fi'
-import Footer from '../../components/Footer'
+import { FiCreditCard, FiCheck, FiShield, FiClock, FiArrowRight, FiFileText } from 'react-icons/fi'
 
 const VisaProcessing = () => {
   const headerRef = useRef(null)
@@ -49,22 +48,26 @@ const VisaProcessing = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10"></div>
+    <div className="min-h-screen bg-gray-900">
+      {/* Background overlay with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 to-gray-900/50"></div>
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        {/* Service Badge */}
+        <div className="flex justify-center mb-8">
+          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-500/10 text-purple-400 ring-1 ring-inset ring-purple-500/20">
+            <FiFileText className="mr-2 h-4 w-4" />
+            Expert Visa Processing
+          </span>
+        </div>
+
         {/* Header */}
-        <div ref={headerRef} className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-3xl mb-8 shadow-2xl">
-            <FiCreditCard className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-5xl md:text-7xl font-heading font-black bg-gradient-to-r from-white via-purple-200 to-purple-300 bg-clip-text text-transparent mb-6">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-7xl font-heading font-black text-white mb-6">
             Visa Processing
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Expert guidance through the visa application process with industry-leading success rates and comprehensive support.
+            Professional guidance through every step of your student visa application process.
           </p>
         </div>
 
@@ -167,36 +170,35 @@ const VisaProcessing = () => {
               ))}
             </div>
           </div>
-
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-8 md:p-12 text-white text-center">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-              Secure Your Student Visa Today
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Let our visa experts guide you through the process with confidence
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/consultation" 
-                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center group"
-              >
-                Start Visa Process
-                <FiArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link 
-                to="/services" 
-                className="border border-white/30 text-white hover:bg-white/10 px-8 py-3 rounded-lg font-semibold transition-all duration-300"
-              >
-                View All Services
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <Footer />
+      {/* CTA Section - Full width */}
+      <div className="w-full bg-[#7C3AED] mx-auto px-4 py-16 mt-32 mb-0">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-6 text-white">
+            Secure Your Student Visa Today
+          </h2>
+          <p className="text-xl mb-10 text-white/90">
+            Let our visa experts guide you through the process with confidence
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link 
+              to="/consultation" 
+              className="bg-white text-[#7C3AED] hover:bg-gray-100 px-10 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center group text-lg"
+            >
+              Start Visa Process
+              <FiArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link 
+              to="/services" 
+              className="border-2 border-white/50 text-white hover:bg-white/10 px-10 py-4 rounded-xl font-semibold transition-all duration-300 text-lg"
+            >
+              View All Services
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

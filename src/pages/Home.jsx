@@ -3,7 +3,6 @@ import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import UniversityCard from '../components/UniversityCard'
-import Footer from '../components/Footer'
 import { supabase } from '../lib/supabase'
 
 const Home = () => {
@@ -329,7 +328,7 @@ const Home = () => {
 
               {/* Main Headline */}
               <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
-                {contentSections.hero?.title || 'Your Gateway to'}
+                Your Gateway to
                 <span className="block text-green-400">Global Education</span>
               </h1>
 
@@ -1093,8 +1092,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }

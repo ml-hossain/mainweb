@@ -61,9 +61,9 @@ const InterviewPreparation = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-rose-600/10"></div>
+    <div className="min-h-screen bg-gray-900">
+      {/* Background overlay with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800/50 to-gray-900/50"></div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         

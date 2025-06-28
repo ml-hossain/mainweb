@@ -1,121 +1,89 @@
-import React, { useState } from 'react'
-import { FiMapPin, FiArrowRight } from 'react-icons/fi'
+import React from 'react'
 import { Link } from 'react-router-dom'
+import { FiStar, FiMapPin } from 'react-icons/fi'
 
-const UniversityCard = ({
-  ranking,
-  university,
-  location,
-  program,
-  budget,
-  duration,
-  additionalPrograms = [],
-  allPrograms = [], // Full list of all programs
-  image,
-  slug
-}) => {
-  const [showAllPrograms, setShowAllPrograms] = useState(false)
-
-  // Add safety checks for undefined values
-  const safeUniversity = university || 'Unknown University'
-  const safeLocation = location || 'Unknown Location'
-  const safeProgram = program || 'Various Programs'
-  const safeDuration = duration || 'Contact for details'
-  const safeBudget = budget || 'Contact for details'
-  const safeRanking = ranking || 'Unranked'
-
-  // Separate actual programs from "+X more" indicator
-  const actualPrograms = additionalPrograms.filter(prog => !prog.includes('+') || !prog.includes('more'))
-  const moreIndicator = additionalPrograms.find(prog => prog.includes('+') && prog.includes('more'))
-
-  // Use allPrograms if provided, otherwise fallback to actualPrograms
-  const programsToShow = showAllPrograms ? (allPrograms.length > 0 ? allPrograms : actualPrograms) : actualPrograms
-  const hasMorePrograms = allPrograms.length > actualPrograms.length || moreIndicator
-
+const UniversityCard = ({ university }) => {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-      {/* University Image */}
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={image || '/api/placeholder/400/300'}
-          alt={`${safeUniversity} campus`}
-          className="w-full h-full object-cover"
-        />
-        {/* QS Ranking - Top Right Corner on Image */}
-        <div className="absolute top-4 right-4">
-          <div className="bg-orange-400 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {safeRanking}
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+      {/* University Logo/Image */}
+      <div className="h-48 bg-gray-100 flex items-center justify-center p-4">
+        {university.logo_url ? (
+          <img
+            src={university.logo_url}
+            alt={university.name}
+            className="max-h-full max-w-full object-contain"
+            onError={(e) => {
+              e.target.style.display = 'none'
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400 text-lg">No Image Available</span>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Card Content */}
+      {/* Content */}
       <div className="p-6">
-        {/* University Name - Left Top */}
-        <h3 className="text-lg font-bold text-gray-900 mb-4">
-          {safeUniversity}
-        </h3>
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="font-semibold text-xl text-gray-900">{university.name}</h3>
+          {university.is_featured && (
+            <FiStar className="w-5 h-5 text-yellow-500 fill-current" />
+          )}
+        </div>
 
-        {/* Location with Icon */}
         <div className="flex items-center text-gray-600 mb-4">
-          <FiMapPin className="w-4 h-4 mr-2" />
-          <span className="text-sm">{safeLocation}</span>
+          <FiMapPin className="w-4 h-4 mr-1" />
+          <span className="text-sm">{university.country}</span>
         </div>
 
-        {/* Program Name */}
-        <div className="mb-4">
-          <span className="text-gray-700 font-medium">{safeProgram}</span>
+        {university.description && (
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            {university.description}
+          </p>
+        )}
+
+        {/* Quick Info */}
+        <div className="space-y-2 mb-6">
+          {university.ranking && (
+            <div className="inline-block bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-1 rounded-full mr-2">
+              #{university.ranking} {university.ranking_type}
+            </div>
+          )}
+          {university.tuition_fee_range && (
+            <div className="text-sm text-green-700 font-medium">
+              {university.tuition_fee_range}
+            </div>
+          )}
         </div>
 
-        {/* Duration */}
-        <div className="mb-4">
-          <span className="text-gray-700">Duration: {safeDuration}</span>
-        </div>
-
-        {/* Total Budget */}
-        <div className="mb-4">
-          <span className="text-gray-700">Total Budget: {safeBudget}</span>
-        </div>
-
-        {/* Additional Programs */}
-        {additionalPrograms.length > 0 && (
+        {/* Programs Preview */}
+        {university.programs && university.programs.length > 0 && (
           <div className="mb-6">
             <div className="flex flex-wrap gap-2">
-              {programsToShow.map((prog, index) => (
+              {university.programs.slice(0, 3).map((program, index) => (
                 <span
                   key={index}
-                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium"
+                  className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
                 >
-                  {prog}
+                  {program}
                 </span>
               ))}
-              {hasMorePrograms && !showAllPrograms && (
-                <button
-                  onClick={() => setShowAllPrograms(true)}
-                  className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium hover:bg-blue-200 transition-colors duration-200"
-                >
-                  {moreIndicator || `+${allPrograms.length - actualPrograms.length} more`}
-                </button>
-              )}
-              {showAllPrograms && hasMorePrograms && (
-                <button
-                  onClick={() => setShowAllPrograms(false)}
-                  className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-300 transition-colors duration-200"
-                >
-                  Show less
-                </button>
+              {university.programs.length > 3 && (
+                <span className="text-xs text-gray-500">
+                  +{university.programs.length - 3} more
+                </span>
               )}
             </div>
           </div>
         )}
 
-        {/* Button */}
+        {/* Action Button */}
         <Link
-          to={`/universities/${slug || safeUniversity.toLowerCase().replace(/\s+/g, '-')}`}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
+          to={`/universities/${university.id}`}
+          className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300"
         >
           Get More Info
-          <FiArrowRight className="ml-2 w-4 h-4" />
         </Link>
       </div>
     </div>
