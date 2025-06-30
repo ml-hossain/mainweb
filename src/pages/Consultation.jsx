@@ -1,8 +1,90 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBookOpen } from 'react-icons/fi'
 import Footer from '../components/Footer'
+import { supabase } from '../lib/supabase'
 
 const Consultation = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    education: '',
+    interestedCountry: '',
+    preferredMode: '',
+    preferredTime: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState('')
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitMessage('')
+
+    try {
+      // Validate required fields
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.education || !formData.preferredMode) {
+        setSubmitMessage('Please fill in all required fields.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Prepare data for Supabase
+      const consultationData = {
+        full_name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        preferred_destination: formData.interestedCountry || null,
+        study_level: formData.education,
+        consultation_type: formData.preferredMode,
+        preferred_date: null,
+        message: formData.message ? 
+          `${formData.message}${formData.preferredTime ? `\n\nPreferred Time: ${formData.preferredTime}` : ''}` : 
+          (formData.preferredTime ? `Preferred Time: ${formData.preferredTime}` : null),
+        status: 'pending'
+      }
+
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('consultations')
+        .insert([consultationData])
+
+      if (error) {
+        throw error
+      }
+
+      // Success
+      setSubmitMessage('Thank you! Your consultation request has been submitted successfully. We will contact you within 24 hours.')
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        education: '',
+        interestedCountry: '',
+        preferredMode: '',
+        preferredTime: '',
+        message: ''
+      })
+
+    } catch (error) {
+      console.error('Error submitting consultation:', error)
+      setSubmitMessage('Sorry, there was an error submitting your request. Please try again or contact us directly.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,7 +160,13 @@ const Consultation = () => {
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Book Your Free Consultation</h2>
             
-            <form className="space-y-6">
+            {submitMessage && (
+              <div className={`mb-6 p-4 rounded-lg ${submitMessage.includes('successfully') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                {submitMessage}
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -88,6 +176,8 @@ const Consultation = () => {
                     type="text"
                     id="firstName"
                     name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Your first name"
@@ -101,6 +191,8 @@ const Consultation = () => {
                     type="text"
                     id="lastName"
                     name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Your last name"
@@ -116,6 +208,8 @@ const Consultation = () => {
                   type="email"
                   id="email"
                   name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="your.email@example.com"
@@ -130,6 +224,8 @@ const Consultation = () => {
                   type="tel"
                   id="phone"
                   name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="+1 (555) 123-4567"
@@ -143,6 +239,8 @@ const Consultation = () => {
                 <select
                   id="education"
                   name="education"
+                  value={formData.education}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
@@ -162,6 +260,8 @@ const Consultation = () => {
                 <select
                   id="interestedCountry"
                   name="interestedCountry"
+                  value={formData.interestedCountry}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
                   <option value="">Select preferred destination</option>
@@ -183,6 +283,8 @@ const Consultation = () => {
                 <select
                   id="preferredMode"
                   name="preferredMode"
+                  value={formData.preferredMode}
+                  onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
@@ -200,6 +302,8 @@ const Consultation = () => {
                 <select
                   id="preferredTime"
                   name="preferredTime"
+                  value={formData.preferredTime}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
                   <option value="">Select preferred time</option>
@@ -216,6 +320,8 @@ const Consultation = () => {
                 <textarea
                   id="message"
                   name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="Tell us about your goals, preferred programs, or any specific questions you have..."
@@ -224,9 +330,10 @@ const Consultation = () => {
 
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300"
+                disabled={isSubmitting}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300"
               >
-                Book Free Consultation
+                {isSubmitting ? 'Submitting...' : 'Book Free Consultation'}
               </button>
 
               <p className="text-sm text-gray-500 text-center">

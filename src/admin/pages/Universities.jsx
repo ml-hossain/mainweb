@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FiPlus, FiEdit, FiTrash2, FiGlobe, FiStar, FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiGlobe, FiStar, FiEye, FiEyeOff, FiExternalLink } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
 
@@ -10,7 +10,7 @@ const Universities = ({ onLogout }) => {
   const [editingUniversity, setEditingUniversity] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
-    country: '',
+    location: '',
     logo_url: '',
     description: '',
     ranking: '',
@@ -47,16 +47,39 @@ const Universities = ({ onLogout }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      // Convert programs string to array
+      if (
+        !formData.name ||
+        !formData.location ||
+        !formData.logo_url ||
+        !formData.description ||
+        !formData.website_url ||
+        !formData.tuition_fee_range ||
+        !formData.programs ||
+        !formData.requirements
+      ) {
+        alert('All fields are required')
+        return
+      }
+
       const programsArray = formData.programs
         .split(',')
         .map(p => p.trim())
         .filter(p => p.length > 0)
 
       const universityData = {
-        ...formData,
-        programs: programsArray,
-        ranking: formData.ranking ? parseInt(formData.ranking) : null
+        name: formData.name,
+        location: formData.location,
+        logo_url: formData.logo_url,
+        description: formData.description,
+        website_url: formData.website_url,
+        featured: formData.is_featured,
+        is_active: formData.is_active,
+        content: {
+          ranking: formData.ranking ? parseInt(formData.ranking) : null,
+          tuition_fee_range: formData.tuition_fee_range,
+          programs: programsArray,
+          requirements: formData.requirements,
+        },
       }
 
       if (editingUniversity) {
@@ -89,16 +112,16 @@ const Universities = ({ onLogout }) => {
     setEditingUniversity(university)
     setFormData({
       name: university.name || '',
-      country: university.country || '',
+      location: university.location || '',
       logo_url: university.logo_url || '',
       description: university.description || '',
-      ranking: university.ranking?.toString() || '',
+      ranking: university.content?.ranking?.toString() || '',
       website_url: university.website_url || '',
-      tuition_fee_range: university.tuition_fee_range || '',
-      programs: university.programs?.join(', ') || '',
-      requirements: university.requirements || '',
-      is_featured: university.is_featured || false,
-      is_active: university.is_active || true
+      tuition_fee_range: university.content?.tuition_fee_range || '',
+      programs: university.content?.programs?.join(', ') || '',
+      requirements: university.content?.requirements || '',
+      is_featured: university.featured || false,
+      is_active: university.is_active || true,
     })
     setShowModal(true)
   }
@@ -125,7 +148,7 @@ const Universities = ({ onLogout }) => {
     try {
       const { error } = await supabase
         .from('universities')
-        .update({ is_featured: !currentStatus })
+        .update({ featured: !currentStatus })
         .eq('id', id)
 
       if (error) throw error
@@ -154,7 +177,7 @@ const Universities = ({ onLogout }) => {
   const resetForm = () => {
     setFormData({
       name: '',
-      country: '',
+      location: '',
       logo_url: '',
       description: '',
       ranking: '',
@@ -227,18 +250,18 @@ const Universities = ({ onLogout }) => {
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-gray-900 text-sm">{university.name}</h3>
                   <div className="flex items-center space-x-1">
-                    {university.ranking && (
+                    {university.content?.ranking && (
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        #{university.ranking}
+                        #{university.content.ranking}
                       </span>
                     )}
-                    {university.is_featured && (
+                    {university.featured && (
                       <FiStar className="w-4 h-4 text-yellow-500 fill-current" />
                     )}
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-2">{university.country}</p>
+                <p className="text-sm text-gray-600 mb-2">{university.location}</p>
 
                 {university.description && (
                   <p className="text-xs text-gray-500 mb-3 line-clamp-2">
@@ -246,17 +269,17 @@ const Universities = ({ onLogout }) => {
                   </p>
                 )}
 
-                {university.programs && university.programs.length > 0 && (
+                {university.content?.programs && university.content?.programs.length > 0 && (
                   <div className="mb-3">
                     <div className="flex flex-wrap gap-1">
-                      {university.programs.slice(0, 3).map((program, index) => (
+                      {university.content.programs.slice(0, 3).map((program, index) => (
                         <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                           {program}
                         </span>
                       ))}
-                      {university.programs.length > 3 && (
+                      {university.content.programs.length > 3 && (
                         <span className="text-xs text-gray-500">
-                          +{university.programs.length - 3} more
+                          +{university.content.programs.length - 3} more
                         </span>
                       )}
                     </div>
@@ -272,8 +295,8 @@ const Universities = ({ onLogout }) => {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => toggleFeatured(university.id, university.is_featured)}
-                      className={`p-1 rounded ${university.is_featured ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                      onClick={() => toggleFeatured(university.id, university.featured)}
+                      className={`p-1 rounded ${university.featured ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
                       title="Toggle Featured"
                     >
                       <FiStar className="w-4 h-4" />
@@ -358,8 +381,8 @@ const Universities = ({ onLogout }) => {
                       </label>
                       <input
                         type="text"
-                        name="country"
-                        value={formData.country}
+                        name="location"
+                        value={formData.location}
                         onChange={handleInputChange}
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -368,7 +391,7 @@ const Universities = ({ onLogout }) => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        World Ranking
+                        Ranking
                       </label>
                       <input
                         type="number"
@@ -470,7 +493,7 @@ const Universities = ({ onLogout }) => {
                         onChange={handleInputChange}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Featured University</span>
+                      <span className="ml-2 text-sm text-gray-700">Featured</span>
                     </label>
 
                     <label className="flex items-center">

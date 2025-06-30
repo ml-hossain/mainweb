@@ -48,17 +48,17 @@ const Home = () => {
     // Search filter
     const matchesSearch = searchTerm === '' ||
       uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      uni.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (uni.programs && uni.programs.some(prog => prog.toLowerCase().includes(searchTerm.toLowerCase())))
+      uni.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (uni.content.programs && uni.content.programs.some(prog => prog.toLowerCase().includes(searchTerm.toLowerCase())))
 
     // Program filter
     const matchesProgram = programFilter === 'All Programs' ||
-      (uni.programs && uni.programs.some(prog => prog === programFilter))
+      (uni.content.programs && uni.content.programs.some(prog => prog === programFilter))
 
     // Budget filter - parse tuition fee range if available
     let budgetNumber = 0
-    if (uni.tuition_fee_range) {
-      const match = uni.tuition_fee_range.match(/\d+,?\d*/g)
+    if (uni.content.tuition_fee_range) {
+      const match = uni.content.tuition_fee_range.match(/\d+,?\d*/g)
       if (match) {
         budgetNumber = parseInt(match[0].replace(',', ''))
       }
@@ -70,14 +70,14 @@ const Home = () => {
       (budgetFilter === 'Above 100,000' && budgetNumber > 100000)
 
     // Location filter
-    const matchesLocation = locationFilter === 'All Malaysia' || uni.country === locationFilter
+    const matchesLocation = locationFilter === 'All Malaysia' || uni.location === locationFilter
 
     // Ranking filter
     const matchesRanking = rankingFilter === 'All Rankings' ||
-      (rankingFilter === 'Top 10' && uni.ranking && uni.ranking <= 10) ||
-      (rankingFilter === 'Top 50' && uni.ranking && uni.ranking <= 50) ||
-      (rankingFilter === 'Top 100' && uni.ranking && uni.ranking <= 100) ||
-      (rankingFilter === 'Top 500' && uni.ranking && uni.ranking <= 500)
+      (rankingFilter === 'Top 10' && uni.content.ranking && uni.content.ranking <= 10) ||
+      (rankingFilter === 'Top 50' && uni.content.ranking && uni.content.ranking <= 50) ||
+      (rankingFilter === 'Top 100' && uni.content.ranking && uni.content.ranking <= 100) ||
+      (rankingFilter === 'Top 500' && uni.content.ranking && uni.content.ranking <= 500)
 
     return matchesSearch && matchesProgram && matchesBudget && matchesLocation && matchesRanking
   })
@@ -184,7 +184,7 @@ const Home = () => {
         .from('universities')
         .select('*')
         .eq('is_active', true)
-        .order('ranking', { ascending: true, nullsLast: true })
+        .order('content->ranking', { ascending: true, nullsLast: true })
 
       if (error) throw error
       setUniversities(data || [])
@@ -811,14 +811,14 @@ const Home = () => {
               filteredUniversities.map((university, index) => (
                 <UniversityCard
                   key={index}
-                  ranking={university.ranking}
+                  ranking={university.content.ranking}
                   university={university.name}
-                  location={university.country}
-                  program={university.programs ? university.programs.join(', ') : 'Various Programs'}
-                  budget={university.tuition_fee_range}
-                  duration={university.duration || 'Contact for details'}
-                  additionalPrograms={university.programs || []}
-                  allPrograms={university.programs || []}
+                  location={university.location}
+                  program={university.content.programs ? university.content.programs.join(', ') : 'Various Programs'}
+                  budget={university.content.tuition_fee_range}
+                  duration={university.content.duration || 'Contact for details'}
+                  additionalPrograms={university.content.programs || []}
+                  allPrograms={university.content.programs || []}
                   image={university.logo_url}
                   slug={university.slug || university.name?.toLowerCase().replace(/\s+/g, '-')}
                 />

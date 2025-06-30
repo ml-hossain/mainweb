@@ -8,10 +8,8 @@ import AdminLogin from './components/AdminLogin'
 // Admin Pages
 import Dashboard from './pages/Dashboard'
 import Universities from './pages/Universities'
-import Services from './pages/Services'
 import Consultations from './pages/Consultations'
-import Content from './pages/Content'
-import Users from './pages/Users'
+import Contacts from './pages/Contacts'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 
@@ -105,12 +103,8 @@ const AdminApp = () => {
       <Route index element={<Dashboard onLogout={handleLogout} />} />
       <Route path="dashboard" element={<Navigate to="/admin" replace />} />
       <Route path="universities" element={<Universities onLogout={handleLogout} />} />
-      <Route path="services" element={<Services onLogout={handleLogout} />} />
-      <Route path="services/*" element={<Services onLogout={handleLogout} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
-      <Route path="content" element={<Content onLogout={handleLogout} />} />
-      <Route path="content/*" element={<Content onLogout={handleLogout} />} />
-      <Route path="users" element={<Users onLogout={handleLogout} />} />
+      <Route path="contacts" element={<Contacts onLogout={handleLogout} />} />
       <Route path="analytics" element={<Analytics onLogout={handleLogout} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

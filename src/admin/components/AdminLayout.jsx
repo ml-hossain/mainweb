@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react'
 import {
   FiHome,
   FiUsers,
-  FiBook,
   FiSettings,
   FiBarChart2,
   FiMessageSquare,
   FiAward,
   FiGlobe,
-  FiFileText,
   FiCreditCard,
   FiSend,
   FiUser,
@@ -43,28 +41,8 @@ const AdminLayout = ({ children, onLogout }) => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: FiHome },
     { name: 'Universities', href: '/admin/universities', icon: FiGlobe },
-    {
-      name: 'Services', href: '/admin/services', icon: FiBook, submenu: [
-        { name: 'University Selection', href: '/admin/services/university-selection' },
-        { name: 'Application Assistance', href: '/admin/services/application-assistance' },
-        { name: 'Visa Processing', href: '/admin/services/visa-processing' },
-        { name: 'Scholarship Guidance', href: '/admin/services/scholarship-guidance' },
-        { name: 'Test Preparation', href: '/admin/services/test-preparation' },
-        { name: 'Interview Preparation', href: '/admin/services/interview-preparation' },
-        { name: 'Documentation Support', href: '/admin/services/documentation-support' },
-        { name: 'Pre-Departure Orientation', href: '/admin/services/pre-departure-orientation' },
-      ]
-    },
     { name: 'Consultations', href: '/admin/consultations', icon: FiMessageSquare },
-    {
-      name: 'Content', href: '/admin/content', icon: FiFileText, submenu: [
-        { name: 'Hero Section', href: '/admin/content/hero' },
-        { name: 'Statistics', href: '/admin/content/statistics' },
-        { name: 'About Page', href: '/admin/content/about' },
-        { name: 'CEO Section', href: '/admin/content/ceo' },
-      ]
-    },
-    { name: 'Users', href: '/admin/users', icon: FiUsers },
+    { name: 'Contacts', href: '/admin/contacts', icon: FiUsers },
     { name: 'Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { name: 'Settings', href: '/admin/settings', icon: FiSettings },
   ]

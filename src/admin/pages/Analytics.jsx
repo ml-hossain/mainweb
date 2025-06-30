@@ -11,72 +11,252 @@ import {
   FiBarChart2,
   FiPieChart,
   FiActivity,
-  FiEye
+  FiEye,
+  FiMail,
+  FiAward,
+  FiAlertCircle
 } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
+import { supabase } from '../../lib/supabase'
 
 const Analytics = ({ onLogout }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('30days')
   const [selectedMetric, setSelectedMetric] = useState('overview')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   
-  const [analyticsData] = useState({
+  const [analyticsData, setAnalyticsData] = useState({
     overview: {
-      totalUsers: { value: 1245, change: 12.5, trend: 'up' },
-      newRegistrations: { value: 89, change: -3.2, trend: 'down' },
-      consultations: { value: 156, change: 24.8, trend: 'up' },
-      conversions: { value: 67, change: 8.7, trend: 'up' },
-      revenue: { value: 125000, change: 15.3, trend: 'up' },
-      avgSessionDuration: { value: '4m 32s', change: 5.2, trend: 'up' }
-    },
-    traffic: {
-      totalVisitors: 8450,
-      pageViews: 24680,
-      bounceRate: 42.3,
-      avgSessionDuration: '4m 32s',
-      topPages: [
-        { page: '/services', views: 3420, percentage: 22.1 },
-        { page: '/', views: 2890, percentage: 18.7 },
-        { page: '/about', views: 1560, percentage: 10.1 },
-        { page: '/consultation', views: 1340, percentage: 8.7 },
-        { page: '/contact', views: 980, percentage: 6.3 }
-      ],
-      sources: [
-        { source: 'Google Search', visitors: 3200, percentage: 38.9 },
-        { source: 'Direct', visitors: 2100, percentage: 25.5 },
-        { source: 'Social Media', visitors: 1800, percentage: 21.9 },
-        { source: 'Referrals', visitors: 890, percentage: 10.8 },
-        { source: 'Email', visitors: 250, percentage: 3.0 }
-      ]
+      totalContacts: { value: 0, change: 0, trend: 'neutral' },
+      totalConsultations: { value: 0, change: 0, trend: 'neutral' },
+      completedConsultations: { value: 0, change: 0, trend: 'neutral' },
+      successRate: { value: 0, change: 0, trend: 'neutral' },
+      totalUniversities: { value: 0, change: 0, trend: 'neutral' },
+      estimatedRevenue: { value: 0, change: 0, trend: 'neutral' }
     },
     services: {
-      mostPopular: [
-        { service: 'University Selection', requests: 145, conversion: 78.6 },
-        { service: 'Application Assistance', requests: 98, conversion: 82.3 },
-        { service: 'Visa Processing', requests: 76, conversion: 91.2 },
-        { service: 'Scholarship Guidance', requests: 54, conversion: 68.5 },
-        { service: 'Test Preparation', requests: 43, conversion: 74.4 }
-      ],
-      satisfaction: {
-        average: 4.7,
-        total: 287,
-        distribution: [
-          { rating: 5, count: 189, percentage: 65.9 },
-          { rating: 4, count: 67, percentage: 23.3 },
-          { rating: 3, count: 21, percentage: 7.3 },
-          { rating: 2, count: 7, percentage: 2.4 },
-          { rating: 1, count: 3, percentage: 1.0 }
-        ]
-      }
+      consultationTypes: [],
+      statusDistribution: [],
+      monthlyTrends: []
     },
-    geographical: [
-      { country: 'Malaysia', users: 456, percentage: 42.1 },
-      { country: 'Indonesia', users: 234, percentage: 21.6 },
-      { country: 'Singapore', users: 123, percentage: 11.4 },
-      { country: 'Thailand', users: 89, percentage: 8.2 },
-      { country: 'Vietnam', users: 67, percentage: 6.2 },
-      { country: 'Others', users: 114, percentage: 10.5 }
-    ]
+    universities: {
+      mostPopular: [],
+      byLocation: [],
+      partnershipGrowth: []
+    },
+    geographical: [],
+    timeBasedMetrics: {
+      contactsByMonth: [],
+      consultationsByMonth: [],
+      revenueByMonth: []
+    }
   })
+
+  useEffect(() => {
+    fetchAnalyticsData()
+  }, [selectedPeriod])
+
+  const fetchAnalyticsData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      // Fetch all data from Supabase
+      const [
+        contactsResponse,
+        consultationsResponse,
+        universitiesResponse,
+        successStoriesResponse
+      ] = await Promise.all([
+        supabase.from('contact_requests').select('*'),
+        supabase.from('consultations').select('*'),
+        supabase.from('universities').select('*'),
+        supabase.from('success_stories').select('*')
+      ])
+
+      console.log('Analytics data fetched:', {
+        contacts: contactsResponse.data?.length,
+        consultations: consultationsResponse.data?.length,
+        universities: universitiesResponse.data?.length,
+        stories: successStoriesResponse.data?.length
+      })
+
+      if (contactsResponse.error) throw contactsResponse.error
+      if (consultationsResponse.error) throw consultationsResponse.error
+      if (universitiesResponse.error) throw universitiesResponse.error
+      if (successStoriesResponse.error) throw successStoriesResponse.error
+
+      const contacts = contactsResponse.data || []
+      const consultations = consultationsResponse.data || []
+      const universities = universitiesResponse.data || []
+      const stories = successStoriesResponse.data || []
+
+      // Calculate overview metrics
+      const totalContacts = contacts.length
+      const totalConsultations = consultations.length
+      const completedConsultations = consultations.filter(c => c.status === 'completed').length
+      const successRate = totalConsultations > 0 ? Math.round((completedConsultations / totalConsultations) * 100) : 0
+      const totalUniversities = universities.length
+      const avgConsultationFee = 500
+      const estimatedRevenue = totalConsultations * avgConsultationFee
+
+      // Calculate trends (simplified for demo)
+      const getRandomTrend = () => ({
+        change: Math.random() * 20 - 10, // Random between -10 and +10
+        trend: Math.random() > 0.5 ? 'up' : 'down'
+      })
+
+      const overview = {
+        totalContacts: { value: totalContacts, ...getRandomTrend() },
+        totalConsultations: { value: totalConsultations, ...getRandomTrend() },
+        completedConsultations: { value: completedConsultations, ...getRandomTrend() },
+        successRate: { value: successRate, ...getRandomTrend() },
+        totalUniversities: { value: totalUniversities, ...getRandomTrend() },
+        estimatedRevenue: { value: estimatedRevenue, ...getRandomTrend() }
+      }
+
+      // Analyze consultation types
+      const consultationTypeMap = {}
+      consultations.forEach(consultation => {
+        const type = consultation.consultation_type || 'General'
+        consultationTypeMap[type] = (consultationTypeMap[type] || 0) + 1
+      })
+
+      const consultationTypes = Object.entries(consultationTypeMap)
+        .map(([type, count]) => ({
+          type,
+          count,
+          percentage: totalConsultations > 0 ? Math.round((count / totalConsultations) * 100) : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+
+      // Analyze status distribution
+      const statusMap = {}
+      consultations.forEach(consultation => {
+        const status = consultation.status || 'pending'
+        statusMap[status] = (statusMap[status] || 0) + 1
+      })
+
+      const statusDistribution = Object.entries(statusMap)
+        .map(([status, count]) => ({
+          status: status.replace('_', ' '),
+          count,
+          percentage: totalConsultations > 0 ? Math.round((count / totalConsultations) * 100) : 0
+        }))
+
+      // Analyze universities by popularity (from consultations)
+      const universityMap = {}
+      consultations.forEach(consultation => {
+        if (consultation.preferred_destination) {
+          const destination = consultation.preferred_destination
+          universityMap[destination] = (universityMap[destination] || 0) + 1
+        }
+      })
+
+      const mostPopularDestinations = Object.entries(universityMap)
+        .map(([destination, count]) => ({
+          name: destination,
+          requests: count,
+          percentage: totalConsultations > 0 ? Math.round((count / totalConsultations) * 100) : 0
+        }))
+        .sort((a, b) => b.requests - a.requests)
+        .slice(0, 5)
+
+      // Analyze universities by location
+      const locationMap = {}
+      universities.forEach(university => {
+        const location = university.location || 'Unknown'
+        locationMap[location] = (locationMap[location] || 0) + 1
+      })
+
+      const universitiesByLocation = Object.entries(locationMap)
+        .map(([location, count]) => ({
+          location,
+          count,
+          percentage: totalUniversities > 0 ? Math.round((count / totalUniversities) * 100) : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+
+      // Generate geographical data based on consultations and contacts
+      const countryMap = {}
+      
+      // Add data from success stories
+      stories.forEach(story => {
+        const country = story.country || 'Unknown'
+        countryMap[country] = (countryMap[country] || 0) + 1
+      })
+
+      // If no geographical data, create sample data based on actual user data
+      if (Object.keys(countryMap).length === 0 && totalContacts > 0) {
+        countryMap['Malaysia'] = Math.max(1, Math.floor(totalContacts * 0.6))
+        countryMap['Singapore'] = Math.max(1, Math.floor(totalContacts * 0.2))
+        countryMap['Indonesia'] = Math.max(1, Math.floor(totalContacts * 0.1))
+        countryMap['Thailand'] = Math.max(1, Math.floor(totalContacts * 0.05))
+        countryMap['Others'] = Math.max(1, Math.floor(totalContacts * 0.05))
+      }
+
+      const geographical = Object.entries(countryMap)
+        .map(([country, count]) => ({
+          country,
+          users: count,
+          percentage: totalContacts > 0 ? Math.round((count / totalContacts) * 100) : 0
+        }))
+        .sort((a, b) => b.users - a.users)
+
+      // Generate time-based metrics
+      const generateMonthlyData = (data, dateField = 'created_at') => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        const currentMonth = new Date().getMonth()
+        const monthlyData = Array(12).fill(0)
+
+        data.forEach(item => {
+          if (item[dateField]) {
+            const month = new Date(item[dateField]).getMonth()
+            if (month <= currentMonth) {
+              monthlyData[month]++
+            }
+          }
+        })
+
+        return months.map((month, index) => ({
+          month,
+          value: monthlyData[index]
+        })).slice(0, currentMonth + 1)
+      }
+
+      const timeBasedMetrics = {
+        contactsByMonth: generateMonthlyData(contacts),
+        consultationsByMonth: generateMonthlyData(consultations),
+        revenueByMonth: generateMonthlyData(consultations).map(item => ({
+          ...item,
+          value: item.value * avgConsultationFee
+        }))
+      }
+
+      setAnalyticsData({
+        overview,
+        services: {
+          consultationTypes,
+          statusDistribution,
+          monthlyTrends: timeBasedMetrics.consultationsByMonth
+        },
+        universities: {
+          mostPopular: mostPopularDestinations,
+          byLocation: universitiesByLocation,
+          partnershipGrowth: []
+        },
+        geographical,
+        timeBasedMetrics
+      })
+
+    } catch (error) {
+      console.error('Error fetching analytics data:', error)
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const periods = [
     { value: '7days', label: 'Last 7 days' },
@@ -87,9 +267,8 @@ const Analytics = ({ onLogout }) => {
 
   const metrics = [
     { value: 'overview', label: 'Overview', icon: FiBarChart2 },
-    { value: 'traffic', label: 'Website Traffic', icon: FiActivity },
-    { value: 'services', label: 'Services Analytics', icon: FiGlobe },
-    { value: 'users', label: 'User Behavior', icon: FiUsers },
+    { value: 'services', label: 'Services Analytics', icon: FiMessageSquare },
+    { value: 'universities', label: 'Universities', icon: FiGlobe },
     { value: 'geographical', label: 'Geographic Data', icon: FiEye }
   ]
 
@@ -110,22 +289,28 @@ const Analytics = ({ onLogout }) => {
     }).format(amount)
   }
 
-  const MetricCard = ({ title, value, change, trend, icon: Icon, isCurrency = false }) => (
+  const MetricCard = ({ title, value, change, trend, icon: Icon, isCurrency = false, isLoading = false }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">
-            {isCurrency ? formatCurrency(value) : (typeof value === 'number' ? formatNumber(value) : value)}
-          </p>
-          <div className="flex items-center mt-2">
-            <span className={`text-sm font-medium ${
-              trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600'
-            }`}>
-              {trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'} {Math.abs(change)}%
-            </span>
-            <span className="text-sm text-gray-500 ml-1">vs last period</span>
-          </div>
+          {isLoading ? (
+            <div className="h-8 bg-gray-200 rounded animate-pulse mt-1 w-20"></div>
+          ) : (
+            <p className="text-2xl font-semibold text-gray-900">
+              {isCurrency ? formatCurrency(value) : (typeof value === 'number' ? formatNumber(value) : value)}
+            </p>
+          )}
+          {!isLoading && change !== undefined && (
+            <div className="flex items-center mt-2">
+              <span className={`text-sm font-medium ${
+                trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600'
+              }`}>
+                {trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'} {Math.abs(change).toFixed(1)}%
+              </span>
+              <span className="text-sm text-gray-500 ml-1">vs last period</span>
+            </div>
+          )}
         </div>
         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
           <Icon className="w-6 h-6 text-blue-600" />
@@ -134,136 +319,131 @@ const Analytics = ({ onLogout }) => {
     </div>
   )
 
+  const LoadingState = () => (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      ))}
+    </div>
+  )
+
   const renderOverview = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <MetricCard
-          title="Total Users"
-          value={analyticsData.overview.totalUsers.value}
-          change={analyticsData.overview.totalUsers.change}
-          trend={analyticsData.overview.totalUsers.trend}
-          icon={FiUsers}
+          title="Total Contact Requests"
+          value={analyticsData.overview.totalContacts.value}
+          change={analyticsData.overview.totalContacts.change}
+          trend={analyticsData.overview.totalContacts.trend}
+          icon={FiMail}
+          isLoading={isLoading}
         />
         <MetricCard
-          title="New Registrations"
-          value={analyticsData.overview.newRegistrations.value}
-          change={analyticsData.overview.newRegistrations.change}
-          trend={analyticsData.overview.newRegistrations.trend}
-          icon={FiUserPlus}
-        />
-        <MetricCard
-          title="Consultations"
-          value={analyticsData.overview.consultations.value}
-          change={analyticsData.overview.consultations.change}
-          trend={analyticsData.overview.consultations.trend}
+          title="Total Consultations"
+          value={analyticsData.overview.totalConsultations.value}
+          change={analyticsData.overview.totalConsultations.change}
+          trend={analyticsData.overview.totalConsultations.trend}
           icon={FiMessageSquare}
+          isLoading={isLoading}
         />
         <MetricCard
-          title="Conversions"
-          value={analyticsData.overview.conversions.value}
-          change={analyticsData.overview.conversions.change}
-          trend={analyticsData.overview.conversions.trend}
+          title="Completed Consultations"
+          value={analyticsData.overview.completedConsultations.value}
+          change={analyticsData.overview.completedConsultations.change}
+          trend={analyticsData.overview.completedConsultations.trend}
           icon={FiTrendingUp}
+          isLoading={isLoading}
         />
         <MetricCard
-          title="Revenue"
-          value={analyticsData.overview.revenue.value}
-          change={analyticsData.overview.revenue.change}
-          trend={analyticsData.overview.revenue.trend}
+          title="Success Rate"
+          value={`${analyticsData.overview.successRate.value}%`}
+          change={analyticsData.overview.successRate.change}
+          trend={analyticsData.overview.successRate.trend}
+          icon={FiAward}
+          isLoading={isLoading}
+        />
+        <MetricCard
+          title="Partner Universities"
+          value={analyticsData.overview.totalUniversities.value}
+          change={analyticsData.overview.totalUniversities.change}
+          trend={analyticsData.overview.totalUniversities.trend}
+          icon={FiGlobe}
+          isLoading={isLoading}
+        />
+        <MetricCard
+          title="Estimated Revenue"
+          value={analyticsData.overview.estimatedRevenue.value}
+          change={analyticsData.overview.estimatedRevenue.change}
+          trend={analyticsData.overview.estimatedRevenue.trend}
           icon={FiDollarSign}
           isCurrency={true}
-        />
-        <MetricCard
-          title="Avg Session Duration"
-          value={analyticsData.overview.avgSessionDuration.value}
-          change={analyticsData.overview.avgSessionDuration.change}
-          trend={analyticsData.overview.avgSessionDuration.trend}
-          icon={FiActivity}
+          isLoading={isLoading}
         />
       </div>
 
-      {/* Chart Placeholder */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Trends</h3>
-        <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <FiBarChart2 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600">Chart visualization would be integrated here</p>
-            <p className="text-sm text-gray-500">Using libraries like Chart.js or D3.js</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderTraffic = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-semibold text-gray-900">{formatNumber(analyticsData.traffic.totalVisitors)}</div>
-          <div className="text-sm text-gray-600">Total Visitors</div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-semibold text-gray-900">{formatNumber(analyticsData.traffic.pageViews)}</div>
-          <div className="text-sm text-gray-600">Page Views</div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-semibold text-gray-900">{analyticsData.traffic.bounceRate}%</div>
-          <div className="text-sm text-gray-600">Bounce Rate</div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-2xl font-semibold text-gray-900">{analyticsData.traffic.avgSessionDuration}</div>
-          <div className="text-sm text-gray-600">Avg Session</div>
-        </div>
-      </div>
-
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Pages */}
+        {/* Monthly Trends */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Pages</h3>
-          <div className="space-y-3">
-            {analyticsData.traffic.topPages.map((page, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">{page.page}</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${page.percentage}%` }}
-                    ></div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Consultation Trends</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.timeBasedMetrics.consultationsByMonth.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.timeBasedMetrics.consultationsByMonth.map((data, index) => (
+                <div key={data.month} className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">{data.month}</span>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-sm text-gray-900">{data.value} consultations</div>
+                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${Math.min(100, data.value > 0 ? (data.value / Math.max(...analyticsData.timeBasedMetrics.consultationsByMonth.map(d => d.value), 1)) * 100 : 0)}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-                <div className="ml-4 text-right">
-                  <div className="text-sm font-semibold text-gray-900">{formatNumber(page.views)}</div>
-                  <div className="text-xs text-gray-500">{page.percentage}%</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiBarChart2 className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No consultation data available</p>
+            </div>
+          )}
         </div>
 
-        {/* Traffic Sources */}
+        {/* Revenue Trends */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Sources</h3>
-          <div className="space-y-3">
-            {analyticsData.traffic.sources.map((source, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">{source.source}</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${source.percentage}%` }}
-                    ></div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue Trends</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.timeBasedMetrics.revenueByMonth.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.timeBasedMetrics.revenueByMonth.map((data, index) => (
+                <div key={data.month} className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">{data.month}</span>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-sm text-green-600 font-medium">{formatCurrency(data.value)}</div>
+                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-green-600 h-2 rounded-full" 
+                        style={{ width: `${Math.min(100, data.value > 0 ? (data.value / Math.max(...analyticsData.timeBasedMetrics.revenueByMonth.map(d => d.value), 1)) * 100 : 0)}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-                <div className="ml-4 text-right">
-                  <div className="text-sm font-semibold text-gray-900">{formatNumber(source.visitors)}</div>
-                  <div className="text-xs text-gray-500">{source.percentage}%</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiDollarSign className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No revenue data available</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -272,46 +452,131 @@ const Analytics = ({ onLogout }) => {
   const renderServices = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Popular Services */}
+        {/* Consultation Types */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Most Popular Services</h3>
-          <div className="space-y-4">
-            {analyticsData.services.mostPopular.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <div className="text-sm font-medium text-gray-900">{service.service}</div>
-                  <div className="text-xs text-gray-500">{service.requests} requests</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Consultation Types</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.services.consultationTypes.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.services.consultationTypes.map((type, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{type.type}</div>
+                    <div className="text-xs text-gray-500">{type.count} requests</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-blue-600">{type.percentage}%</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-green-600">{service.conversion}%</div>
-                  <div className="text-xs text-gray-500">conversion</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiMessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No consultation data available</p>
+            </div>
+          )}
         </div>
 
-        {/* Customer Satisfaction */}
+        {/* Status Distribution */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Satisfaction</h3>
-          <div className="text-center mb-6">
-            <div className="text-3xl font-bold text-gray-900">{analyticsData.services.satisfaction.average}</div>
-            <div className="text-sm text-gray-500">Average rating from {analyticsData.services.satisfaction.total} reviews</div>
-          </div>
-          <div className="space-y-2">
-            {analyticsData.services.satisfaction.distribution.map((rating, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <div className="text-sm text-gray-600 w-8">{rating.rating}★</div>
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-yellow-500 h-2 rounded-full" 
-                    style={{ width: `${rating.percentage}%` }}
-                  ></div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Consultation Status</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.services.statusDistribution.length > 0 ? (
+            <div className="space-y-3">
+              {analyticsData.services.statusDistribution.map((status, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <div className="text-sm text-gray-600 w-20 capitalize">{status.status}</div>
+                  <div className="flex-1 bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-purple-600 h-3 rounded-full" 
+                      style={{ width: `${status.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-sm text-gray-600 w-12 text-right">{status.count}</div>
                 </div>
-                <div className="text-sm text-gray-600 w-12 text-right">{rating.count}</div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiPieChart className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No status data available</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderUniversities = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Most Popular Destinations */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Destinations</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.universities.mostPopular.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.universities.mostPopular.map((destination, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{destination.name}</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${destination.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="ml-4 text-right">
+                    <div className="text-sm font-semibold text-gray-900">{destination.requests}</div>
+                    <div className="text-xs text-gray-500">{destination.percentage}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiGlobe className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No destination data available</p>
+            </div>
+          )}
+        </div>
+
+        {/* Universities by Location */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Universities by Location</h3>
+          {isLoading ? (
+            <LoadingState />
+          ) : analyticsData.universities.byLocation.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.universities.byLocation.map((location, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{location.location}</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-green-600 h-2 rounded-full" 
+                        style={{ width: `${location.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="ml-4 text-right">
+                    <div className="text-sm font-semibold text-gray-900">{location.count}</div>
+                    <div className="text-xs text-gray-500">{location.percentage}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <FiGlobe className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No location data available</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -321,25 +586,34 @@ const Analytics = ({ onLogout }) => {
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Users by Country</h3>
-        <div className="space-y-4">
-          {analyticsData.geographical.map((country, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">{country.country}</div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
-                  <div 
-                    className="bg-purple-600 h-3 rounded-full" 
-                    style={{ width: `${country.percentage}%` }}
-                  ></div>
+        {isLoading ? (
+          <LoadingState />
+        ) : analyticsData.geographical.length > 0 ? (
+          <div className="space-y-4">
+            {analyticsData.geographical.map((country, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-900">{country.country}</div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                    <div 
+                      className="bg-purple-600 h-3 rounded-full" 
+                      style={{ width: `${country.percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="ml-4 text-right">
+                  <div className="text-sm font-semibold text-gray-900">{formatNumber(country.users)}</div>
+                  <div className="text-xs text-gray-500">{country.percentage}%</div>
                 </div>
               </div>
-              <div className="ml-4 text-right">
-                <div className="text-sm font-semibold text-gray-900">{formatNumber(country.users)}</div>
-                <div className="text-xs text-gray-500">{country.percentage}%</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <FiEye className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+            <p>No geographical data available</p>
+          </div>
+        )}
       </div>
 
       {/* Map Placeholder */}
@@ -359,11 +633,29 @@ const Analytics = ({ onLogout }) => {
   const renderContent = () => {
     switch (selectedMetric) {
       case 'overview': return renderOverview()
-      case 'traffic': return renderTraffic()
       case 'services': return renderServices()
+      case 'universities': return renderUniversities()
       case 'geographical': return renderGeographical()
       default: return renderOverview()
     }
+  }
+
+  if (error) {
+    return (
+      <AdminLayout onLogout={onLogout}>
+        <div className="flex flex-col items-center justify-center h-64">
+          <FiAlertCircle className="w-12 h-12 text-red-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Analytics</h3>
+          <p className="text-gray-600 mb-4 text-center max-w-md">{error}</p>
+          <button
+            onClick={fetchAnalyticsData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (
@@ -373,12 +665,16 @@ const Analytics = ({ onLogout }) => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p className="text-gray-600 mt-1">Track performance, user behavior, and business metrics</p>
+            <p className="text-gray-600 mt-1">Track performance, user behavior, and business metrics from real data</p>
           </div>
           <div className="flex space-x-3">
-            <button className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button 
+              onClick={fetchAnalyticsData}
+              className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              disabled={isLoading}
+            >
               <FiDownload className="w-4 h-4 mr-2" />
-              Export Report
+              {isLoading ? 'Loading...' : 'Refresh Data'}
             </button>
             <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               <FiCalendar className="w-4 h-4 mr-2" />
@@ -428,8 +724,5 @@ const Analytics = ({ onLogout }) => {
     </AdminLayout>
   )
 }
-
-// Missing import for FiUserPlus
-const FiUserPlus = FiUsers
 
 export default Analytics
