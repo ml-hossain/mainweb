@@ -2,42 +2,45 @@ import React, { useState } from 'react'
 import { FiMapPin, FiArrowRight } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
-const UniversityCard = ({
-  ranking,
-  university,
-  location,
-  program,
-  budget,
-  duration,
-  additionalPrograms = [],
-  allPrograms = [], // Full list of all programs
-  image,
-  slug
-}) => {
+const UniversityCard = ({ university }) => {
+  const {
+    name,
+    location,
+    logo_url,
+    slug,
+    content = {}
+  } = university || {}
+
+  const {
+    ranking,
+    programs = [],
+    tuition_fee_range,
+    duration
+  } = content
+
   const [showAllPrograms, setShowAllPrograms] = useState(false)
 
   // Add safety checks for undefined values
-  const safeUniversity = university || 'Unknown University'
+  const safeUniversity = name || 'Unknown University'
   const safeLocation = location || 'Unknown Location'
-  const safeProgram = program || 'Various Programs'
+  const safeProgram = programs.length > 0 ? programs[0] : 'Various Programs'
   const safeDuration = duration || 'Contact for details'
-  const safeBudget = budget || 'Contact for details'
+  const safeBudget = tuition_fee_range || 'Contact for details'
   const safeRanking = ranking || 'Unranked'
+  const safeSlug = slug || safeUniversity.toLowerCase().replace(/\s+/g, '-')
 
-  // Separate actual programs from "+X more" indicator
-  const actualPrograms = additionalPrograms.filter(prog => !prog.includes('+') || !prog.includes('more'))
-  const moreIndicator = additionalPrograms.find(prog => prog.includes('+') && prog.includes('more'))
-
-  // Use allPrograms if provided, otherwise fallback to actualPrograms
-  const programsToShow = showAllPrograms ? (allPrograms.length > 0 ? allPrograms : actualPrograms) : actualPrograms
-  const hasMorePrograms = allPrograms.length > actualPrograms.length || moreIndicator
+  // Determine which programs to display
+  const initialProgramsToShow = 4
+  const hasMorePrograms = programs.length > initialProgramsToShow
+  const programsToShow = showAllPrograms ? programs : programs.slice(0, initialProgramsToShow)
+  const moreCount = programs.length - initialProgramsToShow
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
       {/* University Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={image || '/api/placeholder/400/300'}
+          src={logo_url || '/api/placeholder/400/300'}
           alt={`${safeUniversity} campus`}
           className="w-full h-full object-cover"
         />
@@ -50,7 +53,7 @@ const UniversityCard = ({
       </div>
 
       {/* Card Content */}
-      <div className="p-6">
+      <div className="p-6 flex-grow flex flex-col">
         {/* University Name - Left Top */}
         <h3 className="text-lg font-bold text-gray-900 mb-4">
           {safeUniversity}
@@ -78,7 +81,7 @@ const UniversityCard = ({
         </div>
 
         {/* Additional Programs */}
-        {additionalPrograms.length > 0 && (
+        {programs.length > 0 && (
           <div className="mb-6">
             <div className="flex flex-wrap gap-2">
               {programsToShow.map((prog, index) => (
@@ -94,10 +97,10 @@ const UniversityCard = ({
                   onClick={() => setShowAllPrograms(true)}
                   className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium hover:bg-blue-200 transition-colors duration-200"
                 >
-                  {moreIndicator || `+${allPrograms.length - actualPrograms.length} more`}
+                  +{moreCount} more
                 </button>
               )}
-              {showAllPrograms && hasMorePrograms && (
+              {showAllPrograms && (
                 <button
                   onClick={() => setShowAllPrograms(false)}
                   className="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-medium hover:bg-gray-300 transition-colors duration-200"
@@ -108,15 +111,17 @@ const UniversityCard = ({
             </div>
           </div>
         )}
-
-        {/* Button */}
-        <Link
-          to={`/universities/${slug || safeUniversity.toLowerCase().replace(/\s+/g, '-')}`}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
-        >
-          Get More Info
-          <FiArrowRight className="ml-2 w-4 h-4" />
-        </Link>
+        
+        <div className="mt-auto">
+          {/* Button */}
+          <Link
+            to={`/universities/${safeSlug}`}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
+          >
+            Get More Info
+            <FiArrowRight className="ml-2 w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </div>
   )

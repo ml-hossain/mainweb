@@ -13,7 +13,8 @@ import {
   FiLogOut,
   FiMenu,
   FiX,
-  FiBell
+  FiBell,
+  FiFileText
 } from 'react-icons/fi'
 import { Link, useLocation } from 'react-router-dom'
 

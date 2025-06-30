@@ -42,6 +42,12 @@ const Home = () => {
 
   // University data from Supabase
   const [universities, setUniversities] = useState([])
+  const [loadingUniversities, setLoadingUniversities] = useState(true)
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 6,
+    totalCount: 0
+  })
 
   // Filtered universities based on search and filters
   const filteredUniversities = universities.filter(uni => {
@@ -131,8 +137,11 @@ const Home = () => {
   // Fetch dynamic content from Supabase
   useEffect(() => {
     fetchContentData()
-    fetchUniversities()
   }, [])
+
+  useEffect(() => {
+    fetchUniversities()
+  }, [pagination.currentPage, searchTerm, programFilter, budgetFilter, locationFilter, rankingFilter])
 
   const fetchContentData = async () => {
     try {
@@ -179,18 +188,60 @@ const Home = () => {
   }
 
   const fetchUniversities = async () => {
+    setLoadingUniversities(true)
     try {
-      const { data, error } = await supabase
+      const { from, to } = {
+        from: (pagination.currentPage - 1) * pagination.pageSize,
+        to: pagination.currentPage * pagination.pageSize - 1
+      }
+
+      let query = supabase
         .from('universities')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('is_active', true)
         .order('content->ranking', { ascending: true, nullsLast: true })
+        .range(from, to)
+
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
+      }
+
+      if (programFilter !== 'All Programs') {
+        query = query.contains('content->programs', [programFilter])
+      }
+
+      if (locationFilter !== 'All Malaysia') {
+        query = query.eq('location', locationFilter)
+      }
+
+      if (rankingFilter !== 'All Rankings') {
+        const rankingMap = {
+          'Top 10': 10,
+          'Top 50': 50,
+          'Top 100': 100,
+          'Top 500': 500
+        }
+        if (rankingMap[rankingFilter]) {
+          query = query.lte('content->ranking', rankingMap[rankingFilter])
+        }
+      }
+
+      const { data, error, count } = await query
 
       if (error) throw error
+      
       setUniversities(data || [])
+      setPagination(prev => ({ ...prev, totalCount: count }))
+
     } catch (error) {
       console.error('Error fetching universities:', error)
+    } finally {
+      setLoadingUniversities(false)
     }
+  }
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }))
   }
 
   useEffect(() => {
@@ -805,61 +856,64 @@ const Home = () => {
             </p>
           </div>
 
-          {/* University Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {filteredUniversities.length > 0 ? (
-              filteredUniversities.map((university, index) => (
-                <UniversityCard
-                  key={index}
-                  ranking={university.content.ranking}
-                  university={university.name}
-                  location={university.location}
-                  program={university.content.programs ? university.content.programs.join(', ') : 'Various Programs'}
-                  budget={university.content.tuition_fee_range}
-                  duration={university.content.duration || 'Contact for details'}
-                  additionalPrograms={university.content.programs || []}
-                  allPrograms={university.content.programs || []}
-                  image={university.logo_url}
-                  slug={university.slug || university.name?.toLowerCase().replace(/\s+/g, '-')}
-                />
+          {/* University Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {loadingUniversities ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+                  <div className="w-full h-48 bg-gray-300"></div>
+                  <div className="p-6">
+                    <div className="h-6 bg-gray-300 rounded mb-2 w-3/4"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))
+            ) : filteredUniversities.length > 0 ? (
+              filteredUniversities.map(uni => (
+                <UniversityCard key={uni.id} university={uni} />
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.467-.681-6.283-1.709M15.051 7.05a7.951 7.951 0 00-6.102 0M12 2L2 7.05v9.9L12 22l10-5.05v-9.9L12 2z" />
-                  </svg>
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No universities found</h3>
-                  <p className="text-gray-500">Try adjusting your search criteria or filters to find more results.</p>
-                </div>
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                <h3 className="text-xl text-gray-800 font-semibold">No Universities Found</h3>
+                <p className="text-gray-600 mt-2">Try adjusting your search or filter criteria.</p>
               </div>
             )}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center items-center space-x-4">
-            <button className="flex items-center px-4 py-2 text-gray-500 hover:text-blue-600 transition-colors duration-300">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Previous
-            </button>
+          {/* Pagination Controls */}
+          {pagination.totalCount > pagination.pageSize && (
+            <div className="flex justify-center items-center mt-12 space-x-2">
+              <button
+                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                disabled={pagination.currentPage === 1}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              {Array.from({ length: Math.ceil(pagination.totalCount / pagination.pageSize) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-4 py-2 border border-gray-300 rounded-md text-sm font-medium ${
+                    pagination.currentPage === page
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
 
-            <div className="flex space-x-2">
-              <button className="w-10 h-10 bg-blue-600 text-white rounded-lg font-semibold">1</button>
-              <button className="w-10 h-10 text-gray-600 hover:bg-blue-100 rounded-lg font-semibold transition-colors duration-300">2</button>
-              <button className="w-10 h-10 text-gray-600 hover:bg-blue-100 rounded-lg font-semibold transition-colors duration-300">3</button>
-              <span className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>
-              <button className="w-10 h-10 text-gray-600 hover:bg-blue-100 rounded-lg font-semibold transition-colors duration-300">12</button>
+              <button
+                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                disabled={pagination.currentPage === Math.ceil(pagination.totalCount / pagination.pageSize)}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
             </div>
-
-            <button className="flex items-center px-4 py-2 text-gray-500 hover:text-blue-600 transition-colors duration-300">
-              Next
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          )}
         </div>
       </section>
 

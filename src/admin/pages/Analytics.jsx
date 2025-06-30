@@ -297,19 +297,19 @@ const Analytics = ({ onLogout }) => {
           {isLoading ? (
             <div className="h-8 bg-gray-200 rounded animate-pulse mt-1 w-20"></div>
           ) : (
-            <p className="text-2xl font-semibold text-gray-900">
-              {isCurrency ? formatCurrency(value) : (typeof value === 'number' ? formatNumber(value) : value)}
-            </p>
+          <p className="text-2xl font-semibold text-gray-900">
+            {isCurrency ? formatCurrency(value) : (typeof value === 'number' ? formatNumber(value) : value)}
+          </p>
           )}
           {!isLoading && change !== undefined && (
-            <div className="flex items-center mt-2">
-              <span className={`text-sm font-medium ${
-                trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600'
-              }`}>
+          <div className="flex items-center mt-2">
+            <span className={`text-sm font-medium ${
+              trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600'
+            }`}>
                 {trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'} {Math.abs(change).toFixed(1)}%
-              </span>
-              <span className="text-sm text-gray-500 ml-1">vs last period</span>
-            </div>
+            </span>
+            <span className="text-sm text-gray-500 ml-1">vs last period</span>
+          </div>
           )}
         </div>
         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -417,7 +417,7 @@ const Analytics = ({ onLogout }) => {
         </div>
 
         {/* Revenue Trends */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue Trends</h3>
           {isLoading ? (
             <LoadingState />
@@ -442,7 +442,7 @@ const Analytics = ({ onLogout }) => {
             <div className="text-center py-8 text-gray-500">
               <FiDollarSign className="w-12 h-12 mx-auto mb-2 text-gray-300" />
               <p>No revenue data available</p>
-            </div>
+          </div>
           )}
         </div>
       </div>
@@ -467,10 +467,10 @@ const Analytics = ({ onLogout }) => {
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-semibold text-blue-600">{type.percentage}%</div>
-                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <FiMessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -485,7 +485,7 @@ const Analytics = ({ onLogout }) => {
           {isLoading ? (
             <LoadingState />
           ) : analyticsData.services.statusDistribution.length > 0 ? (
-            <div className="space-y-3">
+          <div className="space-y-3">
               {analyticsData.services.statusDistribution.map((status, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   <div className="text-sm text-gray-600 w-20 capitalize">{status.status}</div>
@@ -496,9 +496,9 @@ const Analytics = ({ onLogout }) => {
                     ></div>
                   </div>
                   <div className="text-sm text-gray-600 w-12 text-right">{status.count}</div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <FiPieChart className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -519,7 +519,7 @@ const Analytics = ({ onLogout }) => {
           {isLoading ? (
             <LoadingState />
           ) : analyticsData.universities.mostPopular.length > 0 ? (
-            <div className="space-y-4">
+          <div className="space-y-4">
               {analyticsData.universities.mostPopular.map((destination, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
@@ -534,10 +534,10 @@ const Analytics = ({ onLogout }) => {
                   <div className="ml-4 text-right">
                     <div className="text-sm font-semibold text-gray-900">{destination.requests}</div>
                     <div className="text-xs text-gray-500">{destination.percentage}%</div>
-                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <FiGlobe className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -561,16 +561,16 @@ const Analytics = ({ onLogout }) => {
                       <div 
                         className="bg-green-600 h-2 rounded-full" 
                         style={{ width: `${location.percentage}%` }}
-                      ></div>
+                  ></div>
                     </div>
                   </div>
                   <div className="ml-4 text-right">
                     <div className="text-sm font-semibold text-gray-900">{location.count}</div>
                     <div className="text-xs text-gray-500">{location.percentage}%</div>
                   </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <FiGlobe className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -589,25 +589,25 @@ const Analytics = ({ onLogout }) => {
         {isLoading ? (
           <LoadingState />
         ) : analyticsData.geographical.length > 0 ? (
-          <div className="space-y-4">
-            {analyticsData.geographical.map((country, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">{country.country}</div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
-                    <div 
-                      className="bg-purple-600 h-3 rounded-full" 
-                      style={{ width: `${country.percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="ml-4 text-right">
-                  <div className="text-sm font-semibold text-gray-900">{formatNumber(country.users)}</div>
-                  <div className="text-xs text-gray-500">{country.percentage}%</div>
+        <div className="space-y-4">
+          {analyticsData.geographical.map((country, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">{country.country}</div>
+                <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                  <div 
+                    className="bg-purple-600 h-3 rounded-full" 
+                    style={{ width: `${country.percentage}%` }}
+                  ></div>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="ml-4 text-right">
+                <div className="text-sm font-semibold text-gray-900">{formatNumber(country.users)}</div>
+                <div className="text-xs text-gray-500">{country.percentage}%</div>
+              </div>
+            </div>
+          ))}
+        </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
             <FiEye className="w-12 h-12 mx-auto mb-2 text-gray-300" />

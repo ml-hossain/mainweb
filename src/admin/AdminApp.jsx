@@ -12,6 +12,7 @@ import Consultations from './pages/Consultations'
 import Contacts from './pages/Contacts'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
+import UniversityEditor from './pages/UniversityEditor'
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -103,6 +104,8 @@ const AdminApp = () => {
       <Route index element={<Dashboard onLogout={handleLogout} />} />
       <Route path="dashboard" element={<Navigate to="/admin" replace />} />
       <Route path="universities" element={<Universities onLogout={handleLogout} />} />
+      <Route path="universities/new" element={<UniversityEditor onLogout={handleLogout} />} />
+      <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
       <Route path="contacts" element={<Contacts onLogout={handleLogout} />} />
       <Route path="analytics" element={<Analytics onLogout={handleLogout} />} />
