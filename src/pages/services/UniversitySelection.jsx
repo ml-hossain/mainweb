@@ -20,7 +20,6 @@ import {
   FiHeart,
   FiShield
 } from 'react-icons/fi'
-import Footer from '../../components/Footer'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -417,9 +416,6 @@ const UniversitySelection = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }
