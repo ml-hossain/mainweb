@@ -26,12 +26,12 @@ const PublicLayout = ({ children }) => {
   const hideFooter = location.pathname.startsWith('/admin')
   return (
     <>
-      <Navbar />
+    <Navbar />
       <main>{children}</main>
-      <FloatingContactButton />
+    <FloatingContactButton />
       {!hideFooter && <Footer />}
     </>
-  )
+)
 }
 
 function App() {

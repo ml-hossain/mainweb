@@ -121,10 +121,10 @@ const Consultations = ({ onLogout }) => {
                   <span className="text-sm text-gray-600">{item.email}</span>
                 </div>
                 {item.phone && (
-                  <div className="flex items-center">
-                    <FiPhone className="w-4 h-4 text-gray-400 mr-2" />
+                <div className="flex items-center">
+                  <FiPhone className="w-4 h-4 text-gray-400 mr-2" />
                     <span className="text-sm text-gray-600">{item.phone}</span>
-                  </div>
+                </div>
                 )}
                 <div className="flex items-center">
                   <FiCalendar className="w-4 h-4 text-gray-400 mr-2" />
@@ -138,22 +138,22 @@ const Consultations = ({ onLogout }) => {
               <div className="bg-blue-50 rounded-lg p-4">
                 <h4 className="font-medium text-gray-900 mb-3">Consultation Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
+            <div>
                     <span className="font-medium text-gray-700">Education Level:</span>
                     <span className="ml-2 text-gray-600">{item.study_level}</span>
-                  </div>
-                  <div>
+              </div>
+              <div>
                     <span className="font-medium text-gray-700">Consultation Type:</span>
                     <span className="ml-2 text-gray-600">{item.consultation_type}</span>
-                  </div>
+              </div>
                   {item.preferred_destination && (
                     <div>
                       <span className="font-medium text-gray-700">Preferred Destination:</span>
                       <span className="ml-2 text-gray-600">{item.preferred_destination}</span>
-                    </div>
+            </div>
                   )}
                   {item.preferred_time && (
-                    <div>
+              <div>
                       <span className="font-medium text-gray-700">Preferred Time:</span>
                       <span className="ml-2 text-gray-600">{item.preferred_time}</span>
                     </div>
@@ -348,7 +348,7 @@ const Consultations = ({ onLogout }) => {
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{item.full_name || item.name}</div>
                           <div className="text-sm text-gray-500">{item.email}</div>
-                        </div>
+                      </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -35,18 +35,18 @@ const Dashboard = ({ onLogout }) => {
     loadDashboardData()
   }, [])
 
-  const loadDashboardData = async () => {
-    try {
-      setIsLoading(true)
+    const loadDashboardData = async () => {
+      try {
+        setIsLoading(true)
       setError(null)
 
       // Fetch real data from all relevant tables
-      const [
-        universitiesResponse,
-        consultationsResponse,
+        const [
+          universitiesResponse,
+          consultationsResponse,
         contactRequestsResponse,
         successStoriesResponse
-      ] = await Promise.all([
+        ] = await Promise.all([
         supabase.from('universities').select('*'),
         supabase.from('consultations').select('*'),
         supabase.from('contact_requests').select('*'),
@@ -82,56 +82,56 @@ const Dashboard = ({ onLogout }) => {
       const avgConsultationFee = 500 // MYR
       const monthlyRevenue = consultations.length * avgConsultationFee
 
-      setStats({
+        setStats({
         totalContacts,
         activeConsultations: pendingConsultations + inProgressConsultations,
         universitiesPartners: activeUniversities,
         monthlyRevenue,
         successRate,
-        pendingApplications: pendingConsultations
-      })
+          pendingApplications: pendingConsultations
+        })
 
       // Generate recent activities from real data
-      const activities = []
+        const activities = []
 
       // Add recent contacts
       if (contacts.length > 0) {
         const recentContact = contacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-        activities.push({
-          id: 1,
+          activities.push({
+            id: 1,
           type: 'contact',
           message: `New contact request from ${recentContact.name}`,
           time: formatTimeAgo(recentContact.created_at),
           icon: FiMail,
-          color: 'text-blue-600'
-        })
-      }
+            color: 'text-blue-600'
+          })
+        }
 
       // Add recent consultations
       if (consultations.length > 0) {
         const recentConsultation = consultations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-        activities.push({
-          id: 2,
-          type: 'consultation',
+          activities.push({
+            id: 2,
+            type: 'consultation',
           message: `New consultation booking from ${recentConsultation.full_name}`,
           time: formatTimeAgo(recentConsultation.created_at),
-          icon: FiMessageSquare,
-          color: 'text-green-600'
-        })
-      }
+            icon: FiMessageSquare,
+            color: 'text-green-600'
+          })
+        }
 
       // Add university activities
       if (universities.length > 0) {
         const recentUni = universities.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
-        activities.push({
-          id: 3,
+          activities.push({
+            id: 3,
           type: 'university',
           message: `University added: ${recentUni.name}`,
           time: formatTimeAgo(recentUni.created_at),
           icon: FiGlobe,
-          color: 'text-purple-600'
-        })
-      }
+            color: 'text-purple-600'
+          })
+        }
 
       // Add success story activity
       if (stories.length > 0) {
@@ -150,15 +150,15 @@ const Dashboard = ({ onLogout }) => {
 
       // Generate monthly data based on actual data
       const monthlyStats = generateMonthlyStats(consultations, contacts)
-      setMonthlyData(monthlyStats)
+        setMonthlyData(monthlyStats)
 
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
       setError(error.message)
     } finally {
-      setIsLoading(false)
+        setIsLoading(false)
+      }
     }
-  }
 
   const formatTimeAgo = (dateString) => {
     if (!dateString) return 'Unknown time'

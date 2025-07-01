@@ -530,7 +530,7 @@ const Analytics = ({ onLogout }) => {
                         style={{ width: `${destination.percentage}%` }}
                       ></div>
                     </div>
-                  </div>
+                </div>
                   <div className="ml-4 text-right">
                     <div className="text-sm font-semibold text-gray-900">{destination.requests}</div>
                     <div className="text-xs text-gray-500">{destination.percentage}%</div>
@@ -562,7 +562,7 @@ const Analytics = ({ onLogout }) => {
                         className="bg-green-600 h-2 rounded-full" 
                         style={{ width: `${location.percentage}%` }}
                   ></div>
-                    </div>
+                </div>
                   </div>
                   <div className="ml-4 text-right">
                     <div className="text-sm font-semibold text-gray-900">{location.count}</div>

@@ -12,7 +12,7 @@ const UniversityCard = ({ university }) => {
   } = university || {}
 
   const {
-    ranking,
+  ranking,
     programs = [],
     tuition_fee_range,
     duration
@@ -111,16 +111,16 @@ const UniversityCard = ({ university }) => {
             </div>
           </div>
         )}
-        
+
         <div className="mt-auto">
-          {/* Button */}
-          <Link
+        {/* Button */}
+        <Link
             to={`/universities/${safeSlug}`}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
-          >
-            Get More Info
-            <FiArrowRight className="ml-2 w-4 h-4" />
-          </Link>
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
+        >
+          Get More Info
+          <FiArrowRight className="ml-2 w-4 h-4" />
+        </Link>
         </div>
       </div>
     </div>

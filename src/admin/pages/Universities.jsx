@@ -7,6 +7,8 @@ import { supabase } from '../../lib/supabase'
 const Universities = ({ onLogout }) => {
   const [universities, setUniversities] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState([])
+  const [selectAll, setSelectAll] = useState(false)
 
   useEffect(() => {
     fetchUniversities()
@@ -78,6 +80,41 @@ const Universities = ({ onLogout }) => {
     }
   }
 
+  const handleSelect = (id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelected([])
+      setSelectAll(false)
+    } else {
+      setSelected(universities.map((u) => u.id))
+      setSelectAll(true)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return
+    if (!window.confirm('Are you sure you want to delete the selected universities?')) return
+    try {
+      const { error } = await supabase
+        .from('universities')
+        .delete()
+        .in('id', selected)
+      if (error) throw error
+      fetchUniversities()
+      setSelected([])
+      setSelectAll(false)
+      alert('Selected universities deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting universities:', error)
+      alert('Error deleting universities')
+    }
+  }
+
   if (loading) {
     return (
       <AdminLayout onLogout={onLogout}>
@@ -97,19 +134,46 @@ const Universities = ({ onLogout }) => {
             <h1 className="text-2xl font-bold text-gray-900">Universities</h1>
             <p className="text-gray-600">Manage partner universities and institutions</p>
           </div>
-          <Link
-            to="/admin/universities/new"
+          <div className="flex gap-2 items-center">
+          <button
+              onClick={handleBulkDelete}
+              disabled={selected.length === 0}
+              className={`inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors ${selected.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <FiTrash2 className="w-4 h-4 mr-2" />
+              Delete Selected
+            </button>
+            <Link
+              to="/admin/universities/new"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FiPlus className="w-4 h-4 mr-2" />
             Add University
-          </Link>
+            </Link>
+          </div>
         </div>
 
         {/* Universities Grid */}
+        <div className="flex items-center mb-2">
+          <input
+            type="checkbox"
+            checked={selectAll}
+            onChange={handleSelectAll}
+            className="mr-2"
+            id="selectAllCheckbox"
+          />
+          <label htmlFor="selectAllCheckbox" className="text-sm text-gray-700">Select All</label>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {universities.map((university) => (
-            <div key={university.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+            <div key={university.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow relative">
+              <input
+                type="checkbox"
+                checked={selected.includes(university.id)}
+                onChange={() => handleSelect(university.id)}
+                className="absolute top-2 left-2 z-10 w-5 h-5"
+                style={{ accentColor: '#2563eb' }}
+              />
               {university.logo_url && (
                 <div className="h-32 bg-gray-100 rounded-t-lg flex items-center justify-center">
                   <img
@@ -158,16 +222,16 @@ const Universities = ({ onLogout }) => {
                     to={`/admin/universities/edit/${university.id}`}
                     className="text-gray-500 hover:text-blue-600 p-2 rounded-full transition-colors"
                     title="Edit University"
-                  >
-                    <FiEdit className="w-4 h-4" />
+                    >
+                      <FiEdit className="w-4 h-4" />
                   </Link>
-                  <button
-                    onClick={() => handleDelete(university.id)}
+                    <button
+                      onClick={() => handleDelete(university.id)}
                     className="text-gray-500 hover:text-red-600 p-2 rounded-full transition-colors"
                     title="Delete University"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                  </button>
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
                 </div>
               </div>
             </div>
