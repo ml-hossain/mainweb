@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { FiStar, FiMapPin, FiCalendar, FiUser } from 'react-icons/fi'
-import Footer from '../components/Footer'
 
 const SuccessStories = () => {
   const headerRef = useRef(null)
@@ -228,9 +227,6 @@ const SuccessStories = () => {
         </div>
 
       </div>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

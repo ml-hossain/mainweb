@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBookOpen } from 'react-icons/fi'
-import Footer from '../components/Footer'
 import { supabase } from '../lib/supabase'
 
 const Consultation = () => {
@@ -343,9 +342,6 @@ const Consultation = () => {
           </div>
         </div>
       </div>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

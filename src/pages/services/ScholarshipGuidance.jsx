@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiAward, FiCheck, FiDollarSign, FiTrendingUp, FiArrowRight } from 'react-icons/fi'
-import Footer from '../../components/Footer'
 
 const ScholarshipGuidance = () => {
   const headerRef = useRef(null)
@@ -167,7 +166,6 @@ const ScholarshipGuidance = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

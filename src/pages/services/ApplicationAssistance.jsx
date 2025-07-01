@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiFileText, FiCheck, FiEdit, FiClock, FiArrowRight } from 'react-icons/fi'
-import Footer from '../../components/Footer'
 
 const ApplicationAssistance = () => {
   const headerRef = useRef(null)
@@ -200,8 +199,6 @@ const ApplicationAssistance = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   )
 }

@@ -9,7 +9,6 @@ import {
   FiSend,
   FiArrowRight 
 } from 'react-icons/fi'
-import Footer from '../components/Footer'
 
 const Services = () => {
   const headerRef = useRef(null)
@@ -182,9 +181,6 @@ const Services = () => {
           </div>
         </div>
       </div>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi'
-import Footer from '../components/Footer'
 import { supabase } from '../lib/supabase'
 
 const Contact = () => {
@@ -274,9 +273,6 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

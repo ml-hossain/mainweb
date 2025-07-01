@@ -3,7 +3,6 @@ import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import UniversityCard from '../components/UniversityCard'
-import Footer from '../components/Footer'
 import { supabase } from '../lib/supabase'
 
 const Home = () => {
@@ -1147,8 +1146,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   )
 }
