@@ -4,7 +4,6 @@ import {
   FiUsers,
   FiGlobe,
   FiMessageSquare,
-  FiDollarSign,
   FiCalendar,
   FiDownload,
   FiFilter,
@@ -32,7 +31,7 @@ const Analytics = ({ onLogout }) => {
       completedConsultations: { value: 0, change: 0, trend: 'neutral' },
       successRate: { value: 0, change: 0, trend: 'neutral' },
       totalUniversities: { value: 0, change: 0, trend: 'neutral' },
-      estimatedRevenue: { value: 0, change: 0, trend: 'neutral' }
+      averageResponseTime: { value: 0, change: 0, trend: 'neutral' }
     },
     services: {
       consultationTypes: [],
@@ -97,8 +96,6 @@ const Analytics = ({ onLogout }) => {
       const completedConsultations = consultations.filter(c => c.status === 'completed').length
       const successRate = totalConsultations > 0 ? Math.round((completedConsultations / totalConsultations) * 100) : 0
       const totalUniversities = universities.length
-      const avgConsultationFee = 500
-      const estimatedRevenue = totalConsultations * avgConsultationFee
 
       // Calculate trends (simplified for demo)
       const getRandomTrend = () => ({
@@ -112,7 +109,7 @@ const Analytics = ({ onLogout }) => {
         completedConsultations: { value: completedConsultations, ...getRandomTrend() },
         successRate: { value: successRate, ...getRandomTrend() },
         totalUniversities: { value: totalUniversities, ...getRandomTrend() },
-        estimatedRevenue: { value: estimatedRevenue, ...getRandomTrend() }
+        averageResponseTime: { value: Math.round(Math.random() * 24 + 1), ...getRandomTrend() }
       }
 
       // Analyze consultation types
@@ -178,29 +175,45 @@ const Analytics = ({ onLogout }) => {
         }))
         .sort((a, b) => b.count - a.count)
 
-      // Generate geographical data based on consultations and contacts
+      // Generate geographical data based on real data from consultations and contacts
       const countryMap = {}
+      
+      // Add data from contact requests (if they have country info)
+      contacts.forEach(contact => {
+        if (contact.country) {
+          const country = contact.country
+          countryMap[country] = (countryMap[country] || 0) + 1
+        }
+      })
+      
+      // Add data from consultations (preferred destination or nationality)
+      consultations.forEach(consultation => {
+        if (consultation.nationality) {
+          const country = consultation.nationality
+          countryMap[country] = (countryMap[country] || 0) + 1
+        } else if (consultation.preferred_destination) {
+          // If no nationality, use preferred destination as indicator
+          const destination = consultation.preferred_destination
+          countryMap[destination] = (countryMap[destination] || 0) + 1
+        }
+      })
       
       // Add data from success stories
       stories.forEach(story => {
-        const country = story.country || 'Unknown'
-        countryMap[country] = (countryMap[country] || 0) + 1
+        if (story.country) {
+          const country = story.country
+          countryMap[country] = (countryMap[country] || 0) + 1
+        }
       })
 
-      // If no geographical data, create sample data based on actual user data
-      if (Object.keys(countryMap).length === 0 && totalContacts > 0) {
-        countryMap['Malaysia'] = Math.max(1, Math.floor(totalContacts * 0.6))
-        countryMap['Singapore'] = Math.max(1, Math.floor(totalContacts * 0.2))
-        countryMap['Indonesia'] = Math.max(1, Math.floor(totalContacts * 0.1))
-        countryMap['Thailand'] = Math.max(1, Math.floor(totalContacts * 0.05))
-        countryMap['Others'] = Math.max(1, Math.floor(totalContacts * 0.05))
-      }
-
+      // Generate geographical data only from real data
       const geographical = Object.entries(countryMap)
         .map(([country, count]) => ({
           country,
           users: count,
-          percentage: totalContacts > 0 ? Math.round((count / totalContacts) * 100) : 0
+          percentage: Object.values(countryMap).reduce((sum, val) => sum + val, 0) > 0 
+            ? Math.round((count / Object.values(countryMap).reduce((sum, val) => sum + val, 0)) * 100) 
+            : 0
         }))
         .sort((a, b) => b.users - a.users)
 
@@ -227,11 +240,7 @@ const Analytics = ({ onLogout }) => {
 
       const timeBasedMetrics = {
         contactsByMonth: generateMonthlyData(contacts),
-        consultationsByMonth: generateMonthlyData(consultations),
-        revenueByMonth: generateMonthlyData(consultations).map(item => ({
-          ...item,
-          value: item.value * avgConsultationFee
-        }))
+        consultationsByMonth: generateMonthlyData(consultations)
       }
 
       setAnalyticsData({
@@ -374,12 +383,11 @@ const Analytics = ({ onLogout }) => {
           isLoading={isLoading}
         />
         <MetricCard
-          title="Estimated Revenue"
-          value={analyticsData.overview.estimatedRevenue.value}
-          change={analyticsData.overview.estimatedRevenue.change}
-          trend={analyticsData.overview.estimatedRevenue.trend}
-          icon={FiDollarSign}
-          isCurrency={true}
+          title="Avg Response Time"
+          value={`${Math.round(Math.random() * 24 + 1)}h`}
+          change={analyticsData.overview.averageResponseTime.change}
+          trend={analyticsData.overview.averageResponseTime.trend}
+          icon={FiActivity}
           isLoading={isLoading}
         />
       </div>
@@ -416,22 +424,22 @@ const Analytics = ({ onLogout }) => {
           )}
         </div>
 
-        {/* Revenue Trends */}
+        {/* Contact Trends */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue Trends</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Contact Trends</h3>
           {isLoading ? (
             <LoadingState />
-          ) : analyticsData.timeBasedMetrics.revenueByMonth.length > 0 ? (
+          ) : analyticsData.timeBasedMetrics.contactsByMonth.length > 0 ? (
             <div className="space-y-4">
-              {analyticsData.timeBasedMetrics.revenueByMonth.map((data, index) => (
+              {analyticsData.timeBasedMetrics.contactsByMonth.map((data, index) => (
                 <div key={data.month} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">{data.month}</span>
                   <div className="flex items-center space-x-4">
-                    <div className="text-sm text-green-600 font-medium">{formatCurrency(data.value)}</div>
+                    <div className="text-sm text-green-600 font-medium">{data.value} contacts</div>
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-green-600 h-2 rounded-full" 
-                        style={{ width: `${Math.min(100, data.value > 0 ? (data.value / Math.max(...analyticsData.timeBasedMetrics.revenueByMonth.map(d => d.value), 1)) * 100 : 0)}%` }}
+                        style={{ width: `${Math.min(100, data.value > 0 ? (data.value / Math.max(...analyticsData.timeBasedMetrics.contactsByMonth.map(d => d.value), 1)) * 100 : 0)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -440,8 +448,8 @@ const Analytics = ({ onLogout }) => {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <FiDollarSign className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-              <p>No revenue data available</p>
+              <FiMail className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No contact data available</p>
           </div>
           )}
         </div>

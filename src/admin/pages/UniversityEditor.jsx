@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import QuillEditor from '../../components/QuillEditor';
-import { FiLoader, FiSave, FiArrowLeft } from 'react-icons/fi';
+import AdminLayout from '../components/AdminLayout';
+import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen } from 'react-icons/fi';
 import slugify from 'slugify';
 
-const UniversityEditor = () => {
+const UniversityEditor = ({ onLogout }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
@@ -185,223 +186,354 @@ const UniversityEditor = () => {
   }
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/admin/universities')}
-            className="flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            <FiArrowLeft className="mr-2 h-4 w-4" />
-            Back to Universities
-          </button>
-        <h1 className="text-2xl font-bold text-gray-800">{!id ? 'Add New University' : 'Edit University'}</h1>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="form-group">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">University Name</label>
-              <input type="text" name="name" id="name" value={university?.name || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required />
+    <AdminLayout onLogout={onLogout}>
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-3xl p-8 text-white shadow-2xl mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
+            <div className="flex-1 mb-6 lg:mb-0">
+              <button
+                onClick={() => navigate('/admin/universities')}
+                className="flex items-center text-blue-100 hover:text-white text-sm font-medium mb-4 transition-colors duration-200"
+              >
+                <FiArrowLeft className="mr-2 h-4 w-4" />
+                Back to Universities
+              </button>
+              <h1 className="text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                {!id ? 'Add New University' : 'Edit University'}
+              </h1>
+              <p className="text-blue-100 text-lg font-medium">
+                {!id ? 'Create a new university profile with detailed information' : 'Update university information and settings'}
+              </p>
             </div>
-            <div className="form-group">
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <input type="text" name="location" id="location" value={university?.location || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-2">
+                <FiGlobe className="w-5 h-5 mr-2" />
+                <span className="font-semibold">Global Education</span>
+              </div>
             </div>
+          </div>
         </div>
         
-        <div className="form-group mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
-            <textarea name="description" id="description" value={university?.description || ''} onChange={handleInputChange} rows="3" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-        </div>
+        {/* Main Content */}
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="p-8">
+            <form onSubmit={handleSubmit}>
+              {/* Basic Information Section */}
+              <div className="mb-12">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mr-4">
+                    <FiGlobe className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
+                    <p className="text-gray-600">Essential university details and branding</p>
+                  </div>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="form-group">
-                <label htmlFor="logo_url" className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-                <input type="text" name="logo_url" id="logo_url" value={university?.logo_url || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-            <div className="form-group">
-                <label htmlFor="banner_url" className="block text-sm font-medium text-gray-700 mb-1">Banner URL</label>
-                <input type="text" name="banner_url" id="banner_url" value={university?.banner_url || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700">University Name *</label>
+                    <div className="relative">
+                      <FiGlobe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="name" 
+                        id="name" 
+                        value={university?.name || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                        placeholder="Enter university name"
+                        required 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="location" className="block text-sm font-semibold text-gray-700">Location</label>
+                    <div className="relative">
+                      <FiMapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="location" 
+                        id="location" 
+                        value={university?.location || ''} 
+                        onChange={handleInputChange} 
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                        placeholder="City, Country"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <label htmlFor="description" className="block text-sm font-semibold text-gray-700">Short Description</label>
+                  <textarea 
+                    name="description" 
+                    id="description" 
+                    value={university?.description || ''} 
+                    onChange={handleInputChange} 
+                    rows="3" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none" 
+                    placeholder="Brief description of the university"
+                  ></textarea>
+                </div>
 
-        <div className="form-group mb-6">
-          <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 mb-1">Official Website URL</label>
-          <input 
-            type="url" 
-            name="website_url" 
-            id="website_url" 
-            value={university?.website_url || ''} 
-            onChange={handleInputChange} 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-          />
-        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label htmlFor="logo_url" className="block text-sm font-semibold text-gray-700">Logo URL</label>
+                    <input 
+                      type="url" 
+                      name="logo_url" 
+                      id="logo_url" 
+                      value={university?.logo_url || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      placeholder="https://example.com/logo.png"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="banner_url" className="block text-sm font-semibold text-gray-700">Banner URL</label>
+                    <input 
+                      type="url" 
+                      name="banner_url" 
+                      id="banner_url" 
+                      value={university?.banner_url || ''} 
+                      onChange={handleInputChange} 
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      placeholder="https://example.com/banner.jpg"
+                    />
+                  </div>
+                </div>
 
-        {/* Enhanced University Information for Card Auto-Generation */}
-        <div className="bg-gray-50 p-6 rounded-lg mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">University Details (For Auto-Generated Cards)</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <div className="form-group">
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <select 
-                name="country" 
-                id="country" 
-                value={university?.content?.country || ''} 
-                onChange={(e) => handleContentFieldChange('country', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select Country</option>
-                <option value="canada">Canada</option>
-                <option value="malaysia">Malaysia</option>
-                <option value="usa">USA</option>
-                <option value="uk">United Kingdom</option>
-                <option value="australia">Australia</option>
-                <option value="germany">Germany</option>
-                <option value="sweden">Sweden</option>
-                <option value="netherlands">Netherlands</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="university_type" className="block text-sm font-medium text-gray-700 mb-1">University Type</label>
-              <select 
-                name="university_type" 
-                id="university_type" 
-                value={university?.content?.university_type || ''} 
-                onChange={(e) => handleContentFieldChange('university_type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select Type</option>
-                <option value="public">Public University</option>
-                <option value="semi-government">Semi-Government</option>
-                <option value="private">Private University</option>
-                <option value="international">International/Foreign Private</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="ranking" className="block text-sm font-medium text-gray-700 mb-1">University Ranking</label>
-              <input 
-                type="text" 
-                name="ranking" 
-                id="ranking" 
-                value={university?.content?.ranking || ''} 
-                onChange={(e) => handleContentFieldChange('ranking', e.target.value)}
-                placeholder="e.g., 150"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-              />
-            </div>
+                <div className="space-y-1">
+                  <label htmlFor="website_url" className="block text-sm font-semibold text-gray-700">Official Website URL</label>
+                  <input 
+                    type="url" 
+                    name="website_url" 
+                    id="website_url" 
+                    value={university?.website_url || ''} 
+                    onChange={handleInputChange} 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    placeholder="https://university-website.edu"
+                  />
+                </div>
+              </div>
+
+              {/* University Details Section */}
+              <div className="mb-12">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mr-4">
+                    <FiStar className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">University Details</h2>
+                    <p className="text-gray-600">Academic information and specifications</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  <div className="space-y-1">
+                    <label htmlFor="country" className="block text-sm font-semibold text-gray-700">Country</label>
+                    <div className="relative">
+                      <FiMapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <select 
+                        name="country" 
+                        id="country" 
+                        value={university?.content?.country || ''} 
+                        onChange={(e) => handleContentFieldChange('country', e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                      >
+                        <option value="">Select Country</option>
+                        <option value="canada">Canada</option>
+                        <option value="malaysia">Malaysia</option>
+                        <option value="usa">USA</option>
+                        <option value="uk">United Kingdom</option>
+                        <option value="australia">Australia</option>
+                        <option value="germany">Germany</option>
+                        <option value="sweden">Sweden</option>
+                        <option value="netherlands">Netherlands</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="university_type" className="block text-sm font-semibold text-gray-700">University Type</label>
+                    <div className="relative">
+                      <FiStar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <select 
+                        name="university_type" 
+                        id="university_type" 
+                        value={university?.content?.university_type || ''} 
+                        onChange={(e) => handleContentFieldChange('university_type', e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                      >
+                        <option value="">Select Type</option>
+                        <option value="public">Public University</option>
+                        <option value="semi-government">Semi-Government</option>
+                        <option value="private">Private University</option>
+                        <option value="international">International/Foreign Private</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="ranking" className="block text-sm font-semibold text-gray-700">University Ranking</label>
+                    <div className="relative">
+                      <FiStar className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="ranking" 
+                        id="ranking" 
+                        value={university?.content?.ranking || ''} 
+                        onChange={(e) => handleContentFieldChange('ranking', e.target.value)}
+                        placeholder="e.g., 150"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-1">
+                    <label htmlFor="ranking_type" className="block text-sm font-semibold text-gray-700">Ranking Type</label>
+                    <select 
+                      name="ranking_type" 
+                      id="ranking_type" 
+                      value={university?.content?.ranking_type || 'QS Ranking'} 
+                      onChange={(e) => handleContentFieldChange('ranking_type', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                    >
+                      <option value="QS Ranking">QS Ranking</option>
+                      <option value="Country Ranking">Country Ranking</option>
+                      <option value="Times Higher Education">Times Higher Education</option>
+                      <option value="Academic Ranking">Academic Ranking</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="initial_payment" className="block text-sm font-semibold text-gray-700">Initial Payment</label>
+                    <div className="relative">
+                      <FiDollarSign className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="initial_payment" 
+                        id="initial_payment" 
+                        value={university?.content?.initial_payment || ''} 
+                        onChange={(e) => handleContentFieldChange('initial_payment', e.target.value)}
+                        placeholder="e.g., $5,000"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-1">
+                    <label htmlFor="duration" className="block text-sm font-semibold text-gray-700">Course Duration</label>
+                    <div className="relative">
+                      <FiClock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="duration" 
+                        id="duration" 
+                        value={university?.content?.duration || ''} 
+                        onChange={(e) => handleContentFieldChange('duration', e.target.value)}
+                        placeholder="e.g., 3-4 years"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label htmlFor="language_requirements" className="block text-sm font-semibold text-gray-700">Language Requirements</label>
+                    <input 
+                      type="text" 
+                      name="language_requirements" 
+                      id="language_requirements" 
+                      value={university?.content?.language_requirements?.join(', ') || ''} 
+                      onChange={(e) => handleArrayFieldChange('language_requirements', e.target.value)}
+                      placeholder="e.g., IELTS 6.5, TOEFL 90"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Separate multiple requirements with commas</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-1 mb-6">
+                  <label htmlFor="popular_courses" className="block text-sm font-semibold text-gray-700">Popular Courses/Subjects</label>
+                  <textarea 
+                    name="popular_courses" 
+                    id="popular_courses" 
+                    value={university?.content?.popular_courses?.join(', ') || ''} 
+                    onChange={(e) => handleArrayFieldChange('popular_courses', e.target.value)}
+                    rows="3"
+                    placeholder="e.g., Computer Science, Business Administration, Engineering, Medicine"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                  ></textarea>
+                  <p className="text-xs text-gray-500 mt-1">Separate multiple courses with commas. Only first 2 will show on cards.</p>
+                </div>
+                
+                <div className="space-y-1">
+                  <label htmlFor="programs" className="block text-sm font-semibold text-gray-700">All Available Programs</label>
+                  <textarea 
+                    name="programs" 
+                    id="programs" 
+                    value={university?.content?.programs?.join(', ') || ''} 
+                    onChange={(e) => handleArrayFieldChange('programs', e.target.value)}
+                    rows="4"
+                    placeholder="e.g., Bachelor of Science, Master of Business Administration, PhD in Engineering"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                  ></textarea>
+                  <p className="text-xs text-gray-500 mt-1">Separate multiple programs with commas</p>
+                </div>
+              </div>
+
+              {/* Content Editor Section */}
+              <div className="mb-12">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mr-4">
+                    <FiBookOpen className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Page Content</h2>
+                    <p className="text-gray-600">Detailed university information and content</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <QuillEditor 
+                    value={university?.page_content || ''} 
+                    onChange={handlePageContentChange} 
+                    className="bg-white rounded-xl"
+                  />
+                </div>
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
+                  <p className="text-red-600 text-sm font-medium">{error}</p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button 
+                  type="submit" 
+                  disabled={saving} 
+                  className="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  {saving ? <FiLoader className="animate-spin mr-2 h-5 w-5" /> : <FiSave className="mr-2 h-5 w-5" />}
+                  <span className="text-lg">{saving ? 'Saving...' : 'Save University'}</span>
+                </button>
+              </div>
+            </form>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="form-group">
-              <label htmlFor="ranking_type" className="block text-sm font-medium text-gray-700 mb-1">Ranking Type</label>
-              <select 
-                name="ranking_type" 
-                id="ranking_type" 
-                value={university?.content?.ranking_type || 'QS Ranking'} 
-                onChange={(e) => handleContentFieldChange('ranking_type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="QS Ranking">QS Ranking</option>
-                <option value="Country Ranking">Country Ranking</option>
-                <option value="Times Higher Education">Times Higher Education</option>
-                <option value="Academic Ranking">Academic Ranking</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="initial_payment" className="block text-sm font-medium text-gray-700 mb-1">Initial Payment</label>
-              <input 
-                type="text" 
-                name="initial_payment" 
-                id="initial_payment" 
-                value={university?.content?.initial_payment || ''} 
-                onChange={(e) => handleContentFieldChange('initial_payment', e.target.value)}
-                placeholder="e.g., $5,000"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="form-group">
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">Course Duration</label>
-              <input 
-                type="text" 
-                name="duration" 
-                id="duration" 
-                value={university?.content?.duration || ''} 
-                onChange={(e) => handleContentFieldChange('duration', e.target.value)}
-                placeholder="e.g., 3-4 years"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="language_requirements" className="block text-sm font-medium text-gray-700 mb-1">Language Requirements</label>
-              <input 
-                type="text" 
-                name="language_requirements" 
-                id="language_requirements" 
-                value={university?.content?.language_requirements?.join(', ') || ''} 
-                onChange={(e) => handleArrayFieldChange('language_requirements', e.target.value)}
-                placeholder="e.g., IELTS 6.5, TOEFL 90"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-              />
-              <p className="text-xs text-gray-500 mt-1">Separate multiple requirements with commas</p>
-            </div>
-          </div>
-          
-          <div className="form-group mb-6">
-            <label htmlFor="popular_courses" className="block text-sm font-medium text-gray-700 mb-1">Popular Courses/Subjects</label>
-            <textarea 
-              name="popular_courses" 
-              id="popular_courses" 
-              value={university?.content?.popular_courses?.join(', ') || ''} 
-              onChange={(e) => handleArrayFieldChange('popular_courses', e.target.value)}
-              rows="3"
-              placeholder="e.g., Computer Science, Business Administration, Engineering, Medicine"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            ></textarea>
-            <p className="text-xs text-gray-500 mt-1">Separate multiple courses with commas. Only first 2 will show on cards.</p>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="programs" className="block text-sm font-medium text-gray-700 mb-1">All Available Programs</label>
-            <textarea 
-              name="programs" 
-              id="programs" 
-              value={university?.content?.programs?.join(', ') || ''} 
-              onChange={(e) => handleArrayFieldChange('programs', e.target.value)}
-              rows="4"
-              placeholder="e.g., Bachelor of Science, Master of Business Administration, PhD in Engineering"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            ></textarea>
-            <p className="text-xs text-gray-500 mt-1">Separate multiple programs with commas</p>
-          </div>
         </div>
-
-        <div className="form-group mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">University Page Content</label>
-          <QuillEditor 
-            value={university?.page_content || ''} 
-            onChange={handlePageContentChange} 
-            className="bg-white"
-          />
-        </div>
-
-        {error && <div className="text-red-500 mb-4 text-sm">{error}</div>}
-
-        <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300">
-            {saving ? <FiLoader className="animate-spin mr-2" /> : <FiSave className="mr-2" />}
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

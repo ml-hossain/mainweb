@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FiUser, FiMail, FiPhone, FiCalendar, FiMessageSquare, FiEye, FiCheck, FiX, FiDownload, FiFilter, FiSearch } from 'react-icons/fi'
+import { FiUser, FiMail, FiPhone, FiCalendar, FiMessageSquare, FiEye, FiCheck, FiX, FiDownload, FiFilter, FiSearch, FiTrash2, FiAlertTriangle } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
 
@@ -12,6 +12,8 @@ const Consultations = ({ onLogout }) => {
   const [selectedItem, setSelectedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -54,11 +56,62 @@ const Consultations = ({ onLogout }) => {
 
       if (error) throw error
 
-      // Refresh data
-      fetchData()
+      // Update local state instead of refetching
+      if (table === 'consultations') {
+        setConsultations(prev => prev.map(item => 
+          item.id === id ? { ...item, status } : item
+        ))
+      } else {
+        setContactRequests(prev => prev.map(item => 
+          item.id === id ? { ...item, status } : item
+        ))
+      }
     } catch (error) {
       console.error('Error updating status:', error)
+      alert('Failed to update status')
     }
+  }
+
+  const deleteItem = async (id, table) => {
+    try {
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      // Update local state instead of refetching
+      if (table === 'consultations') {
+        setConsultations(prev => prev.filter(item => item.id !== id))
+      } else {
+        setContactRequests(prev => prev.filter(item => item.id !== id))
+      }
+      
+      setShowDeleteModal(false)
+      setItemToDelete(null)
+    } catch (error) {
+      console.error('Error deleting item:', error)
+      alert('Failed to delete item')
+    }
+  }
+
+  const handleDeleteClick = (item) => {
+    setItemToDelete(item)
+    setShowDeleteModal(true)
+  }
+
+  const handleSendEmail = (item) => {
+    const subject = activeTab === 'consultations' ? 
+      `Re: Your consultation request - ${item.consultation_type}` : 
+      'Re: Your contact request'
+    
+    const body = activeTab === 'consultations' ? 
+      `Dear ${item.full_name || item.name},\n\nThank you for your consultation request regarding ${item.consultation_type}.\n\nWe have received your request and will get back to you soon.\n\nBest regards,\nMA Education Team` :
+      `Dear ${item.name},\n\nThank you for contacting us.\n\nWe have received your message and will get back to you soon.\n\nBest regards,\nMA Education Team`
+
+    const mailtoLink = `mailto:${item.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailtoLink, '_self')
   }
 
   const formatDate = (dateString) => {
@@ -94,6 +147,11 @@ const Consultations = ({ onLogout }) => {
 
   const ItemModal = ({ item, show, onClose, type }) => {
     if (!show || !item) return null
+
+    const handleStatusUpdate = async (id, status, table) => {
+      await updateStatus(id, status, table)
+      onClose() // Close modal after update to see changes
+    }
 
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
@@ -177,26 +235,29 @@ const Consultations = ({ onLogout }) => {
             {/* Status and Actions */}
             <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
               <button
-                onClick={() => updateStatus(item.id, 'in_progress', type === 'consultation' ? 'consultations' : 'contact_requests')}
+                onClick={() => handleStatusUpdate(item.id, 'in_progress', type === 'consultation' ? 'consultations' : 'contact_requests')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
               >
                 Mark In Progress
               </button>
               <button
-                onClick={() => updateStatus(item.id, 'completed', type === 'consultation' ? 'consultations' : 'contact_requests')}
+                onClick={() => handleStatusUpdate(item.id, 'completed', type === 'consultation' ? 'consultations' : 'contact_requests')}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
               >
                 Mark Complete
               </button>
               {type === 'consultation' && (
                 <button
-                  onClick={() => updateStatus(item.id, 'scheduled', 'consultations')}
+                  onClick={() => handleStatusUpdate(item.id, 'scheduled', 'consultations')}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
                 >
                   Schedule
                 </button>
               )}
-              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm">
+              <button 
+                onClick={() => handleSendEmail(item)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
+              >
                 Send Email
               </button>
             </div>
@@ -220,16 +281,39 @@ const Consultations = ({ onLogout }) => {
     <AdminLayout onLogout={onLogout}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Contact Management</h1>
-            <p className="text-gray-600 mt-1">Manage consultation requests and contact form submissions</p>
-          </div>
-          <div className="flex space-x-3">
-            <button className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <FiDownload className="w-4 h-4 mr-2" />
-              Export
-            </button>
+        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-8 text-white shadow-2xl">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
+            <div className="flex-1 mb-6 lg:mb-0">
+              <h1 className="text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                Contact Management
+              </h1>
+              <p className="text-blue-100 text-lg font-medium">
+                Streamline your consultation requests and contact submissions
+              </p>
+              <div className="flex items-center mt-4 space-x-6 text-sm">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                  <span>Live Updates</span>
+                </div>
+                <div className="flex items-center">
+                  <FiMessageSquare className="w-4 h-4 mr-2" />
+                  <span>{currentData.length} Total Items</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+              <button 
+                onClick={fetchData}
+                className="flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
+              >
+                <FiDownload className="w-5 h-5 mr-2" />
+                <span className="font-semibold">Refresh</span>
+              </button>
+              <button className="flex items-center justify-center px-6 py-3 bg-white text-purple-600 rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg">
+                <FiDownload className="w-5 h-5 mr-2" />
+                <span>Export Data</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -260,21 +344,58 @@ const Consultations = ({ onLogout }) => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: 'Total Requests', value: currentData.length, color: 'blue' },
-            { label: 'Pending', value: currentData.filter(c => c.status === 'pending').length, color: 'yellow' },
-            { label: 'In Progress', value: currentData.filter(c => c.status === 'in_progress').length, color: 'purple' },
-            { label: 'Completed', value: currentData.filter(c => c.status === 'completed').length, color: 'green' }
+            { 
+              label: 'Total Requests', 
+              value: currentData.length, 
+              gradient: 'from-blue-600 to-cyan-500',
+              bgGradient: 'from-blue-50/80 to-cyan-50/80',
+              icon: FiMessageSquare,
+              shadowColor: 'shadow-blue-200/50'
+            },
+            { 
+              label: 'Pending', 
+              value: currentData.filter(c => c.status === 'pending').length, 
+              gradient: 'from-amber-500 to-orange-500',
+              bgGradient: 'from-amber-50/80 to-orange-50/80',
+              icon: FiCalendar,
+              shadowColor: 'shadow-amber-200/50'
+            },
+            { 
+              label: 'In Progress', 
+              value: currentData.filter(c => c.status === 'in_progress').length, 
+              gradient: 'from-purple-600 to-pink-500',
+              bgGradient: 'from-purple-50/80 to-pink-50/80',
+              icon: FiUser,
+              shadowColor: 'shadow-purple-200/50'
+            },
+            { 
+              label: 'Completed', 
+              value: currentData.filter(c => c.status === 'completed').length, 
+              gradient: 'from-emerald-500 to-teal-500',
+              bgGradient: 'from-emerald-50/80 to-teal-50/80',
+              icon: FiCheck,
+              shadowColor: 'shadow-emerald-200/50'
+            }
           ].map((stat, index) => (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+            <div key={index} className={`relative overflow-hidden bg-gradient-to-br ${stat.bgGradient} backdrop-blur-md border border-white/30 rounded-3xl p-6 transition-all duration-500 hover:shadow-2xl hover:scale-105 hover:-translate-y-1 ${stat.shadowColor} group`}>
+              {/* Background decoration */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 opacity-10">
+                <div className={`w-full h-full bg-gradient-to-br ${stat.gradient} rounded-full blur-2xl`}></div>
+              </div>
+              
+              <div className="relative flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">{stat.label}</p>
+                  <p className="text-4xl font-bold text-gray-800 group-hover:text-gray-900 transition-colors duration-300">
+                    {stat.value}
+                  </p>
                 </div>
-                <div className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}>
-                  <FiMessageSquare className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className={`relative w-16 h-16 bg-gradient-to-br ${stat.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300`}>
+                  <stat.icon className="w-8 h-8 text-white" />
+                  {/* Glow effect */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300`}></div>
                 </div>
               </div>
             </div>
@@ -282,102 +403,128 @@ const Consultations = ({ onLogout }) => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 backdrop-blur-sm">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by name or email..."
+                  placeholder="Search by name, email, or type..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-12 pr-4 py-3 w-full border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                 />
               </div>
             </div>
-            <div className="sm:w-48">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                {activeTab === 'consultations' && <option value="scheduled">Scheduled</option>}
-              </select>
+            <div className="lg:w-56">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+              <div className="relative">
+                <FiFilter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">🟡 Pending</option>
+                  <option value="in_progress">🔵 In Progress</option>
+                  <option value="completed">🟢 Completed</option>
+                  {activeTab === 'consultations' && <option value="scheduled">🟣 Scheduled</option>}
+                </select>
+              </div>
             </div>
+          </div>
+          
+          {/* Results count */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{filteredData.length}</span> of <span className="font-semibold text-gray-900">{currentData.length}</span> {activeTab === 'consultations' ? 'consultations' : 'contact requests'}
+            </p>
           </div>
         </div>
 
-        {/* Data Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Data Table - Desktop */}
+        <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Contact
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {activeTab === 'consultations' ? 'Type' : 'Subject'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-50">
                 {filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={item.id} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200">
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <FiUser className="w-5 h-5 text-gray-600" />
+                        <div className="flex-shrink-0 h-12 w-12">
+                          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                            <FiUser className="w-6 h-6 text-blue-600" />
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{item.full_name || item.name}</div>
+                          <div className="text-sm font-semibold text-gray-900">{item.full_name || item.name}</div>
                           <div className="text-sm text-gray-500">{item.email}</div>
-                      </div>
+                          {item.phone && (
+                            <div className="text-xs text-gray-400">{item.phone}</div>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {activeTab === 'consultations' ? item.consultation_type : (item.message?.split('\n')[0] || 'General Inquiry')}
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {activeTab === 'consultations' ? item.consultation_type : (item.message?.split('\n')[0] || 'General Inquiry')}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                        {item.status}
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
+                        {item.status.replace('_', ' ').toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       {formatDate(item.created_at)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-3">
                         <button
                           onClick={() => {
                             setSelectedItem(item)
                             setShowModal(true)
                           }}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                          title="View Details"
                         >
                           <FiEye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => updateStatus(item.id, 'completed', activeTab === 'consultations' ? 'consultations' : 'contact_requests')}
-                          className="text-green-600 hover:text-green-900"
+                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
+                          title="Mark Complete"
                         >
                           <FiCheck className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(item)}
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                          title="Delete"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -386,6 +533,68 @@ const Consultations = ({ onLogout }) => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Card Layout - Mobile & Tablet */}
+        <div className="lg:hidden space-y-4">
+          {filteredData.map((item) => (
+            <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center">
+                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mr-4">
+                    <FiUser className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{item.full_name || item.name}</h3>
+                    <p className="text-sm text-gray-500">{item.email}</p>
+                    {item.phone && <p className="text-xs text-gray-400">{item.phone}</p>}
+                  </div>
+                </div>
+                <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
+                  {item.status.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  {activeTab === 'consultations' ? 'Consultation Type:' : 'Subject:'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {activeTab === 'consultations' ? item.consultation_type : (item.message?.split('\n')[0] || 'General Inquiry')}
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">{formatDate(item.created_at)}</p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setShowModal(true)
+                    }}
+                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                    title="View Details"
+                  >
+                    <FiEye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => updateStatus(item.id, 'completed', activeTab === 'consultations' ? 'consultations' : 'contact_requests')}
+                    className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
+                    title="Mark Complete"
+                  >
+                    <FiCheck className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(item)}
+                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                    title="Delete"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {filteredData.length === 0 && (
@@ -406,6 +615,42 @@ const Consultations = ({ onLogout }) => {
         }}
         type={activeTab === 'consultations' ? 'consultation' : 'contact'}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && itemToDelete && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                <FiAlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Confirm Delete</h3>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this {activeTab === 'consultations' ? 'consultation request' : 'contact message'} from <strong>{itemToDelete.full_name || itemToDelete.name}</strong>? This action cannot be undone.
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setItemToDelete(null)
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteItem(itemToDelete.id, activeTab === 'consultations' ? 'consultations' : 'contact_requests')}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   )
 }

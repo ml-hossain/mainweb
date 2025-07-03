@@ -42,8 +42,7 @@ const AdminLayout = ({ children, onLogout }) => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: FiHome },
     { name: 'Universities', href: '/admin/universities', icon: FiGlobe },
-    { name: 'Consultations', href: '/admin/consultations', icon: FiMessageSquare },
-    { name: 'Contacts', href: '/admin/contacts', icon: FiUsers },
+    { name: 'Contact Management', href: '/admin/consultations', icon: FiMessageSquare },
     { name: 'Analytics', href: '/admin/analytics', icon: FiBarChart2 },
     { name: 'Settings', href: '/admin/settings', icon: FiSettings },
   ]

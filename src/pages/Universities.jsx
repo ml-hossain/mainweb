@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import UniversityCard from '../components/UniversityCard'
+import UniversityListCard from '../components/UniversityListCard'
 import { FiLoader, FiGlobe, FiSearch, FiFilter } from 'react-icons/fi'
 
 const Universities = () => {
@@ -218,7 +218,7 @@ const Universities = () => {
         {filteredUniversities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredUniversities.map(university => (
-              <UniversityCard key={university.id} university={university} />
+              <UniversityListCard key={university.id} university={university} />
             ))}
           </div>
         ) : (

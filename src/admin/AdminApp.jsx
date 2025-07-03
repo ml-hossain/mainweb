@@ -9,7 +9,6 @@ import AdminLogin from './components/AdminLogin'
 import Dashboard from './pages/Dashboard'
 import Universities from './pages/Universities'
 import Consultations from './pages/Consultations'
-import Contacts from './pages/Contacts'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 import UniversityEditor from './pages/UniversityEditor'
@@ -107,7 +106,6 @@ const AdminApp = () => {
       <Route path="universities/new" element={<UniversityEditor onLogout={handleLogout} />} />
       <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
-      <Route path="contacts" element={<Contacts onLogout={handleLogout} />} />
       <Route path="analytics" element={<Analytics onLogout={handleLogout} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

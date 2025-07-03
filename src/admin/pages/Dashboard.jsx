@@ -5,13 +5,13 @@ import {
   FiMessageSquare,
   FiTrendingUp,
   FiCalendar,
-  FiDollarSign,
   FiAward,
   FiArrowUp,
   FiArrowDown,
   FiSettings,
   FiMail,
-  FiAlertCircle
+  FiAlertCircle,
+  FiBookOpen
 } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
@@ -21,9 +21,9 @@ const Dashboard = ({ onLogout }) => {
     totalContacts: 0,
     activeConsultations: 0,
     universitiesPartners: 0,
-    monthlyRevenue: 0,
     successRate: 0,
-    pendingApplications: 0
+    pendingApplications: 0,
+    completedConsultations: 0
   })
 
   const [recentActivities, setRecentActivities] = useState([])
@@ -78,17 +78,13 @@ const Dashboard = ({ onLogout }) => {
         ? Math.round((completedConsultations / consultations.length) * 100)
         : 0
 
-      // Estimate monthly revenue based on consultations (assuming average fee)
-      const avgConsultationFee = 500 // MYR
-      const monthlyRevenue = consultations.length * avgConsultationFee
-
         setStats({
         totalContacts,
         activeConsultations: pendingConsultations + inProgressConsultations,
         universitiesPartners: activeUniversities,
-        monthlyRevenue,
         successRate,
-          pendingApplications: pendingConsultations
+          pendingApplications: pendingConsultations,
+          completedConsultations
         })
 
       // Generate recent activities from real data
@@ -305,14 +301,13 @@ const Dashboard = ({ onLogout }) => {
             isLoading={isLoading}
           />
           <StatCard
-            title="Estimated Revenue"
-            value={stats.monthlyRevenue > 0 ? stats.monthlyRevenue.toLocaleString() : 0}
-            change={stats.monthlyRevenue > 0 ? "Based on consultations" : null}
-            icon={FiDollarSign}
+            title="Completed Consultations"
+            value={stats.completedConsultations}
+            change={stats.completedConsultations > 0 ? "Successfully finished" : null}
+            icon={FiBookOpen}
             color="bg-emerald-500"
             trend="up"
             isLoading={isLoading}
-            suffix=" MYR"
           />
           <StatCard
             title="Success Rate"
