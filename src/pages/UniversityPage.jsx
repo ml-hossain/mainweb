@@ -139,13 +139,149 @@ const UniversityPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Main Content */}
           <div className="lg:col-span-8">
+            {/* About Section */}
             <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">About {university.name}</h2>
               <div
                 className="prose lg:prose-xl max-w-none text-gray-800"
-                dangerouslySetInnerHTML={{ __html: university.page_content || university.content || '<p>No additional details available at the moment. Please check back later.</p>' }}
+                dangerouslySetInnerHTML={{ __html: university.page_content || university.description || '<p>No additional details available at the moment. Please check back later.</p>' }}
               />
             </div>
+
+            {/* Programs & Courses Section */}
+            {university.popular_courses && university.popular_courses.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Popular Programs</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {university.popular_courses.map((course, index) => (
+                    <div key={index} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                      <h3 className="font-semibold text-blue-900 mb-2">{course}</h3>
+                      <p className="text-sm text-blue-700">
+                        Duration: {university.course_duration || 'Varies'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Academic Information */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Academic Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Admission Requirements */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Admission Requirements</h3>
+                  <div className="space-y-3">
+                    {university.language_requirement && (
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-gray-700">Language Requirement:</span>
+                          <p className="text-gray-600 text-sm">{university.language_requirement}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <span className="font-medium text-gray-700">Academic Documents:</span>
+                        <p className="text-gray-600 text-sm">Transcripts, certificates, and relevant qualifications</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <span className="font-medium text-gray-700">Application Documents:</span>
+                        <p className="text-gray-600 text-sm">Statement of purpose, recommendation letters</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Information</h3>
+                  <div className="space-y-3">
+                    {university.initial_payment && (
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-gray-700">Initial Payment:</span>
+                          <p className="text-gray-600 text-sm">{university.initial_payment}</p>
+                        </div>
+                      </div>
+                    )}
+                    {university.content?.tuition_fee_range && (
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <span className="font-medium text-gray-700">Tuition Fee Range:</span>
+                          <p className="text-gray-600 text-sm">{university.content.tuition_fee_range}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <span className="font-medium text-gray-700">Living Expenses:</span>
+                        <p className="text-gray-600 text-sm">Accommodation and daily expenses vary by location</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Subjects Offered */}
+            {university.subjects && university.subjects.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Subjects Offered</h2>
+                <div className="flex flex-wrap gap-2">
+                  {university.subjects.map((subject, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Information */}
+            {(university.content && Object.keys(university.content).length > 0) && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Additional Information</h2>
+                <div className="prose lg:prose-lg max-w-none text-gray-700">
+                  {university.content.campus_life && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Campus Life</h3>
+                      <p className="text-gray-700">{university.content.campus_life}</p>
+                    </div>
+                  )}
+                  {university.content.research_opportunities && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Research Opportunities</h3>
+                      <p className="text-gray-700">{university.content.research_opportunities}</p>
+                    </div>
+                  )}
+                  {university.content.career_services && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Career Services</h3>
+                      <p className="text-gray-700">{university.content.career_services}</p>
+                    </div>
+                  )}
+                  {university.content.international_students && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">International Students</h3>
+                      <p className="text-gray-700">{university.content.international_students}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

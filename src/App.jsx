@@ -20,6 +20,7 @@ import InterviewPreparation from './pages/services/InterviewPreparation'
 import DocumentationSupport from './pages/services/DocumentationSupport'
 import FloatingContactButton from './components/FloatingContactButton'
 import AdminApp from './admin/AdminApp'
+import ContentDemo from './pages/ContentDemo'
 
 // Layout component for public pages
 const PublicLayout = ({ children }) => {
@@ -57,6 +58,9 @@ function App() {
         <Route path="/services/pre-departure-orientation" element={<PublicLayout><PreDepartureOrientation /></PublicLayout>} />
         <Route path="/services/interview-preparation" element={<PublicLayout><InterviewPreparation /></PublicLayout>} />
         <Route path="/services/documentation-support" element={<PublicLayout><DocumentationSupport /></PublicLayout>} />
+        
+        {/* Content Demo */}
+        <Route path="/content-demo" element={<PublicLayout><ContentDemo /></PublicLayout>} />
 
         {/* Admin Panel */}
         <Route path="/admin/*" element={<AdminApp />} />

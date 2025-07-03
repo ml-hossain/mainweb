@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBookOpen } from 'react-icons/fi'
+import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBookOpen, FiStar, FiClock, FiVideo, FiCheck, FiArrowRight } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 
 const Consultation = () => {
@@ -85,82 +85,127 @@ const Consultation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Free Consultation
+    <div className="min-h-screen bg-black py-16">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-20 mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-8">
+            <FiCalendar className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            Free <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Consultation</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
             Book your free consultation with our expert counselors and take the first step towards your international education journey.
           </p>
+          <div className="flex justify-center space-x-8 text-gray-400">
+            <div className="flex items-center space-x-2">
+              <FiClock className="w-5 h-5" />
+              <span>45-60 min</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <FiVideo className="w-5 h-5" />
+              <span>Online/In-person</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <FiStar className="w-5 h-5" />
+              <span>100% Free</span>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Consultation Information */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">What to Expect</h2>
+          <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <h2 className="text-3xl font-bold text-white mb-8">What to Expect</h2>
             
             <div className="space-y-6 mb-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="flex items-start space-x-4 p-4 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-colors">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <FiUser className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Personalized Assessment</h3>
-                  <p className="text-gray-600">Our counselors will assess your academic background, career goals, and preferences to recommend the best options.</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">Personalized Assessment</h3>
+                  <p className="text-gray-300">Our counselors will assess your academic background, career goals, and preferences to recommend the best options.</p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="flex items-start space-x-4 p-4 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-colors">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <FiBookOpen className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">University Recommendations</h3>
-                  <p className="text-gray-600">Get tailored university and program suggestions based on your profile and interests.</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">University Recommendations</h3>
+                  <p className="text-gray-300">Get tailored university and program suggestions based on your profile and interests.</p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="flex items-start space-x-4 p-4 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-colors">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <FiMapPin className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Country & Program Guidance</h3>
-                  <p className="text-gray-600">Learn about different countries, their education systems, and program requirements.</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">Country & Program Guidance</h3>
+                  <p className="text-gray-300">Learn about different countries, their education systems, and program requirements.</p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="flex items-start space-x-4 p-4 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-colors">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <FiCalendar className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Timeline Planning</h3>
-                  <p className="text-gray-600">Get a detailed timeline for your application process, including important deadlines.</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">Timeline Planning</h3>
+                  <p className="text-gray-300">Get a detailed timeline for your application process, including important deadlines.</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-green-900 mb-4">Consultation Details</h3>
-              <ul className="space-y-2 text-green-700">
-                <li>• Duration: 45-60 minutes</li>
-                <li>• Mode: In-person or Online</li>
-                <li>• Cost: Completely Free</li>
-                <li>• Follow-up: Detailed report provided</li>
-                <li>• Expert: Experienced counselor assigned</li>
+            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <FiStar className="w-5 h-5 mr-2 text-yellow-400" />
+                Consultation Highlights
+              </h3>
+              <ul className="space-y-3 text-gray-300">
+                <li className="flex items-center">
+                  <FiCheck className="w-4 h-4 mr-3 text-green-400" />
+                  Duration: 45-60 minutes
+                </li>
+                <li className="flex items-center">
+                  <FiCheck className="w-4 h-4 mr-3 text-green-400" />
+                  Mode: In-person or Online
+                </li>
+                <li className="flex items-center">
+                  <FiCheck className="w-4 h-4 mr-3 text-green-400" />
+                  Cost: Completely Free
+                </li>
+                <li className="flex items-center">
+                  <FiCheck className="w-4 h-4 mr-3 text-green-400" />
+                  Follow-up: Detailed report provided
+                </li>
+                <li className="flex items-center">
+                  <FiCheck className="w-4 h-4 mr-3 text-green-400" />
+                  Expert: Experienced counselor assigned
+                </li>
               </ul>
             </div>
           </div>
 
           {/* Consultation Booking Form */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Book Your Free Consultation</h2>
+          <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl mb-4">
+                <FiCalendar className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Book Your Free Consultation</h2>
+              <p className="text-gray-400">Get expert guidance tailored to your goals</p>
+            </div>
             
             {submitMessage && (
-              <div className={`mb-6 p-4 rounded-lg ${submitMessage.includes('successfully') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+              <div className={`mb-6 p-4 rounded-xl ${submitMessage.includes('successfully') ? 'bg-green-600/20 text-green-400 border border-green-600/30' : 'bg-red-600/20 text-red-400 border border-red-600/30'}`}>
                 {submitMessage}
               </div>
             )}
@@ -168,7 +213,7 @@ const Consultation = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="firstName" className="block text-sm font-medium text-white mb-2">
                     First Name *
                   </label>
                   <input
@@ -178,12 +223,12 @@ const Consultation = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     placeholder="Your first name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="lastName" className="block text-sm font-medium text-white mb-2">
                     Last Name *
                   </label>
                   <input
@@ -193,14 +238,14 @@ const Consultation = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     placeholder="Your last name"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
                   Email Address *
                 </label>
                 <input
@@ -210,13 +255,13 @@ const Consultation = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="your.email@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-white mb-2">
                   Phone Number *
                 </label>
                 <input
@@ -226,13 +271,13 @@ const Consultation = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
 
               <div>
-                <label htmlFor="education" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="education" className="block text-sm font-medium text-white mb-2">
                   Current Education Level *
                 </label>
                 <select
@@ -241,7 +286,7 @@ const Consultation = () => {
                   value={formData.education}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="">Select your education level</option>
                   <option value="high-school">High School</option>
@@ -253,7 +298,7 @@ const Consultation = () => {
               </div>
 
               <div>
-                <label htmlFor="interestedCountry" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="interestedCountry" className="block text-sm font-medium text-white mb-2">
                   Interested Country/Region
                 </label>
                 <select
@@ -261,13 +306,14 @@ const Consultation = () => {
                   name="interestedCountry"
                   value={formData.interestedCountry}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="">Select preferred destination</option>
                   <option value="usa">United States</option>
                   <option value="canada">Canada</option>
                   <option value="uk">United Kingdom</option>
                   <option value="australia">Australia</option>
+                  <option value="malaysia">Malaysia</option>
                   <option value="germany">Germany</option>
                   <option value="france">France</option>
                   <option value="netherlands">Netherlands</option>
@@ -276,7 +322,7 @@ const Consultation = () => {
               </div>
 
               <div>
-                <label htmlFor="preferredMode" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="preferredMode" className="block text-sm font-medium text-white mb-2">
                   Preferred Consultation Mode *
                 </label>
                 <select
@@ -285,7 +331,7 @@ const Consultation = () => {
                   value={formData.preferredMode}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="">Select consultation mode</option>
                   <option value="online">Online (Video Call)</option>
@@ -295,7 +341,7 @@ const Consultation = () => {
               </div>
 
               <div>
-                <label htmlFor="preferredTime" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="preferredTime" className="block text-sm font-medium text-white mb-2">
                   Preferred Time Slot
                 </label>
                 <select
@@ -303,7 +349,7 @@ const Consultation = () => {
                   name="preferredTime"
                   value={formData.preferredTime}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="">Select preferred time</option>
                   <option value="morning">Morning (9 AM - 12 PM)</option>
@@ -313,7 +359,7 @@ const Consultation = () => {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
                   Additional Information
                 </label>
                 <textarea
@@ -322,7 +368,7 @@ const Consultation = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="Tell us about your goals, preferred programs, or any specific questions you have..."
                 ></textarea>
               </div>
@@ -330,14 +376,18 @@ const Consultation = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
               >
-                {isSubmitting ? 'Submitting...' : 'Book Free Consultation'}
+                <span>{isSubmitting ? 'Submitting...' : 'Book Free Consultation'}</span>
+                {!isSubmitting && <FiArrowRight className="w-5 h-5" />}
               </button>
 
-              <p className="text-sm text-gray-500 text-center">
-                * Required fields. We'll contact you within 24 hours to confirm your consultation.
-              </p>
+              <div className="text-center p-4 bg-gray-700/50 rounded-xl">
+                <p className="text-sm text-gray-300">
+                  <FiCheck className="w-4 h-4 inline mr-2 text-green-400" />
+                  * Required fields. We'll contact you within 24 hours to confirm your consultation.
+                </p>
+              </div>
             </form>
           </div>
         </div>

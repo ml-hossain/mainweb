@@ -34,7 +34,7 @@ const HomeUniversityCard = ({ university }) => {
   const safeTotalCost = tuition_fee_range || initial_payment || 'Contact for details'
 
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all duration-300 group transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all duration-300 group transform hover:-translate-y-1 h-full flex flex-col">
       {/* Image Section with Ranking Badge */}
       <div className="relative h-52 bg-gray-100">
         <img
@@ -54,7 +54,7 @@ const HomeUniversityCard = ({ university }) => {
       </div>
 
       {/* Content Section */}
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 flex flex-col flex-grow">
         {/* University Name */}
         <h3 className="font-black text-gray-900 text-xl leading-tight tracking-tight mb-3">
           {safeUniversity}
@@ -131,6 +131,9 @@ const HomeUniversityCard = ({ university }) => {
             </div>
           </div>
         </div>
+
+        {/* Flexible Spacer */}
+        <div className="flex-grow"></div>
 
         {/* Button */}
         <Link

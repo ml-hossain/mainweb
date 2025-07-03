@@ -37,7 +37,7 @@ const UniversityCard = ({ university }) => {
   const hasMoreSubjects = displayPrograms.length > 2
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group h-full flex flex-col">
       {/* University Image with Ranking Badge */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -57,7 +57,7 @@ const UniversityCard = ({ university }) => {
       </div>
 
       {/* Card Content */}
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* University Name */}
         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
           {safeUniversity}
@@ -114,6 +114,9 @@ const UniversityCard = ({ university }) => {
             </div>
           )}
         </div>
+
+        {/* Flexible Spacer */}
+        <div className="flex-grow"></div>
 
         {/* Learn More Button */}
         <Link

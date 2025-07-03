@@ -1,0 +1,23 @@
+[
+  {
+    "product_id": 1,
+    "product_name": "Laptop",
+    "price": 999.99,
+    "category": "Electronics",
+    "in_stock": true
+  },
+  {
+    "product_id": 2,
+    "product_name": "Coffee Mug",
+    "price": 12.50,
+    "category": "Home & Kitchen",
+    "in_stock": false
+  },
+  {
+    "product_id": 3,
+    "product_name": "Running Shoes",
+    "price": 89.99,
+    "category": "Sports",
+    "in_stock": true
+  }
+]

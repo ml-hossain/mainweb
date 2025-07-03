@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { initializeAdmin, checkAdminAccess } from './utils/setupAdmin'
 
 // Admin Components
 import AdminLogin from './components/AdminLogin'
+import AdminSetup from './components/AdminSetup'
 
 // Admin Pages
 import Dashboard from './pages/Dashboard'
@@ -12,6 +14,7 @@ import Consultations from './pages/Consultations'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 import UniversityEditor from './pages/UniversityEditor'
+import SEOManager from './pages/SEOManager'
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -21,11 +24,10 @@ const AdminApp = () => {
   useEffect(() => {
     let mounted = true
 
-    // Check if user is admin
-    const checkAdminStatus = (user) => {
-      if (!user) return false
-      const adminEmails = ['play.rjfahad@gmail.com', 'admin@maeducation.com']
-      return adminEmails.includes(user.email)
+    // Initialize admin setup on first load
+    const initialize = async () => {
+      console.log('Initializing admin system...')
+      await initializeAdmin()
     }
 
     // Handle auth state changes
@@ -35,13 +37,15 @@ const AdminApp = () => {
       if (!mounted) return
 
       if (session && session.user) {
-        // User is signed in
-        if (checkAdminStatus(session.user)) {
-          console.log('User is admin - authenticated')
+        // User is signed in - check admin access in database
+        const adminCheck = await checkAdminAccess()
+        
+        if (adminCheck.success && adminCheck.isAdmin) {
+          console.log('User has admin access - authenticated')
           setIsAuthenticated(true)
           setUser(session.user)
         } else {
-          console.log('User is not admin - signing out')
+          console.log('User does not have admin access - signing out')
           await supabase.auth.signOut()
           setIsAuthenticated(false)
           setUser(null)
@@ -55,6 +59,9 @@ const AdminApp = () => {
 
       setIsLoading(false)
     }
+
+    // Initialize admin setup
+    initialize()
 
     // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange)
@@ -107,6 +114,7 @@ const AdminApp = () => {
       <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
       <Route path="analytics" element={<Analytics onLogout={handleLogout} />} />
+      <Route path="seo" element={<SEOManager onLogout={handleLogout} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FiMail, FiLock, FiEye, FiEyeOff, FiShield } from 'react-icons/fi'
 import { supabase } from '../../lib/supabase'
+import { checkAdminAccess } from '../utils/setupAdmin'
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -31,11 +32,11 @@ const AdminLogin = () => {
 
       console.log('Sign in successful:', data.user.email)
 
-      // Check if user is admin
-      const adminEmails = ['play.rjfahad@gmail.com', 'admin@maeducation.com']
-
-      if (!adminEmails.includes(data.user.email)) {
-        console.log('User email not in admin list, signing out')
+      // Check if user is admin in database
+      const adminCheck = await checkAdminAccess()
+      
+      if (!adminCheck.success || !adminCheck.isAdmin) {
+        console.log('User does not have admin access, signing out')
         await supabase.auth.signOut()
         throw new Error('Access denied. Admin privileges required.')
       }

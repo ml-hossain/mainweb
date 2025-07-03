@@ -29,7 +29,7 @@ const UniversityListCard = ({ university }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 h-full flex flex-col">
       {/* University Image */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -57,7 +57,7 @@ const UniversityListCard = ({ university }) => {
       </div>
 
       {/* Card Content */}
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* University Name */}
         <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
           {safeUniversity}
@@ -67,6 +67,9 @@ const UniversityListCard = ({ university }) => {
         <p className="text-gray-600 text-sm mb-6 leading-relaxed">
           {truncateDescription(safeDescription)}
         </p>
+
+        {/* Flexible Spacer */}
+        <div className="flex-grow"></div>
 
         {/* See More Button */}
         <Link
