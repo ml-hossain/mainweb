@@ -38,6 +38,30 @@
   }
 }
 
+/* React Quill Styles Override */
+.ql-editor {
+  min-height: 200px;
+}
+
+.ql-toolbar {
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.ql-container {
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

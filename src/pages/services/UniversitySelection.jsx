@@ -388,8 +388,8 @@ const UniversitySelection = () => {
       </div>
 
       {/* CTA Section - Full Width */}
-      <div className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700">
+        <div className="max-w-7xl mx-auto text-center">
           <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <FiShield className="w-10 h-10 text-white" />
           </div>

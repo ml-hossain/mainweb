@@ -143,7 +143,7 @@ const UniversityPage = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">About {university.name}</h2>
               <div
                 className="prose lg:prose-xl max-w-none text-gray-800"
-                dangerouslySetInnerHTML={{ __html: university.content || '<p>No additional details available at the moment. Please check back later.</p>' }}
+                dangerouslySetInnerHTML={{ __html: university.page_content || university.content || '<p>No additional details available at the moment. Please check back later.</p>' }}
               />
             </div>
           </div>
@@ -158,10 +158,10 @@ const UniversityPage = () => {
                   <FiMapPin className="w-4 h-4 text-blue-500" />
                   <span>{university.location}</span>
                 </div>
-                {university.content?.ranking && (
+                {(university.content?.ranking || university.ranking_value) && (
                   <div className="flex items-center gap-2 text-gray-700">
                     <FiStar className="w-4 h-4 text-yellow-500" />
-                    <span>Ranking: <span className="font-semibold">#{university.content.ranking}</span></span>
+                    <span>Ranking: <span className="font-semibold">#{university.content?.ranking || university.ranking_value}</span></span>
                   </div>
                 )}
                 {university.website_url && (

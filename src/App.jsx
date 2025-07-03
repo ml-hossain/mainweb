@@ -8,6 +8,7 @@ import Services from './pages/Services'
 import SuccessStories from './pages/SuccessStories'
 import Consultation from './pages/Consultation'
 import Contact from './pages/Contact'
+import Universities from './pages/Universities'
 import UniversityPage from './pages/UniversityPage'
 import UniversitySelection from './pages/services/UniversitySelection'
 import ApplicationAssistance from './pages/services/ApplicationAssistance'
@@ -36,7 +37,7 @@ const PublicLayout = ({ children }) => {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
@@ -44,6 +45,7 @@ function App() {
         <Route path="/success-stories" element={<PublicLayout><SuccessStories /></PublicLayout>} />
         <Route path="/consultation" element={<PublicLayout><Consultation /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+        <Route path="/universities" element={<PublicLayout><Universities /></PublicLayout>} />
         <Route path="/universities/:slug" element={<PublicLayout><UniversityPage /></PublicLayout>} />
 
         {/* Services Sub-routes */}

@@ -73,11 +73,16 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-1">
             <Link 
               to="/" 
-              className={`relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 group ${location.pathname === '/' ? 'text-amber-400' : ''}`}
+              className={`relative group transition-all duration-300 ${location.pathname === '/' ? 'text-white' : 'text-gray-300'}`}
             >
-              Home
-              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
-              <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+              <div className={`absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 ${location.pathname === '/' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100'}`}></div>
+              <div className="relative z-10 flex items-center space-x-2 px-4 py-2.5 font-semibold text-sm uppercase tracking-wide">
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+                <span>Home</span>
+              </div>
+              <div className={`absolute inset-0 bg-blue-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
             
             {/* Services Dropdown */}
@@ -121,30 +126,68 @@ const Navbar = () => {
             </div>
 
             <Link 
-              to="/success-stories" 
-              className={`relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 group ${location.pathname === '/success-stories' ? 'text-amber-400' : ''}`}
+              to="/universities" 
+              className={`relative group transition-all duration-300 ${location.pathname === '/universities' || location.pathname.startsWith('/universities/') ? 'text-white' : 'text-gray-300'}`}
             >
-              Success Stories
-              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
-              <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+              {/* Background Pill */}
+              <div className={`absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-300 ${location.pathname === '/universities' || location.pathname.startsWith('/universities/') ? 'opacity-100 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100'}`}></div>
+              
+              {/* Main Content */}
+              <div className="relative z-10 flex items-center space-x-2 px-4 py-2.5 font-semibold text-sm uppercase tracking-wide">
+                {/* University Icon */}
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.84L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.84l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                </svg>
+                
+                {/* Text */}
+                <span>Universities</span>
+              </div>
+              
+              {/* Subtle Shadow */}
+              <div className={`absolute inset-0 bg-emerald-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/universities' || location.pathname.startsWith('/universities/') ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
+            </Link>
+            
+            <Link 
+              to="/success-stories" 
+              className={`relative group transition-all duration-300 ${location.pathname === '/success-stories' ? 'text-white' : 'text-gray-300'}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all duration-300 ${location.pathname === '/success-stories' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100'}`}></div>
+              <div className="relative z-10 flex items-center space-x-2 px-4 py-2.5 font-semibold text-sm uppercase tracking-wide">
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span>Success Stories</span>
+              </div>
+              <div className={`absolute inset-0 bg-purple-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/success-stories' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
             
             <Link 
               to="/about" 
-              className={`relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 group ${location.pathname === '/about' ? 'text-amber-400' : ''}`}
+              className={`relative group transition-all duration-300 ${location.pathname === '/about' ? 'text-white' : 'text-gray-300'}`}
             >
-              About
-              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
-              <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+              <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300 ${location.pathname === '/about' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100'}`}></div>
+              <div className="relative z-10 flex items-center space-x-2 px-4 py-2.5 font-semibold text-sm uppercase tracking-wide">
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                </svg>
+                <span>About</span>
+              </div>
+              <div className={`absolute inset-0 bg-indigo-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/about' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
             
             <Link 
               to="/contact" 
-              className={`relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 group ${location.pathname === '/contact' ? 'text-amber-400' : ''}`}
+              className={`relative group transition-all duration-300 ${location.pathname === '/contact' ? 'text-white' : 'text-gray-300'}`}
             >
-              Contact
-              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
-              <span className="absolute bottom-1 right-0 w-0 h-0.5 bg-white opacity-0 group-hover:opacity-100 group-hover:w-1/2 transition-all duration-300"></span>
+              <div className={`absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-600 rounded-full transition-all duration-300 ${location.pathname === '/contact' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100'}`}></div>
+              <div className="relative z-10 flex items-center space-x-2 px-4 py-2.5 font-semibold text-sm uppercase tracking-wide">
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+                <span>Contact</span>
+              </div>
+              <div className={`absolute inset-0 bg-pink-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/contact' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
 
             {/* CTA Button */}
@@ -188,6 +231,7 @@ const Navbar = () => {
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link to="/" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Home</Link>
               <Link to="/services" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Services</Link>
+              <Link to="/universities" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Universities</Link>
               <Link to="/success-stories" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Success Stories</Link>
               <Link to="/about" className="block px-3 py-2 text-gray-300 hover:text-amber-400">About</Link>
               <Link to="/contact" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Contact</Link>

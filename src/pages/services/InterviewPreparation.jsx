@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiMic, FiCheck, FiUsers, FiTarget, FiArrowRight } from 'react-icons/fi'
-import Footer from '../../components/Footer'
 
 const InterviewPreparation = () => {
   const headerRef = useRef(null)
@@ -175,33 +174,35 @@ const InterviewPreparation = () => {
             </div>
           </div>
 
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-pink-600 to-pink-700 rounded-2xl p-8 md:p-12 text-white text-center">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
-              Ace Your University Interview
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Build confidence and interview skills with our expert coaching
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/consultation" 
-                className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center group"
-              >
-                Start Preparation
-                <FiArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link 
-                to="/services" 
-                className="border border-white/30 text-white hover:bg-white/10 px-8 py-3 rounded-lg font-semibold transition-all duration-300"
-              >
-                View All Services
-              </Link>
-            </div>
+        </div>
+      </div>
+
+      {/* CTA Section - Full Width */}
+      <div className="w-full bg-gradient-to-r from-pink-600 to-pink-700 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">
+            Ace Your University Interview
+          </h2>
+          <p className="text-xl text-white/90 mb-8">
+            Build confidence and interview skills with our expert coaching
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              to="/consultation" 
+              className="bg-white text-pink-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center group"
+            >
+              Start Preparation
+              <FiArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link 
+              to="/services" 
+              className="border border-white/30 text-white hover:bg-white/10 px-8 py-3 rounded-lg font-semibold transition-all duration-300"
+            >
+              View All Services
+            </Link>
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

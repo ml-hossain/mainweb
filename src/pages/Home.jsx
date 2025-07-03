@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
-import UniversityCard from '../components/UniversityCard'
+import HomeUniversityCard from '../components/HomeUniversityCard'
 import { supabase } from '../lib/supabase'
 
 const Home = () => {
@@ -378,8 +378,8 @@ const Home = () => {
               </div>
 
               {/* Main Headline */}
-              <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
-                {contentSections.hero?.title || 'Your Gateway to'}
+              <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
+                <span className="text-white">Your Gateway to</span>
                 <span className="block text-green-400">Global Education</span>
               </h1>
 
@@ -869,7 +869,7 @@ const Home = () => {
               ))
             ) : filteredUniversities.length > 0 ? (
               filteredUniversities.map(uni => (
-                <UniversityCard key={uni.id} university={uni} />
+                <HomeUniversityCard key={uni.id} university={uni} />
               ))
             ) : (
               <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
@@ -917,7 +917,7 @@ const Home = () => {
       </section>
 
       {/* Ready to Begin Your Next Move Section */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+      <section className="py-12 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -950,34 +950,34 @@ const Home = () => {
             </h2>
 
             {/* Subtitle */}
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
               Get expert guidance from our consultants and fast-track your educational journey with proven strategies.
             </p>
 
             {/* Features Grid - Compact */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <FiUsers className="w-6 h-6 text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-white/50">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg">
+                  <FiUsers className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-1">24/7 Available</h3>
-                <p className="text-gray-600 text-sm">Round-the-clock support whenever you need help</p>
+                <h3 className="text-sm font-bold text-gray-900 mb-1">24/7 Available</h3>
+                <p className="text-gray-600 text-xs">Round-the-clock support whenever you need help</p>
               </div>
 
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <FiClock className="w-6 h-6 text-white" />
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-white/50">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg">
+                  <FiClock className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-1">Save Time</h3>
-                <p className="text-gray-600 text-sm">Streamlined application process</p>
+                <h3 className="text-sm font-bold text-gray-900 mb-1">Save Time</h3>
+                <p className="text-gray-600 text-xs">Streamlined application process</p>
               </div>
 
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <FiAward className="w-6 h-6 text-white" />
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-white/50">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg">
+                  <FiAward className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-1">Success Guaranteed</h3>
-                <p className="text-gray-600 text-sm">Proven track record of success</p>
+                <h3 className="text-sm font-bold text-gray-900 mb-1">Success Guaranteed</h3>
+                <p className="text-gray-600 text-xs">Proven track record of success</p>
               </div>
             </div>
 
@@ -1000,7 +1000,7 @@ const Home = () => {
             </div>
 
             {/* Trust Indicators */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-500">
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-500">
               <div className="flex items-center">
                 <FiCheck className="w-4 h-4 text-green-500 mr-2" />
                 100% Free Consultation
@@ -1013,6 +1013,98 @@ const Home = () => {
                 <FiCheck className="w-4 h-4 text-green-500 mr-2" />
                 Expert Guidance
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pre-Departure Section - Full Width */}
+      <section className="py-16 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <div className="relative max-w-full px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            {/* Section Badge */}
+            <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-semibold mb-6 border border-white/30">
+              <FiCheck className="w-4 h-4 mr-2" />
+              Pre-Departure Support
+            </div>
+
+            {/* Main Heading */}
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+              Start Your Journey
+              <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                Prepared
+              </span>
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-lg text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
+              Get comprehensive pre-departure support for a smooth transition to your new academic adventure abroad.
+            </p>
+
+            {/* Features Grid - Full Width */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-7xl mx-auto">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <FiCheck className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Document Preparation</h3>
+                <p className="text-white/80 text-sm">Complete checklist and document verification before departure</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <FiGlobe className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Cultural Orientation</h3>
+                <p className="text-white/80 text-sm">Learn about local customs, culture, and social norms</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <FiUsers className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Airport Assistance</h3>
+                <p className="text-white/80 text-sm">Dedicated support team to help you at departure and arrival</p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <FiClock className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">24/7 Support</h3>
+                <p className="text-white/80 text-sm">Round-the-clock assistance during your transition period</p>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/services/pre-departure-orientation"
+                className="inline-flex items-center px-8 py-4 bg-white text-indigo-600 font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+              >
+                <FiArrowRight className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                Get Pre-Departure Support
+              </Link>
+              
+              <Link
+                to="/services"
+                className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-300 group"
+              >
+                View All Services
+                <FiArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
             </div>
           </div>
         </div>
