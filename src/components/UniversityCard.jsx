@@ -7,6 +7,7 @@ const UniversityCard = ({ university }) => {
     name,
     location,
     logo_url,
+    banner_url,
     slug,
     content = {},
     description
@@ -31,6 +32,9 @@ const UniversityCard = ({ university }) => {
   const safeDescription = description || 'Explore comprehensive programs and world-class education opportunities.'
   const safeSlug = slug || safeUniversity.toLowerCase().replace(/\s+/g, '-')
 
+  // Use banner_url for main image, fallback to logo_url, then placeholder
+  const displayImage = banner_url || logo_url || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop'
+
   // Display only first line of subjects/programs
   const displayPrograms = popular_courses.length > 0 ? popular_courses : programs
   const subjectsToShow = displayPrograms.slice(0, 2) // Show only first 2 subjects
@@ -41,10 +45,27 @@ const UniversityCard = ({ university }) => {
       {/* University Image with Ranking Badge */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={logo_url || '/api/placeholder/400/300'}
+          src={displayImage}
           alt={`${safeUniversity} campus`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop';
+          }}
         />
+        
+        {/* Logo overlay in bottom-left corner if we have both banner and logo */}
+        {banner_url && logo_url && (
+          <div className="absolute bottom-3 left-3">
+            <img
+              src={logo_url}
+              alt={`${safeUniversity} logo`}
+              className="w-12 h-12 object-contain bg-white rounded-lg p-1 shadow-md"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
         
         {/* Ranking Badge - Top Right Corner */}
         {ranking && (

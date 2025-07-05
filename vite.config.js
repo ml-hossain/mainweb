@@ -7,25 +7,25 @@ export default defineConfig({
   
   // Security and Performance Configuration
   define: {
-    // Remove development tools in production
-    __DEV__: JSON.stringify(false),
-    'process.env.NODE_ENV': JSON.stringify('production')
+    // Environment-specific settings
+    __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
   },
   
   build: {
-    // Security: Minify and obfuscate code
+    // Security: Minify and obfuscate code in production
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true, // Remove debugger statements
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
+        drop_console: process.env.NODE_ENV === 'production', // Only remove console.log in production
+        drop_debugger: true,
+        pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info', 'console.debug', 'console.warn'] : []
       },
       mangle: {
-        toplevel: true // Obfuscate top-level variable names
+        toplevel: process.env.NODE_ENV === 'production' // Only obfuscate in production
       },
       format: {
-        comments: false // Remove all comments
+        comments: process.env.NODE_ENV === 'production' ? false : true // Keep comments in development
       }
     },
     
@@ -71,9 +71,15 @@ export default defineConfig({
   // Development server configuration
   server: {
     port: 3003,
-    host: true,
-    strictPort: false,
-    force: true, // Force cache clearing
+    host: '0.0.0.0',
+    strictPort: true,
+    
+    // Fix HMR connection issues
+    hmr: {
+      port: 3003,
+      host: 'localhost',
+      overlay: false
+    },
     
     // Security headers for development
     headers: {
@@ -81,15 +87,11 @@ export default defineConfig({
       'X-Content-Type-Options': 'nosniff',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
     },
     
-    hmr: {
-      port: 3003,
-      host: 'localhost'
-    },
-    open: true
+    open: false, // Disable auto-open to prevent connection issues
+    cors: true
   },
   
   // Performance: Optimize dependencies

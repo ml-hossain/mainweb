@@ -38,6 +38,33 @@
   }
 }
 
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes sidebarProgress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+  
+  @keyframes progress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+}
+
 /* React Quill Styles Override */
 .ql-editor {
   min-height: 200px;

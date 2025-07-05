@@ -31,8 +31,15 @@ export const useSeoData = (pageSlug) => {
         setSeoData(data || null)
       } catch (err) {
         console.error('Error fetching SEO data:', err)
-        setError(err)
-        setSeoData(null)
+        // Don't treat network errors as critical failures
+        if (err.message?.includes('fetch') || err.message?.includes('network')) {
+          console.warn('Network error fetching SEO data, using fallback')
+          setSeoData(null)
+          setError(null) // Don't show error for network issues
+        } else {
+          setError(err)
+          setSeoData(null)
+        }
       } finally {
         setLoading(false)
       }

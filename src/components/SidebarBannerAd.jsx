@@ -197,13 +197,6 @@ const SidebarBannerAd = ({
           ))}
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes sidebarProgress {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-      `}</style>
     </div>
   )
 }

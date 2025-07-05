@@ -7,6 +7,7 @@ const UniversityListCard = ({ university }) => {
     name,
     location,
     logo_url,
+    banner_url,
     slug,
     description,
     content = {}
@@ -19,6 +20,9 @@ const UniversityListCard = ({ university }) => {
   const safeLocation = location || country || 'Unknown Location'
   const safeDescription = description || 'Explore comprehensive programs and world-class education opportunities at this prestigious institution.'
   const safeSlug = slug || safeUniversity.toLowerCase().replace(/\s+/g, '-')
+
+  // Use banner_url for main image, fallback to logo_url, then placeholder
+  const displayImage = banner_url || logo_url || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop'
 
   // Truncate description
   const truncateDescription = (text, maxLength = 120) => {
@@ -34,10 +38,27 @@ const UniversityListCard = ({ university }) => {
       {/* University Image - Shorter height, wider aspect */}
       <div className="relative h-40 sm:h-44 overflow-hidden">
         <img
-          src={logo_url || '/api/placeholder/400/300'}
+          src={displayImage}
           alt={`${safeUniversity} campus`}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.src = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop';
+          }}
         />
+        
+        {/* Logo overlay in bottom-right corner if we have both banner and logo */}
+        {banner_url && logo_url && (
+          <div className="absolute bottom-2 right-2">
+            <img
+              src={logo_url}
+              alt={`${safeUniversity} logo`}
+              className="w-10 h-10 object-contain bg-white rounded-lg p-1 shadow-md"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
         
         {/* Location Badge */}
         <div className="absolute bottom-2 left-2">

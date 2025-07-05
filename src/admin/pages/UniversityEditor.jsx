@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import QuillEditor from '../../components/QuillEditor';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import CompactFileUpload from '../../components/CompactFileUpload';
+import URLWithUpload from '../../components/URLWithUpload';
 import AdminLayout from '../components/AdminLayout';
 import AdvancedSEOTool from '../../components/AdvancedSEOTool';
 import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload } from 'react-icons/fi';
@@ -338,31 +339,23 @@ const UniversityEditor = ({ onLogout, user }) => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-1">
-                    <label htmlFor="logo_url" className="block text-sm font-semibold text-gray-700">Logo URL</label>
-                    <input 
-                      type="url" 
-                      name="logo_url" 
-                      id="logo_url" 
-                      value={university?.logo_url || ''} 
-                      onChange={handleInputChange} 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                      placeholder="https://example.com/logo.png"
-                    />
-                  </div>
+                  <URLWithUpload
+                    label="Logo URL"
+                    name="logo_url"
+                    value={university?.logo_url}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/logo.png"
+                    uploadPlaceholder="Upload Logo"
+                  />
                   
-                  <div className="space-y-1">
-                    <label htmlFor="banner_url" className="block text-sm font-semibold text-gray-700">Banner URL</label>
-                    <input 
-                      type="url" 
-                      name="banner_url" 
-                      id="banner_url" 
-                      value={university?.banner_url || ''} 
-                      onChange={handleInputChange} 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                      placeholder="https://example.com/banner.jpg"
-                    />
-                  </div>
+                  <URLWithUpload
+                    label="Banner URL"
+                    name="banner_url"
+                    value={university?.banner_url}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/banner.jpg"
+                    uploadPlaceholder="Upload Banner"
+                  />
                 </div>
 
                 <div className="space-y-1">

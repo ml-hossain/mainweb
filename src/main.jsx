@@ -8,6 +8,11 @@ import { registerServiceWorker, performanceMonitor } from './lib/performance'
 import { getCSP } from './lib/security'
 import './lib/console' // Setup console warning suppression
 
+// Development environment tests
+if (import.meta.env.DEV) {
+  import('./utils/envTest.js');
+}
+
 // Note: CSP and X-Frame-Options should be set via HTTP headers, not meta tags
 // These are handled at the server level for proper security
 // Keeping only meta tags that work properly via DOM

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SeoHead from '../components/SeoHead'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import HomeUniversityCard from '../components/HomeUniversityCard'
+
 import { supabase } from '../lib/supabase'
 import { gsap } from 'gsap'
 
@@ -182,6 +183,12 @@ const Home = () => {
 
     } catch (error) {
       console.error('Error fetching content data:', error)
+      // Don't break the page for network errors
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        console.warn('Network error fetching content data, using fallback')
+        setContentData([])
+        setSiteSettings({})
+      }
     } finally {
       setLoadingContent(false)
     }
@@ -235,6 +242,11 @@ const Home = () => {
 
     } catch (error) {
       console.error('Error fetching universities:', error)
+      // Don't break the entire page for network errors
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        console.warn('Network error fetching universities, using fallback')
+        setUniversities([])
+      }
     } finally {
       setLoadingUniversities(false)
     }
@@ -364,6 +376,7 @@ const Home = () => {
           meta_keywords: "study abroad, education consultancy, university admission, visa assistance, international education"
         }}
       />
+      
       {/* Hero Section */}
       <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
         {/* Background Image */}
