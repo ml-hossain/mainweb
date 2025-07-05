@@ -24,6 +24,84 @@ import {
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
 
+// Move component definitions outside to prevent recreation on every render
+const SettingCard = ({ title, children, onSave, section }) => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="flex justify-between items-center mb-6">
+      <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <button
+        onClick={() => onSave(section)}
+        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+      >
+        <FiSave className="w-4 h-4 mr-2" />
+        Save Changes
+      </button>
+    </div>
+    <div className="space-y-4">
+      {children}
+    </div>
+  </div>
+)
+
+const InputField = ({ label, type = 'text', value, onChange, placeholder, required = false }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      required={required}
+    />
+  </div>
+)
+
+const SelectField = ({ label, value, onChange, options, required = false }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <select
+      value={value}
+      onChange={onChange}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      required={required}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+)
+
+const ToggleField = ({ label, description, checked, onChange }) => (
+  <div className="flex items-start justify-between">
+    <div className="flex-1">
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      {description && (
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      )}
+    </div>
+    <button
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        checked ? 'bg-blue-600' : 'bg-gray-200'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+          checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  </div>
+)
+
 const Settings = ({ onLogout, user }) => {
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
@@ -412,83 +490,6 @@ const Settings = ({ onLogout, user }) => {
       setErrors({ backup: 'Failed to export data.' })
     }
   }
-
-  const SettingCard = ({ title, children, onSave, section }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <button
-          onClick={() => onSave(section)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-        >
-          <FiSave className="w-4 h-4 mr-2" />
-          Save Changes
-        </button>
-      </div>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </div>
-  )
-
-  const InputField = ({ label, type = 'text', value, onChange, placeholder, required = false }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        required={required}
-      />
-    </div>
-  )
-
-  const SelectField = ({ label, value, onChange, options, required = false }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <select
-        value={value}
-        onChange={onChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        required={required}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
-
-  const ToggleField = ({ label, description, checked, onChange }) => (
-    <div className="flex items-start justify-between">
-      <div className="flex-1">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        {description && (
-          <p className="text-sm text-gray-500 mt-1">{description}</p>
-        )}
-      </div>
-      <button
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? 'bg-blue-600' : 'bg-gray-200'
-        }`}
-      >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            checked ? 'translate-x-6' : 'translate-x-1'
-          }`}
-        />
-      </button>
-    </div>
-  )
 
   const renderGeneral = () => (
     <SettingCard title="General Settings" onSave={handleSave} section="general">

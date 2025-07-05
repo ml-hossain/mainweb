@@ -65,10 +65,17 @@ document.addEventListener('keydown', (e) => {
   // In development, allow all keyboard shortcuts for debugging
 })
 
-// Register Service Worker for caching
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Register Service Worker for caching (only in production)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     registerServiceWorker()
+  })
+} else if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  // Unregister service worker in development
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => {
+      registration.unregister()
+    })
   })
 }
 

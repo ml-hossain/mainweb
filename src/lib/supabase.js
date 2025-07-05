@@ -8,9 +8,35 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase configuration. Please check your environment variables or configuration.')
 }
 
-console.log('Supabase configuration:', {
-  url: supabaseUrl,
-  hasAnonKey: !!supabaseAnonKey
-})
+// Only log in development
+if (import.meta.env.DEV) {
+  console.log('Supabase configuration:', {
+    url: supabaseUrl,
+    hasAnonKey: !!supabaseAnonKey
+  })
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Configure Supabase with better connection settings
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+    timeout: 20000,
+    heartbeatIntervalMs: 30000,
+    reconnectAfterMs: (retryCount) => Math.min(1000 * Math.pow(2, retryCount), 30000)
+  },
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'ma-education@1.0.0'
+    }
+  }
+})

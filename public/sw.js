@@ -161,7 +161,7 @@ async function cacheFirstWithFallback(request, cacheName) {
 }
 
 // Network First strategy - for API calls
-async function networkFirst(request, cacheName, timeout = 3000) {
+async function networkFirst(request, cacheName, timeout = 8000) {
   const cache = await caches.open(cacheName)
   
   try {
