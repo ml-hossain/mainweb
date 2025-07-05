@@ -14,8 +14,7 @@ import {
   FiMenu,
   FiX,
   FiBell,
-  FiFileText,
-  FiSearch
+  FiFileText
 } from 'react-icons/fi'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -44,8 +43,6 @@ const AdminLayout = ({ children, onLogout }) => {
     { name: 'Dashboard', href: '/admin', icon: FiHome },
     { name: 'Universities', href: '/admin/universities', icon: FiGlobe },
     { name: 'Contact Management', href: '/admin/consultations', icon: FiMessageSquare },
-    { name: 'Analytics', href: '/admin/analytics', icon: FiBarChart2 },
-    { name: 'SEO Manager', href: '/admin/seo', icon: FiSearch },
     { name: 'Settings', href: '/admin/settings', icon: FiSettings },
   ]
 

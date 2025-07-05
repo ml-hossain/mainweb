@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   FiUsers,
   FiGlobe,
@@ -11,7 +11,14 @@ import {
   FiSettings,
   FiMail,
   FiAlertCircle,
-  FiBookOpen
+  FiBookOpen,
+  FiEdit,
+  FiTarget,
+  FiLoader,
+  FiEye,
+  FiCopy,
+  FiDownload,
+  FiSearch
 } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
@@ -31,40 +38,54 @@ const Dashboard = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
-
-    const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
       try {
         setIsLoading(true)
-      setError(null)
+        setError(null)
 
-      // Fetch real data from all relevant tables
-        const [
-          universitiesResponse,
-          consultationsResponse,
-        contactRequestsResponse,
-        successStoriesResponse
-        ] = await Promise.all([
-        supabase.from('universities').select('*'),
-        supabase.from('consultations').select('*'),
-        supabase.from('contact_requests').select('*'),
-        supabase.from('success_stories').select('*')
-      ])
+        // Fetch data with timeout to prevent hanging
+        const timeoutDuration = 8000 // 8 seconds
+        
+        const fetchWithTimeout = async (promise, timeoutMs) => {
+          const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+          )
+          return Promise.race([promise, timeout])
+        }
 
-      console.log('Dashboard data:', {
-        universities: universitiesResponse.data?.length,
-        consultations: consultationsResponse.data?.length,
-        contacts: contactRequestsResponse.data?.length,
-        stories: successStoriesResponse.data?.length
-      })
+        // Fetch all data concurrently for better performance
+        const [universitiesResponse, contactRequestsResponse, consultationsResponse, successStoriesResponse] = await Promise.allSettled([
+          fetchWithTimeout(
+            supabase.from('universities').select('id, name, is_active, featured, created_at'),
+            timeoutDuration
+          ),
+          fetchWithTimeout(
+            supabase.from('contact_requests').select('id, name, created_at, status'),
+            timeoutDuration
+          ),
+          fetchWithTimeout(
+            supabase.from('consultations').select('id, full_name, status, created_at'),
+            timeoutDuration
+          ),
+          fetchWithTimeout(
+            supabase.from('success_stories').select('id, student_name, created_at'),
+            timeoutDuration
+          )
+        ])
 
-      // Calculate real statistics
-      const universities = universitiesResponse.data || []
-      const consultations = consultationsResponse.data || []
-      const contacts = contactRequestsResponse.data || []
-      const stories = successStoriesResponse.data || []
+        // Process results
+        const universities = universitiesResponse.status === 'fulfilled' ? universitiesResponse.value.data || [] : []
+        const contacts = contactRequestsResponse.status === 'fulfilled' ? contactRequestsResponse.value.data || [] : []
+        const consultations = consultationsResponse.status === 'fulfilled' ? consultationsResponse.value.data || [] : []
+        const stories = successStoriesResponse.status === 'fulfilled' ? successStoriesResponse.value.data || [] : []
+
+        // Only log if there are errors
+        const failures = [universitiesResponse, contactRequestsResponse, consultationsResponse, successStoriesResponse]
+          .filter(r => r.status === 'rejected')
+        
+        if (failures.length > 0) {
+          console.warn('Some dashboard data failed to load:', failures.length, 'failures')
+        }
 
       const totalContacts = contacts.length
       const pendingConsultations = consultations.filter(c => c.status === 'pending').length
@@ -154,7 +175,11 @@ const Dashboard = ({ onLogout }) => {
     } finally {
         setIsLoading(false)
       }
-    }
+    }, [])
+
+    useEffect(() => {
+      loadDashboardData()
+    }, [loadDashboardData])
 
   const formatTimeAgo = (dateString) => {
     if (!dateString) return 'Unknown time'
@@ -330,110 +355,46 @@ const Dashboard = ({ onLogout }) => {
           />
         </div>
 
-        {/* Charts and Activity */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-          {/* Monthly Performance Chart */}
-          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base lg:text-lg font-semibold text-gray-900">Monthly Performance</h3>
-              <button
-                onClick={loadDashboardData}
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
-                Refresh
-              </button>
-            </div>
-            {isLoading ? (
-              <LoadingState />
-            ) : monthlyData.length > 0 ? (
-              <div className="space-y-3 lg:space-y-4">
-                {monthlyData.map((data, index) => (
-                  <div key={data.month} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                    <span className="text-sm font-medium text-gray-600 min-w-0 flex-shrink-0">{data.month}</span>
-                    <div className="flex items-center space-x-3 lg:space-x-4 ml-4">
-                      <div className="text-xs lg:text-sm text-gray-900 text-right">
-                        <span className="block lg:inline">{data.students}</span>
-                        <span className="hidden lg:inline"> contacts</span>
-                        <span className="block lg:hidden text-xs text-gray-500">contacts</span>
-                      </div>
-                      <div className="text-xs lg:text-sm text-green-600 text-right font-medium">
-                        {data.revenue.toLocaleString()} MYR
-                      </div>
+        {/* Recent Activities */}
+        <div className="bg-white rounded-lg shadow p-4 lg:p-6 max-w-4xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-900">Recent Activities</h3>
+            <button
+              onClick={loadDashboardData}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              Refresh
+            </button>
+          </div>
+          {isLoading ? (
+            <LoadingState />
+          ) : recentActivities.length > 0 ? (
+            <div className="space-y-3 lg:space-y-4">
+              {recentActivities.map((activity) => {
+                const Icon = activity.icon
+                return (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div className={`p-2 rounded-full bg-gray-100 ${activity.color} flex-shrink-0`}>
+                      <Icon className="w-3 h-3 lg:w-4 lg:h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs lg:text-sm text-gray-900 break-words">{activity.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={FiTrendingUp}
-                title="No Performance Data"
-                description="Monthly performance data will appear here once you start tracking metrics."
-              />
-            )}
-          </div>
-
-          {/* Recent Activities */}
-          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base lg:text-lg font-semibold text-gray-900">Recent Activities</h3>
-              <button
-                onClick={loadDashboardData}
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
-                Refresh
-              </button>
+                )
+              })}
             </div>
-            {isLoading ? (
-              <LoadingState />
-            ) : recentActivities.length > 0 ? (
-              <div className="space-y-3 lg:space-y-4">
-                {recentActivities.map((activity) => {
-                  const Icon = activity.icon
-                  return (
-                    <div key={activity.id} className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full bg-gray-100 ${activity.color} flex-shrink-0`}>
-                        <Icon className="w-3 h-3 lg:w-4 lg:h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs lg:text-sm text-gray-900 break-words">{activity.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                icon={FiMessageSquare}
-                title="No Recent Activity"
-                description="Recent activities will appear here as users interact with your platform."
-              />
-            )}
-          </div>
+          ) : (
+            <EmptyState
+              icon={FiMessageSquare}
+              title="No Recent Activity"
+              description="Recent activities will appear here as users interact with your platform."
+            />
+          )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-4 lg:p-6">
-          <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            <button className="p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center">
-              <FiMessageSquare className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600 mx-auto mb-2" />
-              <p className="text-xs lg:text-sm font-medium text-gray-900">View Contacts</p>
-            </button>
-            <button className="p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center">
-              <FiGlobe className="w-5 h-5 lg:w-6 lg:h-6 text-green-600 mx-auto mb-2" />
-              <p className="text-xs lg:text-sm font-medium text-gray-900">Manage Universities</p>
-            </button>
-            <button className="p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center">
-              <FiCalendar className="w-5 h-5 lg:w-6 lg:h-6 text-purple-600 mx-auto mb-2" />
-              <p className="text-xs lg:text-sm font-medium text-gray-900">Schedule Consultation</p>
-            </button>
-            <button className="p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center">
-              <FiTrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600 mx-auto mb-2" />
-              <p className="text-xs lg:text-sm font-medium text-gray-900">View Analytics</p>
-            </button>
-          </div>
-        </div>
+
       </div>
     </AdminLayout>
   )

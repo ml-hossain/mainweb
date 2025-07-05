@@ -66,7 +66,7 @@ const Navbar = () => {
             <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">MA</span>
             </div>
-            <span className="font-bold text-xl text-white">Education</span>
+            <span className="font-bold text-xl text-white whitespace-nowrap">Education</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -80,7 +80,7 @@ const Navbar = () => {
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                 </svg>
-                <span>Home</span>
+                <span className="whitespace-nowrap">Home</span>
               </div>
               <div className={`absolute inset-0 bg-blue-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
@@ -91,7 +91,7 @@ const Navbar = () => {
                 onClick={handleServicesToggle}
                 className="relative text-gray-300 hover:text-amber-400 font-medium text-sm uppercase tracking-wide transition-colors duration-300 px-3 py-2 flex items-center space-x-1 focus:outline-none group"
               >
-                <span>Services</span>
+                <span className="whitespace-nowrap">Services</span>
                 <FiChevronDown 
                   className={`w-4 h-4 transition-transform duration-200 ${
                     isServicesOpen ? 'transform rotate-180' : ''
@@ -140,7 +140,7 @@ const Navbar = () => {
                 </svg>
                 
                 {/* Text */}
-                <span>Universities</span>
+                <span className="whitespace-nowrap">Universities</span>
               </div>
               
               {/* Subtle Shadow */}
@@ -156,7 +156,7 @@ const Navbar = () => {
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                <span>Success Stories</span>
+                <span className="whitespace-nowrap">Success Stories</span>
               </div>
               <div className={`absolute inset-0 bg-purple-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/success-stories' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
@@ -170,7 +170,7 @@ const Navbar = () => {
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                 </svg>
-                <span>About</span>
+                <span className="whitespace-nowrap">About</span>
               </div>
               <div className={`absolute inset-0 bg-indigo-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/about' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
@@ -185,7 +185,7 @@ const Navbar = () => {
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                 </svg>
-                <span>Contact</span>
+                <span className="whitespace-nowrap">Contact</span>
               </div>
               <div className={`absolute inset-0 bg-pink-500 rounded-full blur-md transition-opacity duration-300 -z-10 ${location.pathname === '/contact' ? 'opacity-30' : 'opacity-0 group-hover:opacity-20'}`}></div>
             </Link>
@@ -202,7 +202,7 @@ const Navbar = () => {
                 <span className="absolute inset-0 bg-white transform origin-top-left scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{clipPath: 'polygon(0% 0%, 50% 0%, 0% 100%)'}}></span>
                 <span className="relative z-10 flex items-center">
                   <FiGift className="mr-2 w-4 h-4" />
-                  Free Consultation
+                  <span className="whitespace-nowrap">Free Consultation</span>
                 </span>
               </Link>
             </div>
@@ -229,12 +229,12 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-700">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link to="/" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Home</Link>
-              <Link to="/services" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Services</Link>
-              <Link to="/universities" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Universities</Link>
-              <Link to="/success-stories" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Success Stories</Link>
-              <Link to="/about" className="block px-3 py-2 text-gray-300 hover:text-amber-400">About</Link>
-              <Link to="/contact" className="block px-3 py-2 text-gray-300 hover:text-amber-400">Contact</Link>
+              <Link to="/" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">Home</Link>
+              <Link to="/services" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">Services</Link>
+              <Link to="/universities" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">Universities</Link>
+              <Link to="/success-stories" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">Success Stories</Link>
+              <Link to="/about" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">About</Link>
+              <Link to="/contact" className="block px-3 py-2 text-gray-300 hover:text-amber-400 break-words">Contact</Link>
               <Link 
                 to="/consultation"
                 className="relative bg-amber-400 text-gray-900 font-black text-sm py-3 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 overflow-hidden group mt-2"
@@ -245,7 +245,7 @@ const Navbar = () => {
                 <span className="absolute inset-0 bg-white transform origin-top-left scale-0 group-hover:scale-150 transition-transform duration-700 ease-out" style={{clipPath: 'polygon(0% 0%, 50% 0%, 0% 100%)'}}></span>
                 <span className="relative z-10 flex items-center">
                   <FiGift className="mr-2 w-4 h-4" />
-                  Free Consultation
+                  <span className="whitespace-nowrap">Free Consultation</span>
                 </span>
               </Link>
             </div>

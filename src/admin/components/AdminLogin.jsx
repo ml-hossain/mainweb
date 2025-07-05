@@ -171,8 +171,8 @@ const AdminLogin = () => {
           <div className="mt-4 lg:mt-6 p-3 lg:p-4 bg-gray-50 rounded-lg">
             <h4 className="text-sm font-medium text-gray-900 mb-2">Admin Credentials</h4>
             <div className="text-xs lg:text-sm text-gray-600 space-y-1">
-              <p><strong>Email:</strong> play.rjfahad@gmail.com</p>
-              <p><strong>Password:</strong> 12345</p>
+              <p><strong>Email:</strong> hossain890m@gmail.com</p>
+              <p><strong>Password:</strong> admin123456</p>
             </div>
           </div>
         </div>

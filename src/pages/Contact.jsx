@@ -15,6 +15,7 @@ import {
   FiHeadphones
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
+import { validateInput, sanitizeHtml } from '../lib/security'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -98,19 +99,43 @@ const Contact = () => {
     setSubmitMessage('')
 
     try {
-      // Validate required fields
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
-        setSubmitMessage('Please fill in all required fields.')
+      // Security validation
+      if (!validateInput(formData.firstName, 'name')) {
+        setSubmitMessage('Please enter a valid first name (2-50 characters, letters only)')
         setIsSubmitting(false)
         return
       }
 
-      // Prepare data for Supabase
+      if (!validateInput(formData.lastName, 'name')) {
+        setSubmitMessage('Please enter a valid last name (2-50 characters, letters only)')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!validateInput(formData.email, 'email')) {
+        setSubmitMessage('Please enter a valid email address')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (formData.phone && !validateInput(formData.phone, 'phone')) {
+        setSubmitMessage('Please enter a valid phone number')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!validateInput(formData.message, 'text')) {
+        setSubmitMessage('Message is required and must be under 1000 characters')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Sanitize and prepare data for Supabase
       const contactData = {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        phone: formData.phone || null,
-        message: `Subject: ${formData.subject || 'General Inquiry'}\n\n${formData.message}`,
+        name: `${sanitizeHtml(formData.firstName.trim())} ${sanitizeHtml(formData.lastName.trim())}`,
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone ? sanitizeHtml(formData.phone.trim()) : null,
+        message: `Subject: ${sanitizeHtml(formData.subject || 'General Inquiry')}\n\n${sanitizeHtml(formData.message.trim())}`,
         status: 'pending'
       }
 

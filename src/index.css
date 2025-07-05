@@ -382,6 +382,85 @@
   }
 }
 
+/* Extra small screen optimizations */
+@media (max-width: 475px) {
+  /* Improve touch targets */
+  .btn-primary,
+  .btn-secondary {
+    @apply py-3 px-4 text-sm;
+  }
+  
+  /* Better spacing for mobile */
+  .nav-link {
+    @apply text-xs tracking-normal;
+  }
+  
+  /* Improve readability on small screens */
+  .content-h1 {
+    @apply text-2xl leading-tight;
+  }
+  
+  .content-h2 {
+    @apply text-xl leading-tight;
+  }
+  
+  .content-h3 {
+    @apply text-lg leading-tight;
+  }
+  
+  .content-paragraph {
+    @apply text-sm leading-relaxed;
+  }
+}
+
+/* Text Overflow and Word Wrapping Utilities */
+.text-wrap-safe {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.text-ellipsis-safe {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-break-normal {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Prevent text overflow globally */
+* {
+  box-sizing: border-box;
+}
+
+/* Default text wrapping for all text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, label {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Specific handling for long words */
+.long-text {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Container overflow handling */
+.container-safe {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Flex item text overflow fix */
+.flex-item-text {
+  min-width: 0;
+  flex: 1;
+}
+
 /* Print Styles */
 @media print {
   .content-renderer {

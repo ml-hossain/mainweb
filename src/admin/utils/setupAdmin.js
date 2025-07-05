@@ -9,12 +9,8 @@ export const setupAdminUser = async (email, password) => {
   try {
     console.log('Setting up admin user...')
 
-    // Check if user already exists in auth
-    const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
-    
-    if (listError) {
-      console.log('Cannot check existing users (auth admin not available), will try direct signup')
-    }
+    // Note: Cannot use auth.admin.listUsers() with anon key, skip auth user check
+    // Just proceed with signup/signin flow
 
     let authData
     let isNewUser = false
@@ -136,9 +132,22 @@ export const setupAdminUser = async (email, password) => {
  */
 export const checkAdminAccess = async () => {
   try {
+    console.log('Starting admin access check...')
+    
+    // First get the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
-    if (userError || !user) {
+    if (userError) {
+      console.error('User error:', userError)
+      return {
+        success: false,
+        isAdmin: false,
+        message: `User error: ${userError.message}`
+      }
+    }
+    
+    if (!user) {
+      console.log('No authenticated user found')
       return {
         success: false,
         isAdmin: false,
@@ -146,7 +155,9 @@ export const checkAdminAccess = async () => {
       }
     }
 
-    // Check if user email is in admin_users table (fallback for when auth.users doesn't have the record)
+    console.log('User found:', user.email, 'ID:', user.id)
+
+    // Check if user email is in admin_users table
     const { data: adminData, error: adminError } = await supabase
       .from('admin_users')
       .select('*')
@@ -154,10 +165,24 @@ export const checkAdminAccess = async () => {
       .eq('is_active', true)
       .single()
 
-    if (adminError && adminError.code !== 'PGRST116') {
-      throw adminError
+    if (adminError) {
+      if (adminError.code === 'PGRST116') {
+        // No rows found - user is not an admin
+        console.log('User not found in admin_users table')
+        return {
+          success: true,
+          isAdmin: false,
+          user,
+          message: 'User does not have admin access'
+        }
+      } else {
+        // Some other error
+        console.error('Admin check error:', adminError)
+        throw adminError
+      }
     }
 
+    console.log('Admin data found:', adminData)
     const isAdmin = !!adminData
 
     return {
@@ -186,7 +211,7 @@ export const initializeAdmin = async () => {
     console.log('Initializing admin setup...')
     
     // Try to setup the default admin user
-    const result = await setupAdminUser('play.rjfahad@gmail.com', '12345')
+const result = await setupAdminUser('hossain890m@gmail.com', 'admin123456')
     
     if (result.success) {
       console.log('✅ Admin initialization successful:', result.message)

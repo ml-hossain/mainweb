@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { FiLoader, FiAlertCircle, FiMapPin, FiExternalLink, FiStar } from 'react-icons/fi'
+import SidebarBannerAd from '../components/SidebarBannerAd'
 
 const UniversityPage = () => {
   const { slug } = useParams()
@@ -137,151 +138,54 @@ const UniversityPage = () => {
       {/* MAIN CONTENT & SIDEBAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Main Content */}
+          {/* Main Content - Only Page Content */}
           <div className="lg:col-span-8">
-            {/* About Section */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">About {university.name}</h2>
-              <div
-                className="prose lg:prose-xl max-w-none text-gray-800"
-                dangerouslySetInnerHTML={{ __html: university.page_content || university.description || '<p>No additional details available at the moment. Please check back later.</p>' }}
-              />
-            </div>
-
-            {/* Programs & Courses Section */}
-            {university.popular_courses && university.popular_courses.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Popular Programs</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {university.popular_courses.map((course, index) => (
-                    <div key={index} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                      <h3 className="font-semibold text-blue-900 mb-2">{course}</h3>
-                      <p className="text-sm text-blue-700">
-                        Duration: {university.course_duration || 'Varies'}
-                      </p>
-                    </div>
-                  ))}
+            {/* University Rich Content */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              {university.page_content ? (
+                <div className="p-8">
+                  <div
+                    className="university-content prose prose-lg max-w-none
+                               prose-headings:text-gray-900 prose-headings:font-bold
+                               prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                               prose-p:text-gray-700 prose-p:leading-relaxed
+                               prose-ul:text-gray-700 prose-ol:text-gray-700
+                               prose-li:text-gray-700
+                               prose-strong:text-gray-900 prose-strong:font-semibold
+                               prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                               prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:p-4
+                               prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded
+                               prose-pre:bg-gray-900 prose-pre:text-gray-100
+                               prose-table:border prose-table:border-gray-300
+                               prose-th:bg-gray-50 prose-th:border prose-th:border-gray-300 prose-th:p-3
+                               prose-td:border prose-td:border-gray-300 prose-td:p-3
+                               prose-img:rounded-lg prose-img:shadow-lg
+                               prose-hr:border-gray-300 prose-hr:my-8"
+                    dangerouslySetInnerHTML={{ __html: university.page_content }}
+                  />
                 </div>
-              </div>
-            )}
-
-            {/* Academic Information */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Academic Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Admission Requirements */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Admission Requirements</h3>
-                  <div className="space-y-3">
-                    {university.language_requirement && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <span className="font-medium text-gray-700">Language Requirement:</span>
-                          <p className="text-gray-600 text-sm">{university.language_requirement}</p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div>
-                        <span className="font-medium text-gray-700">Academic Documents:</span>
-                        <p className="text-gray-600 text-sm">Transcripts, certificates, and relevant qualifications</p>
-                      </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                      <FiAlertCircle className="w-8 h-8 text-gray-400" />
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div>
-                        <span className="font-medium text-gray-700">Application Documents:</span>
-                        <p className="text-gray-600 text-sm">Statement of purpose, recommendation letters</p>
-                      </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Coming Soon</h3>
+                    <p className="text-gray-600 text-sm">
+                      Detailed information about {university.name} will be available soon. Please check back later or contact us for more details.
+                    </p>
+                    <div className="mt-6">
+                      <Link
+                        to="/consultation"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Get Information Now
+                      </Link>
                     </div>
                   </div>
                 </div>
-
-                {/* Financial Information */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Information</h3>
-                  <div className="space-y-3">
-                    {university.initial_payment && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <span className="font-medium text-gray-700">Initial Payment:</span>
-                          <p className="text-gray-600 text-sm">{university.initial_payment}</p>
-                        </div>
-                      </div>
-                    )}
-                    {university.content?.tuition_fee_range && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <span className="font-medium text-gray-700">Tuition Fee Range:</span>
-                          <p className="text-gray-600 text-sm">{university.content.tuition_fee_range}</p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div>
-                        <span className="font-medium text-gray-700">Living Expenses:</span>
-                        <p className="text-gray-600 text-sm">Accommodation and daily expenses vary by location</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-
-            {/* Subjects Offered */}
-            {university.subjects && university.subjects.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Subjects Offered</h2>
-                <div className="flex flex-wrap gap-2">
-                  {university.subjects.map((subject, index) => (
-                    <span 
-                      key={index} 
-                      className="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
-                    >
-                      {subject}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Additional Information */}
-            {(university.content && Object.keys(university.content).length > 0) && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">Additional Information</h2>
-                <div className="prose lg:prose-lg max-w-none text-gray-700">
-                  {university.content.campus_life && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Campus Life</h3>
-                      <p className="text-gray-700">{university.content.campus_life}</p>
-                    </div>
-                  )}
-                  {university.content.research_opportunities && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Research Opportunities</h3>
-                      <p className="text-gray-700">{university.content.research_opportunities}</p>
-                    </div>
-                  )}
-                  {university.content.career_services && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Career Services</h3>
-                      <p className="text-gray-700">{university.content.career_services}</p>
-                    </div>
-                  )}
-                  {university.content.international_students && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">International Students</h3>
-                      <p className="text-gray-700">{university.content.international_students}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
@@ -389,6 +293,16 @@ const UniversityPage = () => {
                 Book Free Consultation
               </Link>
             </div>
+
+            {/* Tall Sidebar Banner Advertisement */}
+            <SidebarBannerAd 
+              autoSlide={true}
+              slideInterval={7000}
+              closeable={true}
+              showLabel={true}
+              className=""
+              onClose={() => console.log('Tall sidebar banner ad closed')}
+            />
           </div>
         </div>
       </div>
