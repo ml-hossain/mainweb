@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
-import { FiFileText, FiCheck, FiShield, FiClock, FiArrowRight } from 'react-icons/fi'
+import { FiFileText, FiCheck, FiShield, FiClock, FiArrowRight, FiFolder } from 'react-icons/fi'
 
 const DocumentationSupport = () => {
   const headerRef = useRef(null)

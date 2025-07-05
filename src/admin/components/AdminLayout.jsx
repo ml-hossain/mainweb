@@ -23,7 +23,8 @@ import {
   FiTrendingUp,
   FiActivity,
   FiPhone,
-  FiMail
+  FiMail,
+  FiTarget
 } from 'react-icons/fi'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -67,12 +68,28 @@ const AdminLayout = ({ children, onLogout, user }) => {
       description: 'Partner Institutions'
     },
     { 
+      name: 'Blog Management', 
+      href: '/admin/blog', 
+      icon: FiFileText,
+      color: 'from-pink-500 to-rose-500',
+      bgColor: 'bg-pink-50',
+      description: 'Content Publishing'
+    },
+    { 
       name: 'Contact Management', 
       href: '/admin/consultations', 
       icon: FiUsers,
       color: 'from-purple-500 to-pink-500',
       bgColor: 'bg-purple-50',
       description: 'Student Inquiries'
+    },
+    { 
+      name: 'SEO Manager', 
+      href: '/admin/seo', 
+      icon: FiTarget,
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-orange-50',
+      description: 'Page SEO Settings'
     },
     { 
       name: 'Settings', 

@@ -10,9 +10,12 @@ import AdminSetup from './components/AdminSetup'
 // Admin Pages
 import Dashboard from './pages/Dashboard'
 import Universities from './pages/Universities'
-import Consultations from './pages/Consultations'
-import Settings from './pages/Settings'
 import UniversityEditor from './pages/UniversityEditor'
+import BlogManager from './pages/BlogManager'
+import BlogEditor from './pages/BlogEditor'
+import Consultations from './pages/Consultations'
+import SeoManager from './pages/SeoManager'
+import Settings from './pages/Settings'
 
 const AdminApp = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -167,7 +170,11 @@ const AdminApp = () => {
       <Route path="universities" element={<Universities onLogout={handleLogout} user={user} />} />
       <Route path="universities/new" element={<UniversityEditor onLogout={handleLogout} user={user} />} />
       <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} user={user} />} />
+      <Route path="blog" element={<BlogManager onLogout={handleLogout} user={user} />} />
+      <Route path="blog/new" element={<BlogEditor onLogout={handleLogout} user={user} />} />
+      <Route path="blog/edit/:id" element={<BlogEditor onLogout={handleLogout} user={user} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} user={user} />} />
+      <Route path="seo" element={<SeoManager onLogout={handleLogout} user={user} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} user={user} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>

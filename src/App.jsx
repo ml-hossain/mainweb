@@ -21,6 +21,8 @@ import DocumentationSupport from './pages/services/DocumentationSupport'
 import FloatingContactButton from './components/FloatingContactButton'
 import AdminApp from './admin/AdminApp'
 import ContentDemo from './pages/ContentDemo'
+import Blog from './pages/Blog'
+import BlogDetail from './pages/BlogDetail'
 
 // Layout component for public pages
 const PublicLayout = ({ children }) => {
@@ -29,7 +31,7 @@ const PublicLayout = ({ children }) => {
   return (
     <>
     <Navbar />
-      <main>{children}</main>
+      <main className="pt-20">{children}</main>
     <FloatingContactButton />
       {!hideFooter && <Footer />}
     </>
@@ -48,6 +50,8 @@ function App() {
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
         <Route path="/universities" element={<PublicLayout><Universities /></PublicLayout>} />
         <Route path="/universities/:slug" element={<PublicLayout><UniversityPage /></PublicLayout>} />
+        <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
+        <Route path="/blog/:slug" element={<PublicLayout><BlogDetail /></PublicLayout>} />
 
         {/* Services Sub-routes */}
         <Route path="/services/university-selection" element={<PublicLayout><UniversitySelection /></PublicLayout>} />

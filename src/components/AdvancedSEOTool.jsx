@@ -30,7 +30,7 @@ const AdvancedSEOTool = ({
   const [targetAudience, setTargetAudience] = useState('students')
   const scrollRef = useRef(null)
 
-  // Smart keyword suggestions based on country and context
+  // Smart keyword suggestions based on country and context with Bangladesh focus
   const getSmartKeywords = () => {
     const baseKeywords = ['study abroad', 'international students', 'university admission', 'scholarship', 'higher education']
     const countryKeywords = {
@@ -44,11 +44,24 @@ const AdvancedSEOTool = ({
       'netherlands': ['study in netherlands', 'dutch universities', 'holland education', 'netherlands visa', 'european education']
     }
     
+    // Enhanced Bangladesh-specific targeting
     const audienceKeywords = {
-      'bangladesh': ['bangladesh students', 'bangladeshi students abroad', 'dhaka to abroad', 'bangladesh education consultancy'],
+      'bangladesh': [
+        'bangladesh students', 'bangladeshi students abroad', 'dhaka to abroad', 'bangladesh education consultancy',
+        'dhaka university admission', 'buet admission guide', 'private university bangladesh', 'study abroad from bangladesh',
+        'bangladesh student visa', 'ielts bangladesh', 'toefl bangladesh', 'scholarship for bangladeshi students',
+        'chittagong to abroad', 'sylhet to abroad', 'rajshahi to abroad', 'khulna to abroad'
+      ],
       'india': ['indian students abroad', 'india to abroad study', 'indian education consultancy'],
       'pakistan': ['pakistani students abroad', 'pakistan to abroad study', 'pakistan education consultancy']
     }
+    
+    // Trending Bangladesh keywords (real-time simulation)
+    const bangladeshTrendingKeywords = [
+      'dhaka university ranking 2024', 'buet admission circular 2025', 'private university fees bangladesh',
+      'study abroad consultancy dhaka', 'ielts preparation bangladesh', 'usa visa from bangladesh',
+      'canada pr from bangladesh', 'australia student visa bangladesh', 'uk tier 4 visa bangladesh'
+    ]
 
     const globalKeywords = ['global education', 'world ranking university', 'international degree', 'career opportunities', 'student life']
     
@@ -66,10 +79,23 @@ const AdvancedSEOTool = ({
       suggestions.push(`${universityName.toLowerCase()} scholarship`)
     }
     
-    // Add target audience keywords (focusing on South Asian students)
+    // Add target audience keywords (focusing on South Asian students, especially Bangladesh)
     Object.values(audienceKeywords).forEach(keywords => {
       suggestions = [...suggestions, ...keywords]
     })
+    
+    // Add Bangladesh trending keywords for better real-time relevance
+    suggestions = [...suggestions, ...bangladeshTrendingKeywords]
+    
+    // Add blog-specific keywords if target entity is blog
+    if (targetEntity === 'blog') {
+      const blogKeywords = [
+        'study tips bangladesh', 'university life bangladesh', 'student guide bangladesh',
+        'education blog bangladesh', 'study abroad tips', 'university comparison bangladesh',
+        'admission requirements bangladesh', 'scholarship guide bangladesh', 'career advice bangladesh'
+      ]
+      suggestions = [...suggestions, ...blogKeywords]
+    }
     
     return [...new Set(suggestions)] // Remove duplicates
   }

@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { gsap } from 'gsap'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import SeoHead from '../components/SeoHead'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import HomeUniversityCard from '../components/HomeUniversityCard'
 import { supabase } from '../lib/supabase'
+import { gsap } from 'gsap'
 
 const Home = () => {
   const heroRef = useRef(null)
@@ -354,6 +355,15 @@ const Home = () => {
 
   return (
     <div className="relative">
+      <SeoHead 
+        pageSlug="home" 
+        fallbackData={{
+          page_title: "MA Education - Your Gateway to Global Education",
+          meta_title: "MA Education | Study Abroad Consultancy | Global Education Services",
+          meta_description: "MA Education is your trusted partner for studying abroad. We provide comprehensive consultation services for students seeking quality education in top universities worldwide.",
+          meta_keywords: "study abroad, education consultancy, university admission, visa assistance, international education"
+        }}
+      />
       {/* Hero Section */}
       <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
         {/* Background Image */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { Link } from 'react-router-dom'
-import { FiMic, FiCheck, FiUsers, FiTarget, FiArrowRight } from 'react-icons/fi'
+import { FiMic, FiCheck, FiUsers, FiTarget, FiArrowRight, FiVideo } from 'react-icons/fi'
 
 const InterviewPreparation = () => {
   const headerRef = useRef(null)

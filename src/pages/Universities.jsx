@@ -213,9 +213,9 @@ const Universities = () => {
           </p>
         </div>
 
-        {/* Universities Grid */}
+        {/* Universities Grid - 4 cards per row for wider cards */}
         {filteredUniversities.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {filteredUniversities.map(university => (
               <UniversityListCard key={university.id} university={university} />
             ))}
