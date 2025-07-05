@@ -162,13 +162,13 @@ const AdminApp = () => {
   // Authenticated - show admin routes
   return (
     <Routes>
-      <Route index element={<Dashboard onLogout={handleLogout} />} />
+      <Route index element={<Dashboard onLogout={handleLogout} user={user} />} />
       <Route path="dashboard" element={<Navigate to="/admin" replace />} />
-      <Route path="universities" element={<Universities onLogout={handleLogout} />} />
-      <Route path="universities/new" element={<UniversityEditor onLogout={handleLogout} />} />
-      <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} />} />
-      <Route path="consultations" element={<Consultations onLogout={handleLogout} />} />
-      <Route path="settings" element={<Settings onLogout={handleLogout} />} />
+      <Route path="universities" element={<Universities onLogout={handleLogout} user={user} />} />
+      <Route path="universities/new" element={<UniversityEditor onLogout={handleLogout} user={user} />} />
+      <Route path="universities/edit/:id" element={<UniversityEditor onLogout={handleLogout} user={user} />} />
+      <Route path="consultations" element={<Consultations onLogout={handleLogout} user={user} />} />
+      <Route path="settings" element={<Settings onLogout={handleLogout} user={user} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
   )

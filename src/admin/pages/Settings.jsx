@@ -17,7 +17,7 @@ import {
 } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 
-const Settings = ({ onLogout }) => {
+const Settings = ({ onLogout, user }) => {
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
   const [settings, setSettings] = useState({
@@ -585,7 +585,7 @@ const Settings = ({ onLogout }) => {
   }
 
   return (
-    <AdminLayout onLogout={onLogout}>
+    <AdminLayout onLogout={onLogout} user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">

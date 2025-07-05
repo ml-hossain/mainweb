@@ -5,10 +5,11 @@ import QuillEditor from '../../components/QuillEditor';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import CompactFileUpload from '../../components/CompactFileUpload';
 import AdminLayout from '../components/AdminLayout';
+import AdvancedSEOTool from '../../components/AdvancedSEOTool';
 import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload } from 'react-icons/fi';
 import slugify from 'slugify';
 
-const UniversityEditor = ({ onLogout }) => {
+const UniversityEditor = ({ onLogout, user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
@@ -233,53 +234,60 @@ const UniversityEditor = ({ onLogout }) => {
   }
   
   return (
-    <AdminLayout onLogout={onLogout}>
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-3xl p-8 text-white shadow-2xl mb-8">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-            <div className="flex-1 mb-6 lg:mb-0">
+    <AdminLayout onLogout={onLogout} user={user}>
+      <div className="flex flex-col xl:flex-row gap-6 min-h-full">
+        {/* Main content - Reduced width to accommodate wider sidebar */}
+        <div className="flex-1 min-w-0 xl:max-w-5xl">
+          <div className="max-w-none mx-auto">
+        {/* Redesigned Header Section - More Compact */}
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-6 text-white shadow-xl mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Left Side - Back Button and Title */}
+            <div className="flex flex-col">
               <button
                 onClick={() => navigate('/admin/universities')}
-                className="flex items-center text-blue-100 hover:text-white text-sm font-medium mb-4 transition-colors duration-200"
+                className="flex items-center text-blue-100 hover:text-white text-sm font-medium mb-3 transition-colors duration-200 self-start group"
               >
-                <FiArrowLeft className="mr-2 h-4 w-4" />
+                <FiArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                 Back to Universities
               </button>
-              <h1 className="text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+              <h1 className="text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                 {!id ? 'Add New University' : 'Edit University'}
               </h1>
-              <p className="text-blue-100 text-lg font-medium">
+              <p className="text-blue-100 text-base font-medium">
                 {!id ? 'Create a new university profile with detailed information' : 'Update university information and settings'}
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-2">
-                <FiGlobe className="w-5 h-5 mr-2" />
-                <span className="font-semibold">Global Education</span>
-              </div>
+            
+            {/* Right Side - Status Badge */}
+            <div className="flex items-center bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-2 self-start lg:self-center">
+              <FiGlobe className="w-5 h-5 mr-2" />
+              <span className="font-semibold">Global Education</span>
             </div>
           </div>
         </div>
         
-        {/* Main Content - Single Column Layout */}
-        <div className="max-w-4xl mx-auto">
+        {/* Main Content - Closer to sidebar with equal weight sections */}
+        <div className="max-w-none mx-auto">
           {/* Form Container */}
           <div>
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-8">
                 <form onSubmit={handleSubmit}>
-              {/* Basic Information Section */}
-              <div className="mb-12">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mr-4">
-                    <FiGlobe className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
-                    <p className="text-gray-600">Essential university details and branding</p>
-                  </div>
-                </div>
+                {/* Two-Column Layout for Equal Weight Sections */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                  
+                  {/* Basic Information Section - Left Column */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 border border-blue-100">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mr-4">
+                        <FiGlobe className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
+                        <p className="text-gray-600">Essential university details and branding</p>
+                      </div>
+                    </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-1">
@@ -370,18 +378,18 @@ const UniversityEditor = ({ onLogout }) => {
                   />
                 </div>
               </div>
-
-              {/* University Details Section */}
-              <div className="mb-12">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mr-4">
-                    <FiStar className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">University Details</h2>
-                    <p className="text-gray-600">Academic information and specifications</p>
-                  </div>
-                </div>
+                  
+                  {/* University Details Section - Right Column */}
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border border-emerald-100">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mr-4">
+                        <FiStar className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">University Details</h2>
+                        <p className="text-gray-600">Academic information and specifications</p>
+                      </div>
+                    </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                   <div className="space-y-1">
@@ -591,6 +599,8 @@ const UniversityEditor = ({ onLogout }) => {
                   <p className="text-xs text-gray-500 mt-1">Type and press Enter, Space, or Comma to add programs.</p>
                 </div>
               </div>
+                
+                </div> {/* Close the two-column grid */}
 
               {/* Content Editor Section */}
               <div className="mb-12">
@@ -656,6 +666,25 @@ const UniversityEditor = ({ onLogout }) => {
                 </form>
               </div>
             </div>
+          </div>
+        </div>
+          </div>
+        </div>
+        
+        {/* SEO Tool - Wider sidebar with more weight */}
+        <div className="w-full xl:w-[30rem] 2xl:w-[32rem] xl:min-w-0">
+          <div className="sticky top-6">
+            <AdvancedSEOTool
+              content={university?.page_content || ''}
+              title={university?.name || ''}
+              description={university?.description || ''}
+              country={university?.content?.country || ''}
+              universityName={university?.name || ''}
+              onContentUpdate={handlePageContentChange}
+              onTitleUpdate={(title) => handleInputChange({target: {name: 'name', value: title}})}
+              onDescriptionUpdate={(desc) => handleInputChange({target: {name: 'description', value: desc}})}
+              targetEntity="university"
+            />
           </div>
         </div>
       </div>

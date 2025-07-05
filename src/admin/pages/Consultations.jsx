@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { FiUser, FiMail, FiPhone, FiCalendar, FiMessageSquare, FiEye, FiCheck, FiX, FiDownload, FiFilter, FiSearch, FiTrash2, FiAlertTriangle } from 'react-icons/fi'
+import { FiUser, FiMail, FiPhone, FiCalendar, FiMessageSquare, FiEye, FiCheck, FiX, FiDownload, FiFilter, FiSearch, FiTrash2, FiAlertTriangle, FiRefreshCw } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
 
-const Consultations = ({ onLogout }) => {
+const Consultations = ({ onLogout, user }) => {
   const [consultations, setConsultations] = useState([])
   const [contactRequests, setContactRequests] = useState([])
   const [activeTab, setActiveTab] = useState('consultations')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -22,28 +23,76 @@ const Consultations = ({ onLogout }) => {
   const fetchData = async () => {
     setLoading(true)
     try {
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      )
+      
       // Fetch consultations
-      const { data: consultationsData, error: consultationsError } = await supabase
+      const consultationsPromise = supabase
         .from('consultations')
         .select('*')
         .order('created_at', { ascending: false })
 
+      const { data: consultationsData, error: consultationsError } = await Promise.race([consultationsPromise, timeoutPromise])
       if (consultationsError) throw consultationsError
 
       // Fetch contact requests
-      const { data: contactData, error: contactError } = await supabase
+      const contactPromise = supabase
         .from('contact_requests')
         .select('*')
         .order('created_at', { ascending: false })
 
+      const { data: contactData, error: contactError } = await Promise.race([contactPromise, timeoutPromise])
       if (contactError) throw contactError
 
       setConsultations(consultationsData || [])
       setContactRequests(contactData || [])
+      console.log('Data loaded successfully:', { consultations: consultationsData?.length, contacts: contactData?.length })
     } catch (error) {
       console.error('Error fetching data:', error)
+      // Show error but don't alert, just log
+      setConsultations([])
+      setContactRequests([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const refreshData = async () => {
+    try {
+      setRefreshing(true)
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      )
+      
+      // Fetch consultations
+      const consultationsPromise = supabase
+        .from('consultations')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      const { data: consultationsData, error: consultationsError } = await Promise.race([consultationsPromise, timeoutPromise])
+      if (consultationsError) throw consultationsError
+
+      // Fetch contact requests
+      const contactPromise = supabase
+        .from('contact_requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      const { data: contactData, error: contactError } = await Promise.race([contactPromise, timeoutPromise])
+      if (contactError) throw contactError
+
+      setConsultations(consultationsData || [])
+      setContactRequests(contactData || [])
+      console.log('Data refreshed successfully:', { consultations: consultationsData?.length, contacts: contactData?.length })
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -269,7 +318,7 @@ const Consultations = ({ onLogout }) => {
 
   if (loading) {
     return (
-      <AdminLayout onLogout={onLogout}>
+      <AdminLayout onLogout={onLogout} user={user}>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
@@ -278,41 +327,86 @@ const Consultations = ({ onLogout }) => {
   }
 
   return (
-    <AdminLayout onLogout={onLogout}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-8 text-white shadow-2xl">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-            <div className="flex-1 mb-6 lg:mb-0">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-3 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                Contact Management
-              </h1>
-              <p className="text-blue-100 text-lg font-medium">
-                Streamline your consultation requests and contact submissions
-              </p>
-              <div className="flex items-center mt-4 space-x-6 text-sm">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                  <span>Live Updates</span>
+    <AdminLayout onLogout={onLogout} user={user}>
+      <div className="space-y-6 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 max-w-7xl mx-auto">
+        {/* Redesigned Header - Modern & Attractive */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 rounded-3xl shadow-2xl">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-white to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute top-20 right-10 w-24 h-24 bg-gradient-to-br from-blue-300 to-transparent rounded-full blur-2xl"></div>
+            <div className="absolute bottom-10 left-20 w-40 h-40 bg-gradient-to-br from-purple-300 to-transparent rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative p-6 md:p-10">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
+              {/* Left Content */}
+              <div className="flex-1 mb-8 lg:mb-0">
+                <div className="flex items-center mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                    <FiMessageSquare className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
+                      Contact Management
+                    </h1>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-blue-200 text-sm font-medium">Live Dashboard</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <FiMessageSquare className="w-4 h-4 mr-2" />
-                  <span>{currentData.length} Total Items</span>
+                
+                <p className="text-blue-100 text-base md:text-lg font-medium mb-6 max-w-2xl">
+                  Efficiently manage consultation requests and contact submissions with our advanced dashboard
+                </p>
+                
+                {/* Stats Row */}
+                <div className="flex flex-wrap gap-6 text-sm">
+                  <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                    <FiMessageSquare className="w-4 h-4 mr-2 text-blue-300" />
+                    <span className="text-white font-semibold">{currentData.length}</span>
+                    <span className="text-blue-200 ml-1">Total Items</span>
+                  </div>
+                  <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                    <span className="text-white font-semibold">{currentData.filter(c => c.status === 'pending').length}</span>
+                    <span className="text-blue-200 ml-1">Pending</span>
+                  </div>
+                  <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                    <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                    <span className="text-white font-semibold">{currentData.filter(c => c.status === 'completed').length}</span>
+                    <span className="text-blue-200 ml-1">Completed</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-              <button 
-                onClick={fetchData}
-                className="flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/30 transition-all duration-300 transform hover:scale-105"
-              >
-                <FiDownload className="w-5 h-5 mr-2" />
-                <span className="font-semibold">Refresh</span>
-              </button>
-              <button className="flex items-center justify-center px-6 py-3 bg-white text-purple-600 rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 font-semibold shadow-lg">
-                <FiDownload className="w-5 h-5 mr-2" />
-                <span>Export Data</span>
-              </button>
+              
+              {/* Right Actions */}
+              <div className="flex flex-col sm:flex-row gap-4 lg:flex-col lg:gap-3">
+                <button 
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  className="group flex items-center justify-center px-6 py-3 bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl hover:bg-white/25 transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                    <FiRefreshCw className={`w-4 h-4 text-white ${refreshing ? 'animate-spin' : ''}`} />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white font-semibold text-sm">{refreshing ? 'Refreshing...' : 'Refresh Data'}</div>
+                    <div className="text-blue-200 text-xs">Update records</div>
+                  </div>
+                </button>
+                
+                <button className="group flex items-center justify-center px-6 py-3 bg-gradient-to-br from-white to-blue-50 text-blue-900 rounded-xl hover:from-blue-50 hover:to-white transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                    <FiDownload className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">Export Data</div>
+                    <div className="text-blue-600 text-xs">Download CSV</div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -343,8 +437,8 @@ const Consultations = ({ onLogout }) => {
           </nav>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Cards with Refresh Indicator */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 transition-all duration-300 ${refreshing ? 'opacity-50 animate-pulse' : ''}`}>
           {[
             { 
               label: 'Total Requests', 
@@ -380,6 +474,13 @@ const Consultations = ({ onLogout }) => {
             }
           ].map((stat, index) => (
             <div key={index} className={`relative overflow-hidden bg-gradient-to-br ${stat.bgGradient} backdrop-blur-md border border-white/30 rounded-3xl p-6 transition-all duration-500 hover:shadow-2xl hover:scale-105 hover:-translate-y-1 ${stat.shadowColor} group`}>
+              {/* Refresh indicator overlay */}
+              {refreshing && (
+                <div className="absolute inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-10 rounded-3xl">
+                  <FiRefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
+                </div>
+              )}
+              
               {/* Background decoration */}
               <div className="absolute -top-4 -right-4 w-24 h-24 opacity-10">
                 <div className={`w-full h-full bg-gradient-to-br ${stat.gradient} rounded-full blur-2xl`}></div>
@@ -445,8 +546,19 @@ const Consultations = ({ onLogout }) => {
           </div>
         </div>
 
-        {/* Data Table - Desktop */}
-        <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Data Table - Desktop with Refresh Indicator */}
+        <div className={`hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 ${refreshing ? 'opacity-60' : ''}`}>
+          {/* Refresh overlay for table */}
+          {refreshing && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none">
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl px-6 py-4 shadow-xl border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <FiRefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+                  <span className="text-blue-700 font-medium">Refreshing contact data...</span>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-100">
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100">

@@ -14,12 +14,22 @@ import {
   FiMenu,
   FiX,
   FiBell,
-  FiFileText
+  FiFileText,
+  FiSearch,
+  FiChevronRight,
+  FiMoon,
+  FiSun,
+  FiGrid,
+  FiTrendingUp,
+  FiActivity,
+  FiPhone,
+  FiMail
 } from 'react-icons/fi'
 import { Link, useLocation } from 'react-router-dom'
 
-const AdminLayout = ({ children, onLogout }) => {
+const AdminLayout = ({ children, onLogout, user }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
   const location = useLocation()
 
   // Close sidebar on route change (mobile)
@@ -40,10 +50,38 @@ const AdminLayout = ({ children, onLogout }) => {
   }, [])
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: FiHome },
-    { name: 'Universities', href: '/admin/universities', icon: FiGlobe },
-    { name: 'Contact Management', href: '/admin/consultations', icon: FiMessageSquare },
-    { name: 'Settings', href: '/admin/settings', icon: FiSettings },
+    { 
+      name: 'Dashboard', 
+      href: '/admin', 
+      icon: FiGrid,
+      color: 'from-blue-500 to-indigo-500',
+      bgColor: 'bg-blue-50',
+      description: 'Overview & Analytics'
+    },
+    { 
+      name: 'Universities', 
+      href: '/admin/universities', 
+      icon: FiGlobe,
+      color: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-emerald-50',
+      description: 'Partner Institutions'
+    },
+    { 
+      name: 'Contact Management', 
+      href: '/admin/consultations', 
+      icon: FiUsers,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-purple-50',
+      description: 'Student Inquiries'
+    },
+    { 
+      name: 'Settings', 
+      href: '/admin/settings', 
+      icon: FiSettings,
+      color: 'from-gray-500 to-slate-500',
+      bgColor: 'bg-gray-50',
+      description: 'System Configuration'
+    },
   ]
 
   const isActive = (href) => {
@@ -54,134 +92,214 @@ const AdminLayout = ({ children, onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      {/* Fixed Modern Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-white/20 transform transition-all duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}>
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 bg-white">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white font-bold text-sm">MA</span>
+        {/* Elegant Sidebar Header */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
+          <div className="relative flex items-center justify-between h-20 px-6 border-b border-white/10">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4 border border-white/20 shadow-lg">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">MA</span>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">MA Education</h1>
+                <p className="text-blue-100 text-sm font-medium">Admin Dashboard</p>
+              </div>
             </div>
-            <h1 className="text-lg lg:text-xl font-bold text-gray-900">Admin Panel</h1>
+            <button
+              className="lg:hidden p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <FiX className="w-5 h-5" />
-          </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+        {/* Enhanced Modern Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navigation.map((item) => (
             <div key={item.name}>
               <Link
                 to={item.href}
-                className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${isActive(item.href)
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                className={`group relative flex items-center px-4 py-4 text-sm font-medium rounded-2xl transition-all duration-300 ${isActive(item.href)
+                  ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-${item.color.split(' ')[1]}/30 transform scale-105`
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50/80 hover:shadow-md hover:scale-102'
                   }`}
               >
-                <item.icon className={`w-5 h-5 mr-3 ${isActive(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                {/* Background decoration for active item */}
+                {isActive(item.href) && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-2xl"></div>
+                )}
+                
+                {/* Icon container */}
+                <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center mr-4 transition-all duration-300 ${
+                  isActive(item.href) 
+                    ? 'bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg' 
+                    : 'bg-gray-100 group-hover:bg-gray-200'
+                }`}>
+                  <item.icon className={`w-5 h-5 transition-all duration-300 ${
+                    isActive(item.href) ? 'text-white' : 'text-gray-600 group-hover:text-gray-800'
                   }`} />
-                <span className="truncate">{item.name}</span>
-              </Link>
-
-              {/* Submenu */}
-              {item.submenu && isActive(item.href) && (
-                <div className="ml-8 mt-2 space-y-1">
-                  {item.submenu.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      to={subItem.href}
-                      className={`block px-3 py-2 text-sm rounded-md transition-colors ${location.pathname === subItem.href
-                        ? 'text-blue-700 bg-blue-50 font-medium'
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                      <span className="truncate">{subItem.name}</span>
-                    </Link>
-                  ))}
                 </div>
-              )}
+                
+                {/* Text content */}
+                <div className="flex-1 min-w-0">
+                  <div className={`font-semibold transition-colors duration-300 ${
+                    isActive(item.href) ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {item.name}
+                  </div>
+                  <div className={`text-xs mt-1 transition-colors duration-300 ${
+                    isActive(item.href) ? 'text-white/80' : 'text-gray-500'
+                  }`}>
+                    {item.description}
+                  </div>
+                </div>
+                
+                {/* Active indicator */}
+                {isActive(item.href) && (
+                  <FiChevronRight className="w-4 h-4 text-white/80" />
+                )}
+              </Link>
             </div>
           ))}
         </nav>
-
-        {/* User info */}
-        <div className="border-t border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
-              <FiUser className="w-5 h-5 text-white" />
-            </div>
-            <div className="ml-3 min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
-              <p className="text-xs text-gray-500 truncate">admin@maeducation.com</p>
-            </div>
-            <button
-              onClick={() => {
-                if (onLogout) {
-                  onLogout()
-                } else {
-                  localStorage.removeItem('adminAuthenticated')
-                  window.location.reload()
-                }
-              }}
-              className="ml-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Logout"
-            >
-              <FiLogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
-        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+      {/* Main content wrapper with fixed positioning */}
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-72">
+        {/* Fixed Modern Enhanced Top Header */}
+        <header className="fixed top-0 left-0 right-0 z-40 lg:left-72 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-4 lg:px-8 py-4 shadow-sm">
           <div className="flex items-center justify-between">
+            {/* Left Section */}
             <div className="flex items-center">
               <button
-                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 mr-2"
+                className="lg:hidden p-3 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 mr-3 transition-all duration-200"
                 onClick={() => setSidebarOpen(true)}
               >
                 <FiMenu className="w-5 h-5" />
               </button>
-              <h2 className="text-lg font-semibold text-gray-900 lg:hidden">
+              
+              {/* Breadcrumb for desktop */}
+              <div className="hidden lg:flex items-center space-x-2">
+                <div className="text-sm text-gray-500">Dashboard</div>
+                <FiChevronRight className="w-4 h-4 text-gray-400" />
+                <div className="text-sm font-semibold text-gray-900">
+                  {navigation.find(item => isActive(item.href))?.name || 'Overview'}
+                </div>
+              </div>
+              
+              {/* Mobile title */}
+              <h2 className="text-xl font-bold text-gray-900 lg:hidden">
                 {navigation.find(item => isActive(item.href))?.name || 'Admin Panel'}
               </h2>
             </div>
 
+            {/* Right Section */}
             <div className="flex items-center space-x-2">
-              <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                <FiBell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                <FiMessageSquare className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                <FiBarChart2 className="w-5 h-5" />
-              </button>
+              {/* Search */}
+              <div className="hidden md:flex items-center relative">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="pl-10 pr-4 py-2 w-64 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                />
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-1">
+                {/* Notifications */}
+                <button className="relative p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-200 group">
+                  <FiBell className="w-5 h-5" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                  <span className="absolute top-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    3 new notifications
+                  </span>
+                </button>
+                
+                {/* Messages */}
+                <button className="relative p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-200 group">
+                  <FiMail className="w-5 h-5" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="absolute top-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    5 new messages
+                  </span>
+                </button>
+                
+                {/* Analytics */}
+                <button className="relative p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-200 group">
+                  <FiActivity className="w-5 h-5" />
+                  <span className="absolute top-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    View analytics
+                  </span>
+                </button>
+                
+                {/* Dark mode toggle */}
+                <button 
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="relative p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
+                >
+                  {darkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+                  <span className="absolute top-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    {darkMode ? 'Light mode' : 'Dark mode'}
+                  </span>
+                </button>
+              </div>
+              
+              {/* User Profile with Logout */}
+              <div className="relative ml-4 flex items-center space-x-2">
+                <div className="hidden md:flex items-center space-x-3 p-2 rounded-xl">
+                  <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <FiUser className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-gray-900">MA Education Admin</div>
+                    <div className="text-xs text-gray-500">{user?.email || 'admin@maeducation.com'}</div>
+                  </div>
+                </div>
+                
+                {/* Logout Button */}
+                <button
+                  onClick={() => {
+                    if (onLogout) {
+                      onLogout()
+                    } else {
+                      // Fallback logout without page reload
+                      localStorage.removeItem('adminAuthenticated')
+                      // Instead of reloading, redirect to login page
+                      window.location.href = '/admin'
+                    }
+                  }}
+                  className="p-3 text-gray-500 hover:text-red-600 rounded-xl hover:bg-red-50 transition-all duration-200 group"
+                  title="Logout"
+                >
+                  <FiLogOut className="w-5 h-5" />
+                  <span className="absolute top-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                    Logout
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        {/* Page content with top padding for fixed header */}
+        <main className="flex-1 p-4 lg:p-6 pt-20 lg:pt-24 overflow-auto">
           {children}
         </main>
       </div>
