@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { FiCalendar, FiUser, FiTag, FiArrowLeft, FiShare2, FiHeart, FiBookmark } from 'react-icons/fi'
 import { FaFacebook, FaTwitter, FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
-import GoogleAds from '../components/GoogleAds'
+import DynamicGoogleAds from '../components/DynamicGoogleAds'
 
 const BlogDetail = () => {
   const { slug } = useParams()
@@ -330,10 +330,10 @@ const BlogDetail = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             {/* Google Ads Section */}
-            <GoogleAds 
+            <DynamicGoogleAds 
+              placement="blog-detail"
               adSize="medium-rectangle"
               className="mb-8"
-              label="Advertisement"
             />
 
             {/* Related Posts */}

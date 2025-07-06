@@ -70,13 +70,13 @@ export default defineConfig({
   
   // Development server configuration
   server: {
-    port: 3003,
+    port: 3004,
     host: '0.0.0.0',
     strictPort: true,
     
     // Fix HMR connection issues
     hmr: {
-      port: 3003,
+      port: 3004,
       host: 'localhost',
       overlay: false
     },

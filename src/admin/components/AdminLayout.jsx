@@ -100,6 +100,14 @@ const AdminLayout = ({ children, onLogout, user }) => {
       description: 'Page SEO Settings'
     },
     { 
+      name: 'Ad Manager', 
+      href: '/admin/ads', 
+      icon: FiBarChart2,
+      color: 'from-indigo-500 to-blue-500',
+      bgColor: 'bg-indigo-50',
+      description: 'Advertisement Management'
+    },
+    { 
       name: 'Settings', 
       href: '/admin/settings', 
       icon: FiSettings,

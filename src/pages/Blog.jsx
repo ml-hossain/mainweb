@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+    import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { FiCalendar, FiUser, FiArrowRight, FiSearch, FiTag, FiTrendingUp, FiClock, FiEye, FiBookmark } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { gsap } from 'gsap'
-import GoogleAds from '../components/GoogleAds'
+import DynamicGoogleAds from '../components/DynamicGoogleAds'
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState([])
@@ -481,9 +481,9 @@ const Blog = () => {
             )}
 
             {/* Google Ads - Skyscraper */}
-            <GoogleAds 
+            <DynamicGoogleAds 
+              placement="blog-sidebar"
               adSize="wide-skyscraper"
-              label="Sponsored"
               className="sticky top-8"
             />
           </div>
