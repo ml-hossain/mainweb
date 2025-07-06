@@ -32,7 +32,7 @@ const DynamicGoogleAds = ({
       const currentPath = window.location.pathname;
       
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .select('*')
         .eq('status', 'active')
         .eq('placement', placement);
@@ -82,7 +82,7 @@ const DynamicGoogleAds = ({
   const trackImpression = async (adId) => {
     try {
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .select('view_count, current_impressions')
         .eq('id', adId)
         .single();
@@ -90,7 +90,7 @@ const DynamicGoogleAds = ({
       if (error) throw error;
 
       await supabase
-        .from('ads')
+        .from('content_placements')
         .update({ 
           view_count: (data.view_count || 0) + 1,
           current_impressions: (data.current_impressions || 0) + 1
@@ -104,7 +104,7 @@ const DynamicGoogleAds = ({
   const trackClick = async (adId) => {
     try {
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .select('click_count')
         .eq('id', adId)
         .single();
@@ -112,7 +112,7 @@ const DynamicGoogleAds = ({
       if (error) throw error;
 
       await supabase
-        .from('ads')
+        .from('content_placements')
         .update({ 
           click_count: (data.click_count || 0) + 1
         })

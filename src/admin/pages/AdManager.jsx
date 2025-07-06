@@ -20,14 +20,14 @@ const AdManager = ({ onLogout, user }) => {
   const fetchAds = async () => {
     try {
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
       setAds(data || [])
     } catch (error) {
-      console.error('Error fetching ads:', error)
+      console.error('Error fetching content placements:', error)
     } finally {
       setLoading(false)
     }
@@ -38,7 +38,7 @@ const AdManager = ({ onLogout, user }) => {
 
     try {
       const { error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .delete()
         .eq('id', id)
 
@@ -46,7 +46,7 @@ const AdManager = ({ onLogout, user }) => {
       
       setAds(ads.filter(ad => ad.id !== id))
     } catch (error) {
-      console.error('Error deleting ad:', error)
+      console.error('Error deleting content placement:', error)
       alert('Error deleting ad')
     }
   }
@@ -56,7 +56,7 @@ const AdManager = ({ onLogout, user }) => {
     
     try {
       const { error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .update({ status: newStatus })
         .eq('id', id)
 
@@ -66,7 +66,7 @@ const AdManager = ({ onLogout, user }) => {
         ad.id === id ? { ...ad, status: newStatus } : ad
       ))
     } catch (error) {
-      console.error('Error updating ad status:', error)
+      console.error('Error updating content placement status:', error)
       alert('Error updating ad status')
     }
   }
@@ -81,7 +81,7 @@ const AdManager = ({ onLogout, user }) => {
       }
 
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .insert([newAd])
         .select()
 
@@ -89,7 +89,7 @@ const AdManager = ({ onLogout, user }) => {
       
       setAds([data[0], ...ads])
     } catch (error) {
-      console.error('Error duplicating ad:', error)
+      console.error('Error duplicating content placement:', error)
       alert('Error duplicating ad')
     }
   }
@@ -458,7 +458,7 @@ const AdEditor = ({ ad, onClose, onSave }) => {
       if (ad) {
         // Update existing ad
         const { error } = await supabase
-          .from('ads')
+          .from('content_placements')
           .update(dataToSave)
           .eq('id', ad.id)
 
@@ -466,7 +466,7 @@ const AdEditor = ({ ad, onClose, onSave }) => {
       } else {
         // Create new ad
         const { error } = await supabase
-          .from('ads')
+          .from('content_placements')
           .insert([dataToSave])
 
         if (error) throw error

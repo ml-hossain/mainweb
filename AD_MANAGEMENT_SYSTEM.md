@@ -12,9 +12,9 @@ The Ad Management System provides a complete solution for managing advertisement
 
 ## Database Schema
 
-### `ads` Table
+### `content_placements` Table
 ```sql
-CREATE TABLE ads (
+CREATE TABLE content_placements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   type VARCHAR(50) NOT NULL,
@@ -63,6 +63,18 @@ CREATE TABLE ads (
   updated_by UUID REFERENCES auth.users(id)
 );
 ```
+
+## Important Note: Table Name
+
+**Table Name**: `content_placements` (not `ads`)
+
+The table is named `content_placements` instead of `ads` to avoid being blocked by browser ad blockers. Ad blockers commonly block requests to endpoints containing words like "ads", "advertisement", "banner", etc.
+
+This naming convention ensures:
+- ✅ Ad blockers won't block API requests
+- ✅ System works in all browsers
+- ✅ No need to disable ad blockers for development
+- ✅ Production-ready without workarounds
 
 ## Components
 

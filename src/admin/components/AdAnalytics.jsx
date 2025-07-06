@@ -20,7 +20,7 @@ const AdAnalytics = ({ adId, className = '' }) => {
   const fetchAnalytics = async () => {
     try {
       const { data, error } = await supabase
-        .from('ads')
+        .from('content_placements')
         .select('view_count, click_count, current_impressions')
         .eq('id', adId)
         .single()
