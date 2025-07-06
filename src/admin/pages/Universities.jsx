@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FiPlus, FiEdit, FiTrash2, FiGlobe, FiStar, FiEye, FiEyeOff, FiExternalLink, FiMapPin, FiUsers, FiSearch, FiFilter, FiRefreshCw, FiDownload, FiBookOpen, FiTrendingUp } from 'react-icons/fi'
+import { FiPlus, FiEdit, FiTrash2, FiGlobe, FiStar, FiEye, FiEyeOff, FiExternalLink, FiMapPin, FiUsers, FiSearch, FiFilter, FiRefreshCw, FiDownload, FiBookOpen, FiTrendingUp, FiZap } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
+import AdvancedSEOTool from '../../components/AdvancedSEOTool'
 
 const Universities = ({ onLogout, user }) => {
   const [universities, setUniversities] = useState([])
@@ -12,6 +13,7 @@ const Universities = ({ onLogout, user }) => {
   const [selectAll, setSelectAll] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [showAdvancedSEO, setShowAdvancedSEO] = useState(false)
 
   useEffect(() => {
     fetchUniversities()
@@ -355,6 +357,54 @@ const Universities = ({ onLogout, user }) => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Advanced SEO Tool Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                  <FiZap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Advanced SEO Tool</h3>
+                  <p className="text-sm text-gray-600">AI-powered university content generation with keyword research and competitor analysis</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAdvancedSEO(!showAdvancedSEO)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  showAdvancedSEO 
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                    : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                }`}
+              >
+                <FiZap className="w-4 h-4" />
+                <span>{showAdvancedSEO ? 'Hide' : 'Show'} SEO Tool</span>
+              </button>
+            </div>
+          </div>
+          
+          {showAdvancedSEO && (
+            <div className="p-6">
+              <AdvancedSEOTool
+                context="university"
+                fields={{ 
+                  title: true, 
+                  shortDescription: true, 
+                  mainContent: true 
+                }}
+                generateFor={['shortDescription', 'mainContent']}
+                onContentGenerated={(content) => {
+                  console.log('Generated university content:', content);
+                  // Here you can integrate with your university creation form
+                  // For example, pre-fill form fields with generated content
+                }}
+                initialData={{}}
+              />
+            </div>
+          )}
         </div>
 
         {/* Enhanced Filters Section */}

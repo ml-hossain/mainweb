@@ -1,0 +1,61 @@
+-- Insert sample blog posts for testing
+INSERT INTO blog_posts (
+  title, 
+  slug, 
+  excerpt, 
+  content, 
+  author, 
+  category, 
+  tags, 
+  meta_title, 
+  meta_description, 
+  featured, 
+  published, 
+  reading_time,
+  created_at
+) VALUES 
+(
+  'Study Abroad: Your Gateway to Global Education',
+  'study-abroad-gateway-global-education',
+  'Discover the benefits and opportunities of studying abroad. Learn how international education can transform your career and broaden your horizons.',
+  '<h2>Why Study Abroad?</h2><p>Studying abroad is one of the most transformative experiences a student can have. It offers countless opportunities for personal growth, academic excellence, and career advancement.</p><h3>Benefits of International Education</h3><ul><li>Cultural immersion and global perspective</li><li>Enhanced language skills</li><li>International network building</li><li>Career advancement opportunities</li><li>Personal growth and independence</li></ul><p>Ready to start your journey? Contact us today to learn more about study abroad opportunities.</p>',
+  'Admin',
+  'Study Abroad',
+  ARRAY['study abroad', 'international education', 'global education', 'student life'],
+  'Study Abroad: Your Gateway to Global Education',
+  'Discover the benefits and opportunities of studying abroad. Learn how international education can transform your career and broaden your horizons.',
+  true,
+  true,
+  5,
+  NOW()
+),
+(
+  'Top 10 Universities for International Students 2024',
+  'top-10-universities-international-students-2024',
+  'Explore the world''s best universities that welcome international students with open arms. Rankings, programs, and admission requirements included.',
+  '<h2>Best Universities for International Students</h2><p>Choosing the right university is crucial for your academic success. Here are the top 10 universities that offer exceptional programs for international students.</p><h3>Our Top Picks</h3><ol><li>Harvard University - USA</li><li>Oxford University - UK</li><li>Cambridge University - UK</li><li>MIT - USA</li><li>Stanford University - USA</li><li>University of Toronto - Canada</li><li>Australian National University - Australia</li><li>ETH Zurich - Switzerland</li><li>University of Tokyo - Japan</li><li>National University of Singapore - Singapore</li></ol><p>Each of these institutions offers unique advantages for international students, including comprehensive support services, diverse academic programs, and vibrant campus communities.</p>',
+  'Admin',
+  'Universities',
+  ARRAY['universities', 'international students', 'rankings', 'admissions'],
+  'Top 10 Universities for International Students 2024',
+  'Explore the world''s best universities that welcome international students. Rankings, programs, and admission requirements included.',
+  true,
+  true,
+  8,
+  NOW() - INTERVAL '1 day'
+),
+(
+  'Scholarship Guide: Funding Your International Education',
+  'scholarship-guide-funding-international-education',
+  'Complete guide to finding and applying for scholarships to fund your international education. Tips, resources, and success stories.',
+  '<h2>Funding Your Dreams</h2><p>Education abroad doesn''t have to break the bank. There are numerous scholarship opportunities available for dedicated students.</p><h3>Types of Scholarships</h3><ul><li>Merit-based scholarships</li><li>Need-based financial aid</li><li>Country-specific programs</li><li>Subject-specific grants</li><li>University scholarships</li></ul><h3>Application Tips</h3><p>Start early, research thoroughly, and tailor each application to the specific scholarship requirements. A compelling personal statement can make all the difference.</p>',
+  'Admin',
+  'Scholarships',
+  ARRAY['scholarships', 'financial aid', 'funding', 'education finance'],
+  'Scholarship Guide: Funding Your International Education',
+  'Complete guide to finding and applying for scholarships to fund your international education. Tips, resources, and success stories.',
+  false,
+  true,
+  6,
+  NOW() - INTERVAL '2 days'
+);

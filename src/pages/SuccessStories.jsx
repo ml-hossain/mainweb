@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { 
   FiStar, 
   FiMapPin, 
@@ -21,6 +22,32 @@ const SuccessStories = () => {
   const headerRef = useRef(null)
   const contentRef = useRef(null)
   const statsRef = useRef(null)
+  const [stories, setStories] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch success stories from database
+  useEffect(() => {
+    const fetchSuccessStories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('success_stories')
+          .select('*')
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('Error fetching success stories:', error)
+        } else {
+          setStories(data || [])
+        }
+      } catch (error) {
+        console.error('Error fetching success stories:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSuccessStories()
+  }, [])
 
   useEffect(() => {
     const tl = gsap.timeline()
@@ -80,76 +107,6 @@ const SuccessStories = () => {
     { number: 15, suffix: '+', label: 'Countries', icon: FiMapPin }
   ]
 
-  const stories = [
-    {
-      name: 'Priya Sharma',
-      university: 'Harvard University',
-      course: 'MS in Computer Science',
-      country: 'USA',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'MA Education made my dream of studying at Harvard a reality. Their guidance was invaluable throughout the application process.',
-      rating: 5,
-      scholarship: '$20,000'
-    },
-    {
-      name: 'Arjun Patel',
-      university: 'University of Toronto',
-      course: 'MBA',
-      country: 'Canada',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'The visa process seemed daunting, but MA Education handled everything perfectly. Now I\'m living my dream in Toronto!',
-      rating: 5,
-      scholarship: '$15,000'
-    },
-    {
-      name: 'Sarah Johnson',
-      university: 'University of Melbourne',
-      course: 'Master of Engineering',
-      country: 'Australia',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'From university selection to scholarship applications, MA Education was with me every step. Couldn\'t have done it without them!',
-      rating: 5,
-      scholarship: '$12,000'
-    },
-    {
-      name: 'Rahul Gupta',
-      university: 'University of Oxford',
-      course: 'MSc in Data Science',
-      country: 'UK',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'Oxford was always a dream, and MA Education made it possible. Their expert guidance was the key to my success.',
-      rating: 5,
-      scholarship: '$18,000'
-    },
-    {
-      name: 'Meera Singh',
-      university: 'ETH Zurich',
-      course: 'MS in Mechanical Engineering',
-      country: 'Switzerland',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'The personalized approach and attention to detail from MA Education was exceptional. Now studying at one of the world\'s best universities!',
-      rating: 5,
-      scholarship: '$25,000'
-    },
-    {
-      name: 'David Kim',
-      university: 'National University of Singapore',
-      course: 'MBA',
-      country: 'Singapore',
-      year: '2023',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-      testimonial: 'MA Education\'s network and expertise in Asian universities helped me secure admission to NUS with a scholarship.',
-      rating: 5,
-      scholarship: '$22,000'
-    }
-  ]
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
       
@@ -201,60 +158,74 @@ const SuccessStories = () => {
 
       {/* Main Content */}
       <div ref={contentRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
-
         {/* Success Stories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stories.map((story, index) => (
-            <div key={index} className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-              {/* Student Image */}
-              <div className="flex items-center mb-6">
-                <img 
-                  src={story.image} 
-                  alt={story.name}
-                  className="w-16 h-16 rounded-full object-cover mr-4 border-4 border-blue-100"
-                />
-                <div>
-                  <h3 className="text-xl font-heading font-bold text-gray-800">{story.name}</h3>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FiMapPin className="w-4 h-4 mr-1" />
-                    {story.country}
-                    <FiCalendar className="w-4 h-4 ml-3 mr-1" />
-                    {story.year}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="text-white text-xl">Loading success stories...</div>
+          </div>
+        ) : stories.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-white text-xl">No success stories yet.</div>
+            <p className="text-gray-300 mt-2">Check back soon for inspiring student achievements!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {stories.map((story, index) => (
+              <div key={story.id || index} className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                {/* Student Image */}
+                <div className="flex items-center mb-6">
+                  <img 
+                    src={story.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'} 
+                    alt={story.name}
+                    className="w-16 h-16 rounded-full object-cover mr-4 border-4 border-blue-100"
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                    }}
+                  />
+                  <div>
+                    <h3 className="text-xl font-heading font-bold text-gray-800">{story.name}</h3>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <FiMapPin className="w-4 h-4 mr-1" />
+                      {story.country}
+                      <FiCalendar className="w-4 h-4 ml-3 mr-1" />
+                      {story.year}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* University Info */}
-              <div className="mb-6">
-                <h4 className="text-lg font-bold text-blue-600 mb-2">{story.university}</h4>
-                <p className="text-gray-600">{story.course}</p>
-              </div>
+                {/* University Info */}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-blue-600 mb-2">{story.university}</h4>
+                  <p className="text-gray-600">{story.course}</p>
+                </div>
 
-              {/* Scholarship Badge */}
-              <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 mb-6">
+                {/* Scholarship Badge - Only show if scholarship amount exists */}
+                {story.scholarship_amount && (
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 mb-6">
+                    <div className="flex items-center">
+                      <FiAward className="w-5 h-5 text-green-600 mr-2" />
+                      <span className="text-green-800 font-bold">{story.scholarship_amount}</span>
+                      <span className="text-green-700 ml-1">Scholarship</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Testimonial */}
+                <blockquote className="text-gray-700 italic mb-6 leading-relaxed">
+                  "{story.testimonial}"
+                </blockquote>
+
+                {/* Rating */}
                 <div className="flex items-center">
-                  <FiAward className="w-5 h-5 text-green-600 mr-2" />
-                  <span className="text-green-800 font-bold">{story.scholarship}</span>
-                  <span className="text-green-700 ml-1">Scholarship</span>
+                  {[...Array(story.rating || 5)].map((_, i) => (
+                    <FiStar key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                  <span className="ml-2 text-gray-600 font-medium">({story.rating || 5}/5)</span>
                 </div>
               </div>
-
-              {/* Testimonial */}
-              <blockquote className="text-gray-700 italic mb-6 leading-relaxed">
-                "{story.testimonial}"
-              </blockquote>
-
-              {/* Rating */}
-              <div className="flex items-center">
-                {[...Array(story.rating)].map((_, i) => (
-                  <FiStar key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-                <span className="ml-2 text-gray-600 font-medium">({story.rating}/5)</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* CTA Section - Full Width */}

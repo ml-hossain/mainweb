@@ -14,6 +14,7 @@ import UniversityEditor from './pages/UniversityEditor'
 import BlogManager from './pages/BlogManager'
 import BlogEditor from './pages/BlogEditor'
 import Consultations from './pages/Consultations'
+import SuccessStories from './pages/SuccessStories'
 import SeoManager from './pages/SeoManager'
 import Settings from './pages/Settings'
 
@@ -174,6 +175,7 @@ const AdminApp = () => {
       <Route path="blog/new" element={<BlogEditor onLogout={handleLogout} user={user} />} />
       <Route path="blog/edit/:id" element={<BlogEditor onLogout={handleLogout} user={user} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} user={user} />} />
+      <Route path="success-stories" element={<SuccessStories onLogout={handleLogout} user={user} />} />
       <Route path="seo" element={<SeoManager onLogout={handleLogout} user={user} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} user={user} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

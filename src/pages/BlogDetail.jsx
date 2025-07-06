@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { FiCalendar, FiUser, FiTag, FiArrowLeft, FiShare2, FiHeart, FiBookmark } from 'react-icons/fi'
 import { FaFacebook, FaTwitter, FaLinkedin, FaWhatsapp } from 'react-icons/fa'
 import { supabase } from '../lib/supabase'
+import GoogleAds from '../components/GoogleAds'
 
 const BlogDetail = () => {
   const { slug } = useParams()
@@ -21,12 +22,27 @@ const BlogDetail = () => {
   const fetchBlogPost = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      
+      // Try with published boolean first
+      let { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .eq('slug', slug)
-        .eq('status', 'published')
+        .eq('published', true)
         .single()
+
+      // If that fails, try without the published filter
+      if (error) {
+        console.log('Trying without published filter:', error.message)
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .single()
+        
+        data = fallback.data
+        error = fallback.error
+      }
 
       if (error) {
         throw new Error(error.message)
@@ -34,8 +50,11 @@ const BlogDetail = () => {
 
       setPost(data)
       setLikeCount(data.like_count || 0)
-      fetchRelatedPosts(data.category, data.id)
+      if (data.category && data.id) {
+        fetchRelatedPosts(data.category, data.id)
+      }
     } catch (err) {
+      console.error('Blog post fetch error:', err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -44,20 +63,36 @@ const BlogDetail = () => {
 
   const fetchRelatedPosts = async (category, postId) => {
     try {
-      const { data, error } = await supabase
+      // Try with published filter first
+      let { data, error } = await supabase
         .from('blog_posts')
-        .select('id, title, slug, excerpt, published_at, category')
+        .select('id, title, slug, excerpt, created_at, category')
         .eq('category', category)
-        .eq('status', 'published')
+        .eq('published', true)
         .neq('id', postId)
         .limit(3)
-        .order('published_at', { ascending: false })
+        .order('created_at', { ascending: false })
+
+      // If that fails, try without published filter
+      if (error) {
+        console.log('Trying related posts without published filter:', error.message)
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('id, title, slug, excerpt, created_at, category')
+          .eq('category', category)
+          .neq('id', postId)
+          .limit(3)
+          .order('created_at', { ascending: false })
+        
+        data = fallback.data
+        error = fallback.error
+      }
 
       if (!error && data) {
         setRelatedPosts(data)
       }
     } catch (err) {
-      console.error('Error fetching related posts:', err)
+      console.error('Related posts fetch error:', err)
     }
   }
 
@@ -207,7 +242,7 @@ const BlogDetail = () => {
                     </div>
                     <div className="flex items-center">
                       <FiCalendar className="h-4 w-4 mr-1" />
-                      <span>{formatDate(post.published_at)}</span>
+                      <span>{formatDate(post.published_at || post.created_at)}</span>
                     </div>
                   </div>
 
@@ -294,19 +329,12 @@ const BlogDetail = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            {/* Ad Section */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-6 mb-8 border border-amber-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Guidance?</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Get personalized advice for your study abroad journey. Our expert consultants are here to help!
-              </p>
-              <Link
-                to="/consultation"
-                className="block w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-center py-3 px-4 rounded-md font-medium hover:from-amber-600 hover:to-orange-600 transition-all duration-200"
-              >
-                Book Free Consultation
-              </Link>
-            </div>
+            {/* Google Ads Section */}
+            <GoogleAds 
+              adSize="medium-rectangle"
+              className="mb-8"
+              label="Advertisement"
+            />
 
             {/* Related Posts */}
             {relatedPosts.length > 0 && (
@@ -321,7 +349,7 @@ const BlogDetail = () => {
                         </Link>
                       </h4>
                       <p className="text-xs text-gray-500 mb-2">
-                        {formatDate(relatedPost.published_at)}
+                        {formatDate(relatedPost.published_at || relatedPost.created_at)}
                       </p>
                       <p className="text-xs text-gray-600 leading-relaxed">
                         {relatedPost.excerpt ? relatedPost.excerpt.substring(0, 100) + '...' : 'No excerpt available'}
@@ -332,25 +360,55 @@ const BlogDetail = () => {
               </div>
             )}
 
-            {/* Newsletter Signup */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Stay Updated</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Subscribe to our newsletter for the latest study abroad tips and updates.
-              </p>
-              <form className="space-y-3">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Subscribe
-                </button>
-              </form>
+            {/* Premium Services Ad */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-sm p-6 border border-blue-200">
+              <div className="text-center">
+                <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Premium Study Abroad Services</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Get personalized guidance from our expert counselors. From university selection to visa processing - we've got you covered!
+                </p>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-center text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    1-on-1 Expert Consultation
+                  </div>
+                  <div className="flex items-center justify-center text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Complete Application Support
+                  </div>
+                  <div className="flex items-center justify-center text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Visa Processing Assistance
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Link
+                    to="/consultation"
+                    className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-md font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Book Free Consultation
+                  </Link>
+                  <Link
+                    to="/services"
+                    className="block w-full bg-white text-blue-600 py-2 px-4 rounded-md font-medium hover:bg-blue-50 transition-colors border border-blue-200"
+                  >
+                    View All Services
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>

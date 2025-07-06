@@ -616,15 +616,38 @@ const BlogEditor = ({ onLogout, user }) => {
         <div className="w-full xl:w-[30rem] 2xl:w-[32rem] xl:min-w-0">
           <div className="sticky top-6">
             <AdvancedSEOTool
-              content={blogPost?.content || ''}
-              title={blogPost?.title || ''}
-              description={blogPost?.excerpt || ''}
-              country="bangladesh"
-              universityName=""
-              onContentUpdate={handleContentChange}
+              context="blog"
+              fields={{ 
+                title: true, 
+                metaDescription: true, 
+                tags: true, 
+                mainContent: true 
+              }}
+              generateFor={['metaDescription', 'mainContent', 'tags']}
+              onContentGenerated={(content) => {
+                console.log('Generated blog content:', content);
+                // Apply generated content to the form
+                if (content.title) {
+                  handleInputChange({target: {name: 'title', value: content.title}});
+                }
+                if (content.shortDescription) {
+                  handleInputChange({target: {name: 'excerpt', value: content.shortDescription}});
+                }
+                if (content.metaDescription) {
+                  handleInputChange({target: {name: 'meta_description', value: content.metaDescription}});
+                }
+                if (content.content || content.longDescription) {
+                  handleContentChange(content.content || content.longDescription);
+                }
+              }}
               onTitleUpdate={(title) => handleInputChange({target: {name: 'title', value: title}})}
               onDescriptionUpdate={(desc) => handleInputChange({target: {name: 'excerpt', value: desc}})}
-              targetEntity="blog"
+              onContentUpdate={handleContentChange}
+              initialData={{
+                title: blogPost?.title || '',
+                shortDescription: blogPost?.excerpt || '',
+                content: blogPost?.content || ''
+              }}
             />
           </div>
         </div>

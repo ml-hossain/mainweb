@@ -84,6 +84,14 @@ const AdminLayout = ({ children, onLogout, user }) => {
       description: 'Student Inquiries'
     },
     { 
+      name: 'Success Stories', 
+      href: '/admin/success-stories', 
+      icon: FiAward,
+      color: 'from-yellow-500 to-orange-500',
+      bgColor: 'bg-yellow-50',
+      description: 'Student Achievements'
+    },
+    { 
       name: 'SEO Manager', 
       href: '/admin/seo', 
       icon: FiTarget,

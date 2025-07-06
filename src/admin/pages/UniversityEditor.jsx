@@ -668,15 +668,34 @@ const UniversityEditor = ({ onLogout, user }) => {
         <div className="w-full xl:w-[30rem] 2xl:w-[32rem] xl:min-w-0">
           <div className="sticky top-6">
             <AdvancedSEOTool
-              content={university?.page_content || ''}
-              title={university?.name || ''}
-              description={university?.description || ''}
-              country={university?.content?.country || ''}
-              universityName={university?.name || ''}
-              onContentUpdate={handlePageContentChange}
+              context="university"
+              fields={{ 
+                title: true, 
+                shortDescription: true, 
+                mainContent: true 
+              }}
+              generateFor={['shortDescription', 'mainContent']}
+              onContentGenerated={(content) => {
+                console.log('Generated university content:', content);
+                // Apply generated content to the form
+                if (content.title) {
+                  handleInputChange({target: {name: 'name', value: content.title}});
+                }
+                if (content.shortDescription) {
+                  handleInputChange({target: {name: 'description', value: content.shortDescription}});
+                }
+                if (content.content || content.longDescription) {
+                  handlePageContentChange(content.content || content.longDescription);
+                }
+              }}
               onTitleUpdate={(title) => handleInputChange({target: {name: 'name', value: title}})}
               onDescriptionUpdate={(desc) => handleInputChange({target: {name: 'description', value: desc}})}
-              targetEntity="university"
+              onContentUpdate={handlePageContentChange}
+              initialData={{
+                title: university?.name || '',
+                shortDescription: university?.description || '',
+                content: university?.page_content || ''
+              }}
             />
           </div>
         </div>

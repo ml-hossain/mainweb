@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { FiTarget, FiEdit, FiTrash2, FiPlus, FiSearch, FiRefreshCw, FiGlobe, FiEye, FiSettings, FiTrendingUp, FiBarChart2, FiSave, FiX, FiCheck, FiAlertTriangle, FiExternalLink, FiCopy, FiImage } from 'react-icons/fi'
+import { FiTarget, FiEdit, FiTrash2, FiPlus, FiSearch, FiRefreshCw, FiGlobe, FiEye, FiSettings, FiTrendingUp, FiBarChart2, FiSave, FiX, FiCheck, FiAlertTriangle, FiExternalLink, FiCopy, FiImage, FiZap } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
 import { supabase } from '../../lib/supabase'
+import AdvancedSEOTool from '../../components/AdvancedSEOTool'
 
 const SeoManager = ({ onLogout, user }) => {
   const [seoSettings, setSeoSettings] = useState([])
@@ -13,6 +14,8 @@ const SeoManager = ({ onLogout, user }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [itemToDelete, setItemToDelete] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showAdvancedSEO, setShowAdvancedSEO] = useState(false)
+  const [seoToolContext, setSeoToolContext] = useState('blog')
 
   useEffect(() => {
     fetchSeoSettings()
@@ -675,6 +678,65 @@ const SeoManager = ({ onLogout, user }) => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Advanced SEO Tool Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                  <FiZap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Advanced SEO Tool</h3>
+                  <p className="text-sm text-gray-600">AI-powered content generation, keyword research, and competitor analysis</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <select
+                  value={seoToolContext}
+                  onChange={(e) => setSeoToolContext(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                >
+                  <option value="blog">Blog Content</option>
+                  <option value="university">University Pages</option>
+                </select>
+                <button
+                  onClick={() => setShowAdvancedSEO(!showAdvancedSEO)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                    showAdvancedSEO 
+                      ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  <FiZap className="w-4 h-4" />
+                  <span>{showAdvancedSEO ? 'Hide' : 'Show'} Advanced Tool</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {showAdvancedSEO && (
+            <div className="p-6">
+              <AdvancedSEOTool
+                context={seoToolContext}
+                fields={seoToolContext === 'blog' ? 
+                  { title: true, metaDescription: true, tags: true, mainContent: true } :
+                  { title: true, shortDescription: true, mainContent: true }
+                }
+                generateFor={seoToolContext === 'blog' ? 
+                  ['metaDescription', 'mainContent', 'tags'] :
+                  ['shortDescription', 'mainContent']
+                }
+                onContentGenerated={(content) => {
+                  console.log('Generated content:', content);
+                  // You can integrate this with your form or save to database
+                }}
+                initialData={{}}
+              />
+            </div>
+          )}
         </div>
 
         {/* Search and Filters */}

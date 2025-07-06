@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiCalendar, FiUser, FiArrowRight, FiSearch, FiTag, FiTrendingUp, FiClock, FiEye, FiBookmark } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { gsap } from 'gsap'
+import GoogleAds from '../components/GoogleAds'
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState([])
@@ -58,11 +59,25 @@ const Blog = () => {
   const fetchBlogPosts = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      
+      // Try with published filter first
+      let { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .eq('published', true)
         .order('created_at', { ascending: false })
+
+      // If published column doesn't work, get all posts
+      if (error) {
+        console.log('Published column issue, getting all posts:', error.message)
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+        
+        data = fallback.data
+        error = fallback.error
+      }
       
       if (error) {
         throw new Error(error.message)
@@ -88,12 +103,25 @@ const Blog = () => {
         .limit(3)
       
       // If featured column doesn't exist, fallback to just getting latest published posts
-      if (error && error.message.includes('featured does not exist')) {
+      if (error && (error.message.includes('featured') || error.message.includes('does not exist'))) {
         console.log('Featured column not found, falling back to latest posts')
         const fallback = await supabase
           .from('blog_posts')
           .select('*')
           .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(3)
+        
+        data = fallback.data
+        error = fallback.error
+      }
+
+      // If published column also doesn't work, just get all posts
+      if (error) {
+        console.log('Published column issue, getting all posts')
+        const fallback = await supabase
+          .from('blog_posts')
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(3)
         
@@ -123,11 +151,16 @@ const Blog = () => {
   const categories = [...new Set(blogPosts.map(post => post.category))]
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    if (!dateString) return 'Recently'
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      return 'Recently'
+    }
   }
 
   const truncateText = (text, wordLimit) => {
@@ -232,9 +265,9 @@ const Blog = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="xl:col-span-3">
             {/* Search and Filter */}
             <div className="mb-12 bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20">
               <div className="flex flex-col md:flex-row gap-6">
@@ -269,71 +302,67 @@ const Blog = () => {
               </div>
             </div>
 
-            {/* Blog Posts Grid */}
-            <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Blog Posts Grid - 3 columns on large screens */}
+            <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPosts.map((post) => (
-                <article key={post.id} className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] border border-white/20 hover:border-white/40">
+                <article key={post.id} className="group bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] border border-white/20 hover:border-white/40 flex flex-col h-full">
                   {/* Featured Image */}
-                  {post.featured_image && (
-                    <div className="aspect-video overflow-hidden relative">
-                      <img
-                        src={post.featured_image}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                  )}
+                  <div className="aspect-video overflow-hidden relative flex-shrink-0">
+                    <img
+                      src={post.featured_image || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
                   
-                  <div className="p-8">
-                    {/* Category Badge */}
-                    {post.category && (
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 rounded-full border border-emerald-500/30">
-                          <FiTag className="w-3 h-3 mr-1" />
-                          {post.category}
-                        </span>
-                        <div className="flex items-center text-xs text-gray-400">
-                          <FiClock className="w-3 h-3 mr-1" />
-                          5 min read
-                        </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    {/* Category Badge and Reading Time */}
+                    <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                      <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 rounded-full border border-emerald-500/30">
+                        <FiTag className="w-3 h-3 mr-1" />
+                        {post.category || 'Study Abroad'}
+                      </span>
+                      <div className="flex items-center text-xs text-gray-400">
+                        <FiClock className="w-3 h-3 mr-1" />
+                        {post.reading_time || 5} min read
                       </div>
-                    )}
+                    </div>
                     
                     {/* Title */}
-                    <h2 className="text-xl font-bold text-white mb-4 hover:text-emerald-300 transition-colors leading-tight group-hover:text-emerald-300">
-                      <Link to={`/blog/${post.slug}`} className="block">
+                    <h2 className="text-lg font-bold text-white mb-3 hover:text-emerald-300 transition-colors leading-tight group-hover:text-emerald-300 flex-shrink-0 min-h-[4.5rem] overflow-visible">
+                      <Link to={`/blog/${post.slug}`} className="block line-clamp-3">
                         {post.title}
                       </Link>
                     </h2>
                     
                     {/* Excerpt */}
-                    <p className="text-gray-300 mb-6 leading-relaxed line-clamp-3">
-                      {truncateText(post.excerpt, 30)}
+                    <p className="text-gray-300 mb-4 leading-relaxed line-clamp-2 flex-grow text-sm min-h-[3rem]">
+                      {truncateText(post.excerpt, 20)}
                     </p>
                     
                     {/* Meta Information */}
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-6">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex items-center justify-between text-xs text-gray-400 mb-4 flex-shrink-0">
+                      <div className="flex items-center space-x-3">
                         <div className="flex items-center">
-                          <FiUser className="w-4 h-4 mr-2" />
-                          <span>{post.author}</span>
+                          <FiUser className="w-3 h-3 mr-1" />
+                          <span className="truncate max-w-20">{post.author}</span>
                         </div>
                         <div className="flex items-center">
-                          <FiCalendar className="w-4 h-4 mr-2" />
-                          <span>{formatDate(post.published_at)}</span>
+                          <FiCalendar className="w-3 h-3 mr-1" />
+                          <span>{formatDate(post.published_at || post.created_at)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <FiEye className="w-4 h-4" />
-                        <FiBookmark className="w-4 h-4 hover:text-emerald-400 cursor-pointer transition-colors" />
+                      <div className="flex items-center space-x-2">
+                        <FiEye className="w-3 h-3" />
+                        <FiBookmark className="w-3 h-3 hover:text-emerald-400 cursor-pointer transition-colors" />
                       </div>
                     </div>
                     
                     {/* Read More Button */}
                     <Link
                       to={`/blog/${post.slug}`}
-                      className="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg group/btn"
+                      className="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg group/btn text-sm flex-shrink-0 mt-auto"
                     >
                       Read Full Article
                       <FiArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
@@ -362,7 +391,7 @@ const Blog = () => {
           </div>
 
           {/* Sidebar */}
-          <div ref={sidebarRef} className="lg:col-span-1 space-y-8">
+          <div ref={sidebarRef} className="xl:col-span-1 space-y-8">
             {/* CTA Section */}
             <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl rounded-2xl p-8 border border-emerald-500/30 shadow-2xl">
               <div className="text-center">
@@ -411,7 +440,7 @@ const Blog = () => {
                           </h4>
                           <div className="flex items-center text-xs text-gray-400">
                             <FiCalendar className="w-3 h-3 mr-1" />
-                            {formatDate(post.published_at)}
+                            {formatDate(post.published_at || post.created_at)}
                           </div>
                         </div>
                       </Link>
@@ -450,6 +479,13 @@ const Blog = () => {
                 </div>
               </div>
             )}
+
+            {/* Google Ads - Skyscraper */}
+            <GoogleAds 
+              adSize="wide-skyscraper"
+              label="Sponsored"
+              className="sticky top-8"
+            />
           </div>
         </div>
       </div>
