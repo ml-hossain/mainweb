@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fi'
 import { supabase } from '../lib/supabase'
 import { validateInput, sanitizeHtml } from '../lib/security'
+import SEOHead from '../components/SEOHead'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -201,6 +202,12 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      <SEOHead 
+        title="Contact MA Education - Get Free Consultation Today"
+        description="Contact MA Education for expert guidance on studying abroad. Book your free consultation today and speak with our education experts. We're here to help you achieve your dreams."
+        keywords="contact MA Education, free consultation, study abroad consultation, educational guidance, international education advice, university admission help, student services Bangladesh"
+        canonical="https://ma-education.com/contact"
+      />
       
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gray-900">

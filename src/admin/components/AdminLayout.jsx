@@ -92,14 +92,6 @@ const AdminLayout = ({ children, onLogout, user }) => {
       description: 'Student Achievements'
     },
     { 
-      name: 'SEO Manager', 
-      href: '/admin/seo', 
-      icon: FiTarget,
-      color: 'from-orange-500 to-red-500',
-      bgColor: 'bg-orange-50',
-      description: 'Page SEO Settings'
-    },
-    { 
       name: 'Ad Manager', 
       href: '/admin/ads', 
       icon: FiBarChart2,

@@ -10,6 +10,9 @@ const SUPPRESS_PATTERNS = [
   'DOMNodeInserted',
   'mutation event',
   'Support for this event type has been removed',
+  'Listener added for a \'DOMNodeInserted\' mutation event',
+  '[Deprecation]',
+  'chromestatus.com/feature/5083947249172480',
   'The Content Security Policy directive',
   'X-Frame-Options may only be set via an HTTP header'
 ]

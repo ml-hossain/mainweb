@@ -23,6 +23,9 @@ import AdminApp from './admin/AdminApp'
 import ContentDemo from './pages/ContentDemo'
 import Blog from './pages/Blog'
 import BlogDetail from './pages/BlogDetail'
+import SEOToolPage from './pages/SEOTool'
+import SEODemo from './pages/SEODemo'
+import SEOTestHelper from './components/SEOTestHelper'
 
 // Layout component for public pages
 const PublicLayout = ({ children }) => {
@@ -41,6 +44,7 @@ const PublicLayout = ({ children }) => {
 function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <SEOTestHelper />
       <Routes>
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
@@ -52,6 +56,8 @@ function App() {
         <Route path="/universities/:slug" element={<PublicLayout><UniversityPage /></PublicLayout>} />
         <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
         <Route path="/blog/:slug" element={<PublicLayout><BlogDetail /></PublicLayout>} />
+            <Route path="/seo-tool" element={<SEOToolPage />} />
+            <Route path="/seo-demo" element={<PublicLayout><SEODemo /></PublicLayout>} />
 
         {/* Services Sub-routes */}
         <Route path="/services/university-selection" element={<PublicLayout><UniversitySelection /></PublicLayout>} />

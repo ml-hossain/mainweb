@@ -1,399 +1,756 @@
-/**
- * SEO Score Calculator
- * 
- * Calculates SEO scores and provides suggestions for improvement
- * Includes auto-fix functionality for common SEO issues
- */
-
-class SeoScoreCalculator {
+// Advanced SEO Score Calculator
+export class SEOScoreCalculator {
   constructor() {
     this.weights = {
-      titleLength: 10,
-      titleKeywords: 15,
+      title: 15,
       metaDescription: 10,
-      contentLength: 15,
-      keywordDensity: 10,
+      content: 20,
+      keywords: 15,
       headings: 10,
-      readability: 10,
-      internalLinks: 5,
-      externalLinks: 5,
-      imageAlt: 5,
-      urlStructure: 5,
-      competition: 5,
-    };
+      images: 8,
+      links: 7,
+      technical: 10,
+      readability: 5
+    }
   }
 
-  // Calculate overall SEO score
-  async calculate({ title, content, keywords, competitors }) {
-    const scores = {};
-    const suggestions = [];
+  // Main scoring function
+  calculateOverallScore(data, keywords = []) {
+    const scores = {
+      title: this.scoreTitleOptimization(data.title, keywords),
+      metaDescription: this.scoreMetaDescription(data.meta_description || data.description, keywords),
+      content: this.scoreContentOptimization(data.content || data.page_content, keywords),
+      keywords: this.scoreKeywordOptimization(data, keywords),
+      headings: this.scoreHeadingStructure(data.content || data.page_content),
+      images: this.scoreImageOptimization(data.content || data.page_content),
+      links: this.scoreLinkOptimization(data.content || data.page_content),
+      technical: this.scoreTechnicalSEO(data),
+      readability: this.scoreReadability(data.content || data.page_content)
+    }
 
-    // Title optimization
-    const titleScore = this.calculateTitleScore(title, keywords);
-    scores.title = titleScore.score;
-    suggestions.push(...titleScore.suggestions);
+    // Calculate weighted score
+    let totalScore = 0
+    let totalWeight = 0
 
-    // Content optimization
-    const contentScore = this.calculateContentScore(content, keywords);
-    scores.content = contentScore.score;
-    suggestions.push(...contentScore.suggestions);
-
-    // Keyword optimization
-    const keywordScore = this.calculateKeywordScore(title, content, keywords);
-    scores.keywords = keywordScore.score;
-    suggestions.push(...keywordScore.suggestions);
-
-    // Competition analysis
-    const competitionScore = this.calculateCompetitionScore(competitors);
-    scores.competition = competitionScore.score;
-    suggestions.push(...competitionScore.suggestions);
-
-    // Calculate weighted total
-    const totalScore = Math.round(
-      (scores.title * this.weights.titleLength +
-       scores.content * this.weights.contentLength +
-       scores.keywords * this.weights.keywordDensity +
-       scores.competition * this.weights.competition) / 100
-    );
+    Object.entries(scores).forEach(([category, score]) => {
+      if (score !== null) {
+        totalScore += score * this.weights[category]
+        totalWeight += this.weights[category]
+      }
+    })
 
     return {
-      score: Math.min(totalScore, 100),
+      overall: totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0,
       breakdown: scores,
-      suggestions: suggestions.filter(s => s), // Remove empty suggestions
-    };
+      suggestions: this.generateSuggestions(scores, data, keywords)
+    }
   }
 
-  // Calculate title score
-  calculateTitleScore(title, keywords) {
-    const suggestions = [];
-    let score = 0;
+  // Title optimization scoring
+  scoreTitleOptimization(title, keywords = []) {
+    if (!title) return 0
 
-    if (!title) {
-      suggestions.push('Title is required');
-      return { score: 0, suggestions };
+    let score = 0
+    const titleLength = title.length
+
+    // Length optimization (0-40 points)
+    if (titleLength >= 30 && titleLength <= 60) {
+      score += 40
+    } else if (titleLength >= 25 && titleLength <= 70) {
+      score += 30
+    } else if (titleLength >= 20 && titleLength <= 80) {
+      score += 20
+    } else if (titleLength >= 15) {
+      score += 10
     }
 
-    // Title length (50-60 characters is optimal)
-    const titleLength = title.length;
-    if (titleLength < 30) {
-      suggestions.push('Title is too short. Aim for 50-60 characters.');
-      score += 20;
-    } else if (titleLength > 60) {
-      suggestions.push('Title is too long. Keep it under 60 characters.');
-      score += 60;
-    } else {
-      score += 100;
-    }
-
-    // Keyword presence in title
-    const titleLower = title.toLowerCase();
-    const keywordInTitle = keywords.some(keyword => 
-      titleLower.includes(keyword.toLowerCase())
-    );
-    
-    if (keywordInTitle) {
-      score += 100;
-    } else {
-      suggestions.push('Include your target keywords in the title');
-    }
-
-    // Title readability
-    const words = title.split(' ');
-    if (words.length < 5) {
-      suggestions.push('Title should be more descriptive (5+ words)');
-      score += 50;
-    } else if (words.length > 12) {
-      suggestions.push('Title is too wordy. Keep it concise.');
-      score += 70;
-    } else {
-      score += 100;
-    }
-
-    return {
-      score: Math.round(score / 3), // Average of 3 checks
-      suggestions,
-    };
-  }
-
-  // Calculate content score
-  calculateContentScore(content, keywords) {
-    const suggestions = [];
-    let score = 0;
-
-    if (!content || Object.keys(content).length === 0) {
-      suggestions.push('Content is required');
-      return { score: 0, suggestions };
-    }
-
-    // Get total content length
-    const totalContent = Object.values(content).join(' ');
-    const wordCount = totalContent.split(/\s+/).length;
-
-    // Content length
-    if (wordCount < 300) {
-      suggestions.push('Content is too short. Aim for at least 300 words.');
-      score += 30;
-    } else if (wordCount > 2000) {
-      suggestions.push('Content might be too long. Consider breaking it up.');
-      score += 80;
-    } else {
-      score += 100;
-    }
-
-    // Keyword density
-    const keywordDensity = this.calculateKeywordDensity(totalContent, keywords);
-    if (keywordDensity < 0.5) {
-      suggestions.push('Keyword density is too low. Include more target keywords.');
-      score += 40;
-    } else if (keywordDensity > 3) {
-      suggestions.push('Keyword density is too high. Avoid keyword stuffing.');
-      score += 60;
-    } else {
-      score += 100;
-    }
-
-    // Content structure
-    const hasHeadings = this.hasHeadings(totalContent);
-    if (!hasHeadings) {
-      suggestions.push('Add headings (H2, H3) to improve content structure.');
-      score += 70;
-    } else {
-      score += 100;
-    }
-
-    return {
-      score: Math.round(score / 3), // Average of 3 checks
-      suggestions,
-    };
-  }
-
-  // Calculate keyword score
-  calculateKeywordScore(title, content, keywords) {
-    const suggestions = [];
-    let score = 0;
-
-    if (!keywords || keywords.length === 0) {
-      suggestions.push('Select target keywords');
-      return { score: 0, suggestions };
-    }
-
-    // Keyword count
-    if (keywords.length < 3) {
-      suggestions.push('Add more target keywords (3-5 recommended)');
-      score += 60;
-    } else if (keywords.length > 8) {
-      suggestions.push('Too many keywords. Focus on 3-5 primary keywords.');
-      score += 70;
-    } else {
-      score += 100;
-    }
-
-    // Keyword placement
-    const titleLower = title.toLowerCase();
-    const keywordsInTitle = keywords.filter(keyword => 
-      titleLower.includes(keyword.toLowerCase())
-    ).length;
-    
-    if (keywordsInTitle === 0) {
-      suggestions.push('Include keywords in the title');
-      score += 30;
-    } else {
-      score += 100;
-    }
-
-    // Keyword variation
-    const hasLongTail = keywords.some(keyword => keyword.split(' ').length > 2);
-    if (!hasLongTail) {
-      suggestions.push('Include some long-tail keywords (3+ words)');
-      score += 80;
-    } else {
-      score += 100;
-    }
-
-    return {
-      score: Math.round(score / 3), // Average of 3 checks
-      suggestions,
-    };
-  }
-
-  // Calculate competition score
-  calculateCompetitionScore(competitors) {
-    const suggestions = [];
-    let score = 100; // Start with perfect score
-
-    if (!competitors || competitors.length === 0) {
-      suggestions.push('Analyze competitors to understand ranking difficulty');
-      return { score: 50, suggestions };
-    }
-
-    // Average domain authority of competitors
-    const avgDA = competitors.reduce((sum, comp) => sum + (comp.domainAuthority || 0), 0) / competitors.length;
-    
-    if (avgDA > 80) {
-      suggestions.push('High competition. Consider targeting long-tail keywords.');
-      score = 30;
-    } else if (avgDA > 60) {
-      suggestions.push('Moderate competition. Focus on quality content and backlinks.');
-      score = 60;
-    } else {
-      suggestions.push('Low competition. Good opportunity for ranking.');
-      score = 90;
-    }
-
-    // Competition density
-    const topPageCompetitors = competitors.filter(comp => comp.page === 1).length;
-    if (topPageCompetitors > 8) {
-      suggestions.push('First page is highly competitive. Consider alternative keywords.');
-      score = Math.min(score, 40);
-    }
-
-    return { score, suggestions };
-  }
-
-  // Auto-fix SEO issues
-  async autoFix({ title, content, suggestions, keywords }) {
-    let fixedTitle = title;
-    let fixedContent = { ...content };
-    let fixedCount = 0;
-
-    // Auto-fix title issues
-    if (suggestions.some(s => s.includes('Title is too long'))) {
-      fixedTitle = this.truncateTitle(title, 60);
-      fixedCount++;
-    }
-
-    if (suggestions.some(s => s.includes('Include your target keywords in the title'))) {
-      fixedTitle = this.addKeywordsToTitle(fixedTitle, keywords);
-      fixedCount++;
-    }
-
-    // Auto-fix content issues
-    if (suggestions.some(s => s.includes('Add headings'))) {
-      fixedContent = this.addHeadings(fixedContent);
-      fixedCount++;
-    }
-
-    if (suggestions.some(s => s.includes('Keyword density is too low'))) {
-      fixedContent = this.improveKeywordDensity(fixedContent, keywords);
-      fixedCount++;
-    }
-
-    if (suggestions.some(s => s.includes('Content is too short'))) {
-      fixedContent = this.expandContent(fixedContent, keywords);
-      fixedCount++;
-    }
-
-    return {
-      title: fixedTitle,
-      content: fixedContent,
-      fixedCount,
-    };
-  }
-
-  // Helper methods
-  calculateKeywordDensity(content, keywords) {
-    const words = content.toLowerCase().split(/\s+/);
-    const keywordCount = keywords.reduce((count, keyword) => {
-      const keywordWords = keyword.toLowerCase().split(/\s+/);
-      return count + this.countOccurrences(words, keywordWords);
-    }, 0);
-    
-    return (keywordCount / words.length) * 100;
-  }
-
-  countOccurrences(words, keywordWords) {
-    let count = 0;
-    for (let i = 0; i <= words.length - keywordWords.length; i++) {
-      if (keywordWords.every((word, j) => words[i + j] === word)) {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  hasHeadings(content) {
-    return /#{1,6}\s/.test(content) || /<h[1-6]/.test(content);
-  }
-
-  truncateTitle(title, maxLength) {
-    if (title.length <= maxLength) return title;
-    return title.substring(0, maxLength - 3) + '...';
-  }
-
-  addKeywordsToTitle(title, keywords) {
-    if (keywords.length === 0) return title;
-    
-    const primaryKeyword = keywords[0];
-    const titleLower = title.toLowerCase();
-    
-    if (titleLower.includes(primaryKeyword.toLowerCase())) {
-      return title;
-    }
-    
-    return `${primaryKeyword} - ${title}`;
-  }
-
-  addHeadings(content) {
-    const fixedContent = { ...content };
-    
-    Object.keys(fixedContent).forEach(key => {
-      if (typeof fixedContent[key] === 'string' && fixedContent[key].length > 100) {
-        const paragraphs = fixedContent[key].split('\n\n');
-        if (paragraphs.length > 1) {
-          fixedContent[key] = paragraphs.map((para, index) => 
-            index === 0 ? para : `## Key Point ${index + 1}\n\n${para}`
-          ).join('\n\n');
-        }
-      }
-    });
-    
-    return fixedContent;
-  }
-
-  improveKeywordDensity(content, keywords) {
-    const fixedContent = { ...content };
-    
-    if (keywords.length === 0) return fixedContent;
-    
-    const primaryKeyword = keywords[0];
-    
-    Object.keys(fixedContent).forEach(key => {
-      if (typeof fixedContent[key] === 'string') {
-        const contentLower = fixedContent[key].toLowerCase();
+    // Keyword presence (0-40 points)
+    if (keywords.length > 0) {
+      const primaryKeyword = keywords[0]
+      if (title.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+        score += 40
         
-        // Add keyword if not present
-        if (!contentLower.includes(primaryKeyword.toLowerCase())) {
-          fixedContent[key] = `${fixedContent[key]} This comprehensive guide covers everything about ${primaryKeyword}.`;
+        // Bonus for keyword position (0-10 points)
+        const keywordPosition = title.toLowerCase().indexOf(primaryKeyword.toLowerCase())
+        if (keywordPosition === 0) {
+          score += 10
+        } else if (keywordPosition <= 10) {
+          score += 5
         }
       }
-    });
-    
-    return fixedContent;
+
+      // Secondary keyword bonus (0-10 points)
+      const secondaryKeywords = keywords.slice(1, 3)
+      const secondaryMatches = secondaryKeywords.filter(kw => 
+        title.toLowerCase().includes(kw.toLowerCase())
+      )
+      score += Math.min(secondaryMatches.length * 5, 10)
+    }
+
+    return Math.min(score, 100)
   }
 
-  expandContent(content, keywords) {
-    const fixedContent = { ...content };
+  // Meta description scoring
+  scoreMetaDescription(description, keywords = []) {
+    if (!description) return 0
+
+    let score = 0
+    const descLength = description.length
+
+    // Length optimization (0-40 points)
+    if (descLength >= 120 && descLength <= 160) {
+      score += 40
+    } else if (descLength >= 100 && descLength <= 180) {
+      score += 30
+    } else if (descLength >= 80 && descLength <= 200) {
+      score += 20
+    } else if (descLength >= 50) {
+      score += 10
+    }
+
+    // Keyword presence (0-30 points)
+    if (keywords.length > 0) {
+      const keywordMatches = keywords.filter(kw => 
+        description.toLowerCase().includes(kw.toLowerCase())
+      )
+      score += Math.min(keywordMatches.length * 10, 30)
+    }
+
+    // Call-to-action presence (0-15 points)
+    const ctaWords = ['learn', 'discover', 'find', 'get', 'read', 'explore', 'contact', 'apply']
+    const hasCTA = ctaWords.some(word => 
+      description.toLowerCase().includes(word)
+    )
+    if (hasCTA) score += 15
+
+    // Uniqueness (0-15 points)
+    const uniqueWords = new Set(description.toLowerCase().split(/\s+/))
+    const uniquenessRatio = uniqueWords.size / description.split(/\s+/).length
+    score += Math.round(uniquenessRatio * 15)
+
+    return Math.min(score, 100)
+  }
+
+  // Content optimization scoring
+  scoreContentOptimization(content, keywords = []) {
+    if (!content) return 0
+
+    let score = 0
+    const wordCount = this.getWordCount(content)
+    const cleanContent = this.stripHtml(content)
+
+    // Content length (0-30 points)
+    if (wordCount >= 1000) {
+      score += 30
+    } else if (wordCount >= 600) {
+      score += 25
+    } else if (wordCount >= 300) {
+      score += 20
+    } else if (wordCount >= 150) {
+      score += 15
+    } else if (wordCount >= 100) {
+      score += 10
+    }
+
+    // Keyword density (0-25 points)
+    if (keywords.length > 0) {
+      const primaryKeyword = keywords[0]
+      const keywordCount = this.countKeywordOccurrences(cleanContent, primaryKeyword)
+      const density = (keywordCount / wordCount) * 100
+
+      if (density >= 1 && density <= 3) {
+        score += 25
+      } else if (density >= 0.5 && density <= 4) {
+        score += 20
+      } else if (density >= 0.2 && density <= 5) {
+        score += 15
+      } else if (density > 0) {
+        score += 10
+      }
+    }
+
+    // Keyword distribution (0-20 points)
+    if (keywords.length > 0) {
+      const primaryKeyword = keywords[0]
+      const paragraphs = cleanContent.split(/\n\s*\n/)
+      
+      // First paragraph keyword presence
+      if (paragraphs[0] && paragraphs[0].toLowerCase().includes(primaryKeyword.toLowerCase())) {
+        score += 10
+      }
+      
+      // Last paragraph keyword presence
+      if (paragraphs[paragraphs.length - 1] && 
+          paragraphs[paragraphs.length - 1].toLowerCase().includes(primaryKeyword.toLowerCase())) {
+        score += 5
+      }
+      
+      // Middle content keyword presence
+      const middleParagraphs = paragraphs.slice(1, -1)
+      const middleMatches = middleParagraphs.filter(p => 
+        p.toLowerCase().includes(primaryKeyword.toLowerCase())
+      )
+      if (middleMatches.length > 0) {
+        score += 5
+      }
+    }
+
+    // LSI keywords (0-15 points)
+    const lsiScore = this.calculateLSIScore(cleanContent, keywords)
+    score += lsiScore
+
+    // Content freshness (0-10 points)
+    const freshnessScore = this.calculateFreshnessScore(content)
+    score += freshnessScore
+
+    return Math.min(score, 100)
+  }
+
+  // Keyword optimization scoring
+  scoreKeywordOptimization(data, keywords = []) {
+    if (keywords.length === 0) return 0
+
+    let score = 0
+
+    // Meta keywords presence (0-20 points)
+    if (data.meta_keywords) {
+      const metaKeywords = data.meta_keywords.toLowerCase().split(',').map(k => k.trim())
+      const matchingKeywords = keywords.filter(kw => 
+        metaKeywords.some(mk => mk.includes(kw.toLowerCase()) || kw.toLowerCase().includes(mk))
+      )
+      score += Math.min((matchingKeywords.length / keywords.length) * 20, 20)
+    }
+
+    // URL optimization (0-25 points)
+    if (data.slug) {
+      const urlKeywords = keywords.filter(kw => 
+        data.slug.toLowerCase().includes(kw.toLowerCase().replace(/\s+/g, '-'))
+      )
+      score += Math.min((urlKeywords.length / keywords.length) * 25, 25)
+    }
+
+    // Alt text optimization (0-20 points)
+    const content = data.content || data.page_content || ''
+    const altTextScore = this.calculateAltTextKeywordScore(content, keywords)
+    score += altTextScore
+
+    // Long-tail keyword usage (0-20 points)
+    const longTailScore = this.calculateLongTailScore(content, keywords)
+    score += longTailScore
+
+    // Keyword variation (0-15 points)
+    const variationScore = this.calculateKeywordVariationScore(content, keywords)
+    score += variationScore
+
+    return Math.min(score, 100)
+  }
+
+  // Heading structure scoring
+  scoreHeadingStructure(content) {
+    if (!content) return 0
+
+    let score = 0
+    const headings = this.extractHeadings(content)
+
+    // H1 optimization (0-30 points)
+    if (headings.h1 === 1) {
+      score += 30
+    } else if (headings.h1 === 0) {
+      score += 0 // No H1
+    } else {
+      score += 5 // Multiple H1s
+    }
+
+    // H2 usage (0-25 points)
+    if (headings.h2 >= 2 && headings.h2 <= 6) {
+      score += 25
+    } else if (headings.h2 === 1) {
+      score += 20
+    } else if (headings.h2 > 6) {
+      score += 15
+    }
+
+    // Heading hierarchy (0-20 points)
+    const hierarchyScore = this.calculateHeadingHierarchy(headings)
+    score += hierarchyScore
+
+    // Heading length (0-15 points)
+    const lengthScore = this.calculateHeadingLengthScore(content)
+    score += lengthScore
+
+    // Heading keyword optimization (0-10 points)
+    const keywordScore = this.calculateHeadingKeywordScore(content)
+    score += keywordScore
+
+    return Math.min(score, 100)
+  }
+
+  // Image optimization scoring
+  scoreImageOptimization(content) {
+    if (!content) return 50 // Neutral score if no content
+
+    let score = 0
+    const images = this.extractImages(content)
+
+    if (images.total === 0) return 80 // Good score if no images to optimize
+
+    // Alt text coverage (0-40 points)
+    const altCoverage = (images.withAlt / images.total) * 100
+    if (altCoverage === 100) {
+      score += 40
+    } else if (altCoverage >= 80) {
+      score += 30
+    } else if (altCoverage >= 60) {
+      score += 20
+    } else if (altCoverage >= 40) {
+      score += 10
+    }
+
+    // Image-to-content ratio (0-20 points)
+    const wordCount = this.getWordCount(content)
+    const imageRatio = (images.total / wordCount) * 1000
+    if (imageRatio >= 5 && imageRatio <= 15) {
+      score += 20
+    } else if (imageRatio >= 2 && imageRatio <= 20) {
+      score += 15
+    } else if (imageRatio >= 1) {
+      score += 10
+    }
+
+    // Descriptive alt text (0-20 points)
+    const descriptiveScore = this.calculateDescriptiveAltScore(content)
+    score += descriptiveScore
+
+    // Image file name optimization (0-20 points)
+    const filenameScore = this.calculateImageFilenameScore(content)
+    score += filenameScore
+
+    return Math.min(score, 100)
+  }
+
+  // Link optimization scoring
+  scoreLinkOptimization(content) {
+    if (!content) return 60 // Neutral score
+
+    let score = 0
+    const links = this.extractLinks(content)
+
+    // Internal linking (0-40 points)
+    const internalLinks = links.filter(link => this.isInternalLink(link))
+    if (internalLinks.length >= 3 && internalLinks.length <= 8) {
+      score += 40
+    } else if (internalLinks.length >= 1 && internalLinks.length <= 10) {
+      score += 30
+    } else if (internalLinks.length > 0) {
+      score += 20
+    }
+
+    // External linking (0-30 points)
+    const externalLinks = links.filter(link => !this.isInternalLink(link))
+    if (externalLinks.length >= 1 && externalLinks.length <= 3) {
+      score += 30
+    } else if (externalLinks.length > 0 && externalLinks.length <= 5) {
+      score += 20
+    }
+
+    // Anchor text optimization (0-30 points)
+    const anchorScore = this.calculateAnchorTextScore(content)
+    score += anchorScore
+
+    return Math.min(score, 100)
+  }
+
+  // Technical SEO scoring
+  scoreTechnicalSEO(data) {
+    let score = 0
+
+    // URL structure (0-25 points)
+    if (data.slug) {
+      const slug = data.slug
+      if (slug.length <= 60 && slug.includes('-') && !slug.includes('_')) {
+        score += 25
+      } else if (slug.length <= 80) {
+        score += 20
+      } else if (slug.length <= 100) {
+        score += 15
+      } else {
+        score += 10
+      }
+    }
+
+    // Meta tags presence (0-30 points)
+    if (data.meta_title) score += 10
+    if (data.meta_description) score += 10
+    if (data.meta_keywords) score += 10
+
+    // Content structure (0-25 points)
+    const content = data.content || data.page_content
+    if (content) {
+      if (content.includes('<h1>') || content.includes('<h1 ')) score += 10
+      if (content.includes('<h2>') || content.includes('<h2 ')) score += 8
+      if (content.includes('<p>')) score += 7
+    }
+
+    // Schema markup potential (0-20 points)
+    const schemaScore = this.calculateSchemaScore(data)
+    score += schemaScore
+
+    return Math.min(score, 100)
+  }
+
+  // Readability scoring
+  scoreReadability(content) {
+    if (!content) return 0
+
+    let score = 0
+    const cleanContent = this.stripHtml(content)
+    const readabilityScore = this.calculateFleschScore(cleanContent)
+
+    // Flesch score interpretation (0-40 points)
+    if (readabilityScore >= 60) {
+      score += 40
+    } else if (readabilityScore >= 50) {
+      score += 30
+    } else if (readabilityScore >= 40) {
+      score += 20
+    } else if (readabilityScore >= 30) {
+      score += 10
+    }
+
+    // Sentence length (0-30 points)
+    const avgSentenceLength = this.calculateAverageSentenceLength(cleanContent)
+    if (avgSentenceLength <= 20) {
+      score += 30
+    } else if (avgSentenceLength <= 25) {
+      score += 20
+    } else if (avgSentenceLength <= 30) {
+      score += 10
+    }
+
+    // Paragraph length (0-30 points)
+    const avgParagraphLength = this.calculateAverageParagraphLength(cleanContent)
+    if (avgParagraphLength <= 150) {
+      score += 30
+    } else if (avgParagraphLength <= 200) {
+      score += 20
+    } else if (avgParagraphLength <= 250) {
+      score += 10
+    }
+
+    return Math.min(score, 100)
+  }
+
+  // Utility functions
+  getWordCount(content) {
+    return this.stripHtml(content).split(/\s+/).filter(word => word.length > 0).length
+  }
+
+  stripHtml(content) {
+    return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  }
+
+  countKeywordOccurrences(content, keyword) {
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
+    return (content.match(regex) || []).length
+  }
+
+  extractHeadings(content) {
+    return {
+      h1: (content.match(/<h1[^>]*>/gi) || []).length,
+      h2: (content.match(/<h2[^>]*>/gi) || []).length,
+      h3: (content.match(/<h3[^>]*>/gi) || []).length,
+      h4: (content.match(/<h4[^>]*>/gi) || []).length,
+      h5: (content.match(/<h5[^>]*>/gi) || []).length,
+      h6: (content.match(/<h6[^>]*>/gi) || []).length
+    }
+  }
+
+  extractImages(content) {
+    const images = content.match(/<img[^>]*>/gi) || []
+    const withAlt = content.match(/<img[^>]*alt\s*=\s*["'][^"']+["'][^>]*>/gi) || []
     
-    // Add additional content sections
-    if (!fixedContent.additionalInfo) {
-      fixedContent.additionalInfo = `
-## Additional Information
+    return {
+      total: images.length,
+      withAlt: withAlt.length,
+      withoutAlt: images.length - withAlt.length
+    }
+  }
 
-This section provides comprehensive details about ${keywords[0] || 'the topic'}. 
-Our research shows that understanding these key aspects is crucial for success.
+  extractLinks(content) {
+    const linkMatches = content.match(/<a[^>]*href\s*=\s*["']([^"']*)["'][^>]*>/gi) || []
+    return linkMatches.map(match => {
+      const hrefMatch = match.match(/href\s*=\s*["']([^"']*)["']/i)
+      return hrefMatch ? hrefMatch[1] : ''
+    }).filter(href => href)
+  }
 
-Key benefits include:
-- Improved understanding of the subject matter
-- Better decision-making capabilities
-- Enhanced practical application
-- Long-term value and sustainability
+  isInternalLink(url) {
+    return !url.startsWith('http') || url.includes(window.location?.hostname || 'localhost')
+  }
 
-For more detailed information, consider consulting with experts in the field.
-      `.trim();
+  calculateFleschScore(content) {
+    const words = content.split(/\s+/).length
+    const sentences = content.split(/[.!?]+/).length
+    const syllables = this.countSyllables(content)
+    
+    if (sentences === 0 || words === 0) return 0
+    
+    return 206.835 - (1.015 * (words / sentences)) - (84.6 * (syllables / words))
+  }
+
+  countSyllables(text) {
+    return text.toLowerCase()
+      .replace(/[^a-z]/g, '')
+      .replace(/[^aeiouy]+/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .length
+  }
+
+  calculateAverageSentenceLength(content) {
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0)
+    const words = content.split(/\s+/).length
+    return sentences.length > 0 ? words / sentences.length : 0
+  }
+
+  calculateAverageParagraphLength(content) {
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0)
+    const words = content.split(/\s+/).length
+    return paragraphs.length > 0 ? words / paragraphs.length : 0
+  }
+
+  // Additional scoring helper methods
+  calculateLSIScore(content, keywords) {
+    // Simplified LSI keyword scoring
+    const lsiKeywords = this.generateLSIKeywords(keywords)
+    const matches = lsiKeywords.filter(lsi => 
+      content.toLowerCase().includes(lsi.toLowerCase())
+    )
+    return Math.min((matches.length / lsiKeywords.length) * 15, 15)
+  }
+
+  generateLSIKeywords(keywords) {
+    // Generate related terms
+    const related = []
+    keywords.forEach(keyword => {
+      related.push(
+        `${keyword} guide`,
+        `${keyword} tips`,
+        `${keyword} services`,
+        `best ${keyword}`,
+        `${keyword} help`
+      )
+    })
+    return related
+  }
+
+  calculateFreshnessScore(content) {
+    // Check for date mentions, recent terminology
+    const currentYear = new Date().getFullYear()
+    const hasCurrentYear = content.includes(currentYear.toString())
+    const hasRecentTerms = /\b(latest|new|updated|recent|current)\b/i.test(content)
+    
+    let score = 0
+    if (hasCurrentYear) score += 5
+    if (hasRecentTerms) score += 5
+    return score
+  }
+
+  calculateAltTextKeywordScore(content, keywords) {
+    const altTexts = content.match(/alt\s*=\s*["']([^"']*)["']/gi) || []
+    const keywordMatches = altTexts.filter(alt => 
+      keywords.some(kw => alt.toLowerCase().includes(kw.toLowerCase()))
+    )
+    return altTexts.length > 0 ? Math.min((keywordMatches.length / altTexts.length) * 20, 20) : 0
+  }
+
+  calculateLongTailScore(content, keywords) {
+    const longTailKeywords = keywords.filter(kw => kw.split(' ').length >= 3)
+    if (longTailKeywords.length === 0) return 10 // Neutral score
+    
+    const matches = longTailKeywords.filter(ltk => 
+      content.toLowerCase().includes(ltk.toLowerCase())
+    )
+    return Math.min((matches.length / longTailKeywords.length) * 20, 20)
+  }
+
+  calculateKeywordVariationScore(content, keywords) {
+    // Check for keyword variations (plurals, synonyms, etc.)
+    let variationCount = 0
+    keywords.forEach(keyword => {
+      const variations = [
+        keyword + 's',
+        keyword + 'es',
+        keyword.replace(/y$/, 'ies'),
+        keyword.replace(/ing$/, ''),
+        keyword.replace(/ed$/, '')
+      ]
+      
+      variationCount += variations.filter(variation => 
+        content.toLowerCase().includes(variation.toLowerCase())
+      ).length
+    })
+    
+    return Math.min(variationCount * 3, 15)
+  }
+
+  calculateHeadingHierarchy(headings) {
+    let score = 0
+    
+    // Check if H2s exist when H3s exist
+    if (headings.h3 > 0 && headings.h2 > 0) score += 10
+    
+    // Check if hierarchy is logical
+    if (headings.h1 <= 1 && headings.h2 > 0) score += 10
+    
+    return score
+  }
+
+  calculateHeadingLengthScore(content) {
+    const headingMatches = content.match(/<h[1-6][^>]*>([^<]*)<\/h[1-6]>/gi) || []
+    const wellSizedHeadings = headingMatches.filter(heading => {
+      const text = heading.replace(/<[^>]*>/g, '').trim()
+      return text.length >= 10 && text.length <= 70
+    })
+    
+    return headingMatches.length > 0 ? 
+      Math.min((wellSizedHeadings.length / headingMatches.length) * 15, 15) : 0
+  }
+
+  calculateHeadingKeywordScore(content) {
+    // Simplified - just check if headings contain important words
+    const headingMatches = content.match(/<h[1-6][^>]*>([^<]*)<\/h[1-6]>/gi) || []
+    const keywordHeadings = headingMatches.filter(heading => {
+      const text = heading.replace(/<[^>]*>/g, '').toLowerCase()
+      return /\b(guide|tips|how|what|why|best|top)\b/.test(text)
+    })
+    
+    return headingMatches.length > 0 ? 
+      Math.min((keywordHeadings.length / headingMatches.length) * 10, 10) : 0
+  }
+
+  calculateDescriptiveAltScore(content) {
+    const altTexts = content.match(/alt\s*=\s*["']([^"']*)["']/gi) || []
+    const descriptiveAlts = altTexts.filter(alt => {
+      const text = alt.replace(/alt\s*=\s*["']|["']/gi, '').trim()
+      return text.length >= 10 && text.length <= 125
+    })
+    
+    return altTexts.length > 0 ? 
+      Math.min((descriptiveAlts.length / altTexts.length) * 20, 20) : 0
+  }
+
+  calculateImageFilenameScore(content) {
+    // Simplified filename scoring
+    const srcMatches = content.match(/src\s*=\s*["']([^"']*)["']/gi) || []
+    const goodFilenames = srcMatches.filter(src => {
+      const filename = src.match(/([^/]+\.(jpg|jpeg|png|gif|webp))/i)
+      if (!filename) return false
+      return filename[1].includes('-') && !filename[1].includes('_')
+    })
+    
+    return srcMatches.length > 0 ? 
+      Math.min((goodFilenames.length / srcMatches.length) * 20, 20) : 0
+  }
+
+  calculateAnchorTextScore(content) {
+    const linkMatches = content.match(/<a[^>]*>([^<]*)<\/a>/gi) || []
+    const descriptiveLinks = linkMatches.filter(link => {
+      const text = link.replace(/<[^>]*>/g, '').trim()
+      return text.length >= 3 && !/(click here|read more|here|more)/i.test(text)
+    })
+    
+    return linkMatches.length > 0 ? 
+      Math.min((descriptiveLinks.length / linkMatches.length) * 30, 30) : 15
+  }
+
+  calculateSchemaScore(data) {
+    let score = 0
+    
+    // Check for structured data potential
+    if (data.category) score += 5
+    if (data.tags && data.tags.length > 0) score += 5
+    if (data.created_at || data.published_date) score += 5
+    if (data.author) score += 5
+    
+    return score
+  }
+
+  // Generate suggestions based on scores
+  generateSuggestions(scores, data, keywords) {
+    const suggestions = []
+    
+    Object.entries(scores).forEach(([category, score]) => {
+      if (score !== null && score < 70) {
+        suggestions.push(...this.getCategorySuggestions(category, score, data, keywords))
+      }
+    })
+    
+    return suggestions.slice(0, 10) // Limit to top 10 suggestions
+  }
+
+  getCategorySuggestions(category, score, data, keywords) {
+    const suggestions = []
+    
+    switch (category) {
+      case 'title':
+        if (score < 50) {
+          suggestions.push({
+            type: 'title',
+            priority: 'high',
+            message: 'Optimize your title length (30-60 characters) and include primary keyword',
+            action: 'edit_title'
+          })
+        }
+        break
+        
+      case 'metaDescription':
+        if (score < 50) {
+          suggestions.push({
+            type: 'meta',
+            priority: 'high',
+            message: 'Write a compelling meta description (120-160 characters) with keywords',
+            action: 'edit_meta_description'
+          })
+        }
+        break
+        
+      case 'content':
+        if (score < 50) {
+          suggestions.push({
+            type: 'content',
+            priority: 'high',
+            message: 'Expand your content and improve keyword usage',
+            action: 'expand_content'
+          })
+        }
+        break
+        
+      case 'headings':
+        if (score < 60) {
+          suggestions.push({
+            type: 'structure',
+            priority: 'medium',
+            message: 'Improve heading structure with proper H1, H2, H3 hierarchy',
+            action: 'fix_headings'
+          })
+        }
+        break
+        
+      case 'images':
+        if (score < 60) {
+          suggestions.push({
+            type: 'images',
+            priority: 'medium',
+            message: 'Add descriptive alt text to all images',
+            action: 'fix_alt_text'
+          })
+        }
+        break
     }
     
-    return fixedContent;
+    return suggestions
   }
 }
 
-export const seoScoreCalculator = new SeoScoreCalculator();
+export default new SEOScoreCalculator()

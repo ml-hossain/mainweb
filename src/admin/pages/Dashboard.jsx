@@ -21,7 +21,6 @@ import {
   FiSearch
 } from 'react-icons/fi'
 import AdminLayout from '../components/AdminLayout'
-import SEOAnalyzer from '../../components/SEOAnalyzer'
 import { supabase } from '../../lib/supabase'
 
 const Dashboard = ({ onLogout, user }) => {

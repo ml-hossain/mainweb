@@ -1,5 +1,37 @@
+// Initialize console suppression as early as possible
+if (typeof window !== 'undefined') {
+  const suppressedPatterns = [
+    'DOMNodeInserted',
+    'mutation event', 
+    'Support for this event type has been removed',
+    'Listener added for a \'DOMNodeInserted\' mutation event',
+    '[Deprecation]',
+    'chromestatus.com/feature/5083947249172480'
+  ];
+  
+  const originalWarn = console.warn;
+  const originalError = console.error;
+  
+  console.warn = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string' && suppressedPatterns.some(pattern => message.includes(pattern))) {
+      return; // Suppress warning
+    }
+    originalWarn.apply(console, args);
+  };
+  
+  console.error = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string' && suppressedPatterns.some(pattern => message.includes(pattern))) {
+      return; // Suppress error
+    }
+    originalError.apply(console, args);
+  };
+}
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import './index.css'
 
@@ -117,6 +149,8 @@ if (typeof window !== 'undefined') {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </React.StrictMode>,
 )

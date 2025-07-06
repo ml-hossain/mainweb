@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import QuillEditor from '../../components/QuillEditor';
 import ErrorBoundary from '../../components/ErrorBoundary';
-import CompactFileUpload from '../../components/CompactFileUpload';
-import AdminLayout from '../components/AdminLayout';
-import AdvancedSEOTool from '../../components/AdvancedSEOTool';
-import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload, FiTag, FiUser, FiCalendar, FiFileText, FiImage, FiEye, FiEyeOff } from 'react-icons/fi';
-import slugify from 'slugify';
+import CompactFileUpload from '../../components/CompactFileUpload'
+import RealTimeSEOTool from '../../components/RealTimeSEOTool'
+import AdminLayout from '../components/AdminLayout'
+import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload, FiTag, FiUser, FiCalendar, FiFileText, FiImage, FiEye, FiEyeOff } from 'react-icons/fi'
+import slugify from 'slugify'
 
 const BlogEditor = ({ onLogout, user }) => {
   const { id } = useParams();
@@ -143,6 +143,20 @@ const BlogEditor = ({ onLogout, user }) => {
 
   const handleFileContentParsed = (htmlContent) => {
     setBlogPost(prev => ({ ...prev, content: htmlContent }));
+  };
+
+  // Handle SEO Tool changes
+  const handleSEOChanges = (seoData) => {
+    setBlogPost(prev => ({
+      ...prev,
+      title: seoData.title || prev.title,
+      excerpt: seoData.description || prev.excerpt,
+      meta_title: seoData.meta_title || prev.meta_title,
+      meta_description: seoData.meta_description || prev.meta_description,
+      meta_keywords: seoData.meta_keywords || prev.meta_keywords,
+      content: seoData.content || prev.content,
+      slug: seoData.title ? generateSlug(seoData.title) : prev.slug
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -615,42 +629,24 @@ const BlogEditor = ({ onLogout, user }) => {
         {/* SEO Tool - Wider sidebar with more weight */}
         <div className="w-full xl:w-[30rem] 2xl:w-[32rem] xl:min-w-0">
           <div className="sticky top-6">
-            <AdvancedSEOTool
-              context="blog"
-              fields={{ 
-                title: true, 
-                metaDescription: true, 
-                tags: true, 
-                mainContent: true 
-              }}
-              generateFor={['metaDescription', 'mainContent', 'tags']}
-              onContentGenerated={(content) => {
-                console.log('Generated blog content:', content);
-                // Apply generated content to the form
-                if (content.title) {
-                  handleInputChange({target: {name: 'title', value: content.title}});
-                }
-                if (content.shortDescription) {
-                  handleInputChange({target: {name: 'excerpt', value: content.shortDescription}});
-                }
-                if (content.metaDescription) {
-                  handleInputChange({target: {name: 'meta_description', value: content.metaDescription}});
-                }
-                if (content.content || content.longDescription) {
-                  handleContentChange(content.content || content.longDescription);
-                }
-              }}
-              onTitleUpdate={(title) => handleInputChange({target: {name: 'title', value: title}})}
-              onDescriptionUpdate={(desc) => handleInputChange({target: {name: 'excerpt', value: desc}})}
-              onContentUpdate={handleContentChange}
-              initialData={{
+            <RealTimeSEOTool 
+              currentData={{
                 title: blogPost?.title || '',
-                shortDescription: blogPost?.excerpt || '',
-                content: blogPost?.content || ''
+                description: blogPost?.excerpt || '',
+                content: blogPost?.content || '',
+                category: blogPost?.category || '',
+                tags: blogPost?.tags || [],
+                meta_title: blogPost?.meta_title || '',
+                meta_description: blogPost?.meta_description || '',
+                meta_keywords: blogPost?.meta_keywords || '',
+                slug: blogPost?.slug || ''
               }}
+              onApplyChanges={handleSEOChanges}
+              contentType="blog"
             />
           </div>
         </div>
+        
       </div>
     </AdminLayout>
   );

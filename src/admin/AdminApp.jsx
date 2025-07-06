@@ -15,7 +15,6 @@ import BlogManager from './pages/BlogManager'
 import BlogEditor from './pages/BlogEditor'
 import Consultations from './pages/Consultations'
 import SuccessStories from './pages/SuccessStories'
-import SeoManager from './pages/SeoManager'
 import AdManager from './pages/AdManager'
 import Settings from './pages/Settings'
 
@@ -177,7 +176,6 @@ const AdminApp = () => {
       <Route path="blog/edit/:id" element={<BlogEditor onLogout={handleLogout} user={user} />} />
       <Route path="consultations" element={<Consultations onLogout={handleLogout} user={user} />} />
       <Route path="success-stories" element={<SuccessStories onLogout={handleLogout} user={user} />} />
-      <Route path="seo" element={<SeoManager onLogout={handleLogout} user={user} />} />
       <Route path="ads" element={<AdManager onLogout={handleLogout} user={user} />} />
       <Route path="settings" element={<Settings onLogout={handleLogout} user={user} />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

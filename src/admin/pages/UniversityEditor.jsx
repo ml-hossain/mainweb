@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import QuillEditor from '../../components/QuillEditor';
 import ErrorBoundary from '../../components/ErrorBoundary';
-import CompactFileUpload from '../../components/CompactFileUpload';
-import URLWithUpload from '../../components/URLWithUpload';
-import AdminLayout from '../components/AdminLayout';
-import AdvancedSEOTool from '../../components/AdvancedSEOTool';
-import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload } from 'react-icons/fi';
-import slugify from 'slugify';
+import CompactFileUpload from '../../components/CompactFileUpload'
+import URLWithUpload from '../../components/URLWithUpload'
+import RealTimeSEOTool from '../../components/RealTimeSEOTool'
+import AdminLayout from '../components/AdminLayout'
+import { FiLoader, FiSave, FiArrowLeft, FiGlobe, FiMapPin, FiStar, FiDollarSign, FiClock, FiBookOpen, FiX, FiPlus, FiUpload } from 'react-icons/fi'
+import slugify from 'slugify'
 
 const UniversityEditor = ({ onLogout, user }) => {
   const { id } = useParams();
@@ -143,6 +143,21 @@ const UniversityEditor = ({ onLogout, user }) => {
   const handleFileContentParsed = (htmlContent) => {
     setUniversity(prev => ({ ...prev, page_content: htmlContent }))
   }
+
+  // Handle SEO Tool changes
+  const handleSEOChanges = (seoData) => {
+    setUniversity(prev => ({
+      ...prev,
+      name: seoData.title || prev.name,
+      description: seoData.description || prev.description,
+      location: seoData.location || prev.location,
+      page_content: seoData.content || prev.page_content,
+      content: {
+        ...prev.content,
+        programs: seoData.programs || prev.content?.programs
+      }
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -667,38 +682,24 @@ const UniversityEditor = ({ onLogout, user }) => {
         {/* SEO Tool - Wider sidebar with more weight */}
         <div className="w-full xl:w-[30rem] 2xl:w-[32rem] xl:min-w-0">
           <div className="sticky top-6">
-            <AdvancedSEOTool
-              context="university"
-              fields={{ 
-                title: true, 
-                shortDescription: true, 
-                mainContent: true 
-              }}
-              generateFor={['shortDescription', 'mainContent']}
-              onContentGenerated={(content) => {
-                console.log('Generated university content:', content);
-                // Apply generated content to the form
-                if (content.title) {
-                  handleInputChange({target: {name: 'name', value: content.title}});
-                }
-                if (content.shortDescription) {
-                  handleInputChange({target: {name: 'description', value: content.shortDescription}});
-                }
-                if (content.content || content.longDescription) {
-                  handlePageContentChange(content.content || content.longDescription);
-                }
-              }}
-              onTitleUpdate={(title) => handleInputChange({target: {name: 'name', value: title}})}
-              onDescriptionUpdate={(desc) => handleInputChange({target: {name: 'description', value: desc}})}
-              onContentUpdate={handlePageContentChange}
-              initialData={{
+            <RealTimeSEOTool 
+              currentData={{
                 title: university?.name || '',
-                shortDescription: university?.description || '',
-                content: university?.page_content || ''
+                description: university?.description || '',
+                content: university?.page_content || '',
+                location: university?.location || '',
+                programs: university?.content?.programs || [],
+                country: university?.content?.country || '',
+                meta_title: university?.meta_title || '',
+                meta_description: university?.meta_description || '',
+                slug: university?.slug || ''
               }}
+              onApplyChanges={handleSEOChanges}
+              contentType="university"
             />
           </div>
         </div>
+        
       </div>
     </AdminLayout>
   );

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import SeoHead from '../components/SeoHead'
 import { FiStar, FiArrowRight, FiCheck, FiClock, FiGift, FiUsers, FiGlobe, FiAward, FiTrendingUp } from 'react-icons/fi'
 import HomeUniversityCard from '../components/HomeUniversityCard'
+import SEOHead from '../components/SEOHead'
 
 import { supabase } from '../lib/supabase'
 import { gsap } from 'gsap'
@@ -33,8 +33,35 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [programFilter, setProgramFilter] = useState('All Programs')
   const [budgetFilter, setBudgetFilter] = useState('All Budgets')
-  const [locationFilter, setLocationFilter] = useState('All Malaysia')
+  const [countryFilter, setCountryFilter] = useState('All Countries')
+  const [cityFilter, setCityFilter] = useState('All Cities')
   const [rankingFilter, setRankingFilter] = useState('All Rankings')
+
+  // Country-City mapping
+  const countryToCities = {
+    malaysia: ['Kuala Lumpur', 'Selangor', 'Penang', 'Johor', 'Sabah', 'Sarawak', 'Melaka', 'Perak', 'Kedah', 'Kelantan', 'Terengganu', 'Pahang', 'Negeri Sembilan', 'Perlis', 'Putrajaya', 'Labuan'],
+    canada: ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa', 'Edmonton', 'Quebec City', 'Winnipeg', 'Hamilton', 'London', 'Kitchener', 'Victoria', 'Halifax', 'Saskatoon', 'Regina'],
+    usa: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus', 'Charlotte'],
+    uk: ['London', 'Birmingham', 'Manchester', 'Liverpool', 'Leeds', 'Sheffield', 'Bristol', 'Newcastle', 'Nottingham', 'Leicester', 'Coventry', 'Bradford', 'Cardiff', 'Belfast', 'Edinburgh'],
+    australia: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Newcastle', 'Canberra', 'Sunshine Coast', 'Wollongong', 'Geelong', 'Hobart', 'Townsville', 'Cairns', 'Darwin'],
+    germany: ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden', 'Hanover', 'Nuremberg', 'Duisburg'],
+    sweden: ['Stockholm', 'Gothenburg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 'Norrköping', 'Lund', 'Umeå', 'Gävle', 'Borås', 'Södertälje'],
+    netherlands: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven', 'Tilburg', 'Groningen', 'Almere', 'Breda', 'Nijmegen', 'Enschede', 'Haarlem', 'Arnhem', 'Zaanstad', 'Haarlemmermeer']
+  }
+
+  // Get available cities based on selected country
+  const getAvailableCities = () => {
+    if (countryFilter === 'All Countries') {
+      return []
+    }
+    return countryToCities[countryFilter.toLowerCase()] || []
+  }
+
+  // Handle country change
+  const handleCountryChange = (newCountry) => {
+    setCountryFilter(newCountry)
+    setCityFilter('All Cities') // Reset city when country changes
+  }
 
   // Dynamic content states
   const [contentSections, setContentSections] = useState({})
@@ -76,8 +103,21 @@ const Home = () => {
       (budgetFilter === '50,000 - 100,000' && budgetNumber >= 50000 && budgetNumber <= 100000) ||
       (budgetFilter === 'Above 100,000' && budgetNumber > 100000)
 
-    // Location filter
-    const matchesLocation = locationFilter === 'All Malaysia' || uni.location === locationFilter
+    // Location filter - hierarchical country-city system
+    let matchesLocation = true
+    if (countryFilter !== 'All Countries') {
+      const uniCountry = uni.country || uni.content?.country
+      if (uniCountry) {
+        matchesLocation = uniCountry.toLowerCase() === countryFilter.toLowerCase()
+        
+        // If a specific city is selected, also check city match
+        if (matchesLocation && cityFilter !== 'All Cities') {
+          matchesLocation = uni.location.toLowerCase().includes(cityFilter.toLowerCase())
+        }
+      } else {
+        matchesLocation = false
+      }
+    }
 
     // Ranking filter
     const matchesRanking = rankingFilter === 'All Rankings' ||
@@ -142,52 +182,85 @@ const Home = () => {
 
   useEffect(() => {
     fetchUniversities()
-  }, [pagination.currentPage, searchTerm, programFilter, budgetFilter, locationFilter, rankingFilter])
+  }, [pagination.currentPage, searchTerm, programFilter, budgetFilter, countryFilter, cityFilter, rankingFilter])
 
   const fetchContentData = async () => {
     try {
-      // Fetch content sections
-      const { data: contentData, error: contentError } = await supabase
+      // Add a timeout to prevent hanging requests
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      )
+      
+      // Fetch content sections with timeout
+      const contentPromise = supabase
         .from('content_sections')
         .select('*')
         .eq('page_name', 'home')
         .eq('is_active', true)
+      
+      const { data: contentData, error: contentError } = await Promise.race([
+        contentPromise,
+        timeoutPromise
+      ])
 
       if (contentError) throw contentError
 
       // Convert array to object for easy access
       const contentObj = {}
-      contentData.forEach(section => {
-        contentObj[section.section_name] = section
-      })
+      if (contentData && Array.isArray(contentData)) {
+        contentData.forEach(section => {
+          contentObj[section.section_name] = section
+        })
+      }
       setContentSections(contentObj)
 
-      // Fetch site settings
-      const { data: settingsData, error: settingsError } = await supabase
+      // Fetch site settings with timeout
+      const settingsPromise = supabase
         .from('site_settings')
         .select('*')
         .eq('is_active', true)
+      
+      const { data: settingsData, error: settingsError } = await Promise.race([
+        settingsPromise,
+        timeoutPromise
+      ])
 
       if (settingsError) throw settingsError
 
       // Convert array to object for easy access
       const settingsObj = {}
-      settingsData.forEach(setting => {
-        try {
-          settingsObj[setting.setting_key] = JSON.parse(setting.setting_value)
-        } catch {
-          settingsObj[setting.setting_key] = setting.setting_value
-        }
-      })
+      if (settingsData && Array.isArray(settingsData)) {
+        settingsData.forEach(setting => {
+          try {
+            settingsObj[setting.setting_key] = JSON.parse(setting.setting_value)
+          } catch {
+            settingsObj[setting.setting_key] = setting.setting_value
+          }
+        })
+      }
       setSiteSettings(settingsObj)
 
     } catch (error) {
       console.error('Error fetching content data:', error)
-      // Don't break the page for network errors
-      if (error.message?.includes('fetch') || error.message?.includes('network')) {
-        console.warn('Network error fetching content data, using fallback')
-        setContentData([])
-        setSiteSettings({})
+      
+      // Set fallback values for offline/error state
+      setContentSections({
+        hero: {
+          content: 'Transform your dreams into reality with personalized guidance for studying abroad.'
+        }
+      })
+      
+      setSiteSettings({
+        hero_stats: {
+          students_placed: '2500',
+          success_rate: '98',
+          university_partners: '150'
+        }
+      })
+      
+      // Only show console warning in development
+      if (import.meta.env.DEV) {
+        console.warn('Using fallback content due to connection issues')
       }
     } finally {
       setLoadingContent(false)
@@ -217,8 +290,12 @@ const Home = () => {
         query = query.contains('content->programs', [programFilter])
       }
 
-      if (locationFilter !== 'All Malaysia') {
-        query = query.eq('location', locationFilter)
+      if (countryFilter !== 'All Countries') {
+        query = query.eq('country', countryFilter.toLowerCase())
+        
+        if (cityFilter !== 'All Cities') {
+          query = query.ilike('location', `%${cityFilter}%`)
+        }
       }
 
       if (rankingFilter !== 'All Rankings') {
@@ -367,14 +444,11 @@ const Home = () => {
 
   return (
     <div className="relative">
-      <SeoHead 
-        pageSlug="home" 
-        fallbackData={{
-          page_title: "MA Education - Your Gateway to Global Education",
-          meta_title: "MA Education | Study Abroad Consultancy | Global Education Services",
-          meta_description: "MA Education is your trusted partner for studying abroad. We provide comprehensive consultation services for students seeking quality education in top universities worldwide.",
-          meta_keywords: "study abroad, education consultancy, university admission, visa assistance, international education"
-        }}
+      <SEOHead 
+        title="MA Education - Your Gateway to Global Education"
+        description="Expert guidance for international education. Find the best universities worldwide, get scholarship assistance, visa processing, and complete support for your study abroad journey."
+        keywords="study abroad, international education, university admission, scholarship guidance, visa processing, overseas education, educational consultancy, global universities, student visa, study overseas, Malaysia universities, Canada universities, UK universities, Australia universities"
+        canonical="https://ma-education.com/"
       />
       
       {/* Hero Section */}
@@ -813,23 +887,42 @@ const Home = () => {
                   </select>
                 </div>
 
-                {/* Location Filter */}
+                {/* Country Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                   <select
-                    value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
+                    value={countryFilter}
+                    onChange={(e) => handleCountryChange(e.target.value)}
                     className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   >
-                    <option>All Malaysia</option>
-                    <option>Kuala Lumpur</option>
-                    <option>Selangor</option>
-                    <option>Penang</option>
-                    <option>Johor</option>
-                    <option>Sabah</option>
-                    <option>Sarawak</option>
+                    <option>All Countries</option>
+                    <option>Malaysia</option>
+                    <option>Canada</option>
+                    <option>USA</option>
+                    <option>UK</option>
+                    <option>Australia</option>
+                    <option>Germany</option>
+                    <option>Sweden</option>
+                    <option>Netherlands</option>
                   </select>
                 </div>
+
+                {/* City Filter - Only show when a country is selected */}
+                {countryFilter !== 'All Countries' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                    <select
+                      value={cityFilter}
+                      onChange={(e) => setCityFilter(e.target.value)}
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option>All Cities</option>
+                      {getAvailableCities().map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {/* Ranking Filter */}
                 <div>
@@ -854,7 +947,8 @@ const Home = () => {
                       setSearchTerm('')
                       setProgramFilter('All Programs')
                       setBudgetFilter('All Budgets')
-                      setLocationFilter('All Malaysia')
+                      setCountryFilter('All Countries')
+                      setCityFilter('All Cities')
                       setRankingFilter('All Rankings')
                     }}
                     className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-colors duration-300 font-medium text-sm"

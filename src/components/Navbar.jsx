@@ -304,6 +304,7 @@ const Navbar = () => {
               <Link to="/success-stories" className="block px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 break-words">Success Stories</Link>
               <Link to="/about" className="block px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 break-words">About</Link>
               <Link to="/blog" className="block px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 break-words">Blog</Link>
+              <Link to="/seo-demo" className="block px-3 py-2 text-blue-400 hover:text-blue-300 hover:bg-blue-600/10 rounded-lg transition-all duration-200 break-words font-medium">🎯 SEO Demo</Link>
               <Link to="/contact" className="block px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 break-words">Contact</Link>
               <Link 
                 to="/consultation"

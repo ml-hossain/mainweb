@@ -9,6 +9,7 @@ import {
   FiTarget,
   FiStar
 } from 'react-icons/fi'
+import SEOHead from '../components/SEOHead'
 
 const About = () => {
   const stats = [
@@ -20,6 +21,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      <SEOHead 
+        title="About MA Education - Leading Educational Consultancy"
+        description="Learn about MA Education, Bangladesh's premier educational consultancy with 10+ years of experience. Discover our mission to help 2000+ students achieve their study abroad dreams."
+        keywords="about MA Education, educational consultancy, study abroad experts, international education guidance, Bangladesh education consultants, university admission assistance, student placement services"
+        canonical="https://ma-education.com/about"
+      />
       
       {/* Hero Section */}
       <div className="bg-gray-900">
